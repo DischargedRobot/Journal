@@ -1,0 +1,41 @@
+# Build artifacts
+**/bin/
+**/obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE folders
+.vs/
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# Test and coverage outputs
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Local database files
+*.db
+*.db-shm
+*.db-wal
+
+# ASP.NET local secrets/config
+**/appsettings.Development.json
+.env.*
+
+# Frontend (Node.js)
+**/node_modules/
+**/dist/
+**/build/
+
+# OS files
+.DS_Store
+Thumbs.db
