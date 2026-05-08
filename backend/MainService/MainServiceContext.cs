@@ -9,6 +9,9 @@ namespace MainService
 		public MainServiceContext(DbContextOptions<MainServiceContext> options) : base(options) { }
 
 		public DbSet<AcademicYears> AcademicYears => Set<AcademicYears>();
+		public DbSet<Attestations> Attestations => Set<Attestations>();
+		public DbSet<AttestationMarks> AttestationMarks => Set<AttestationMarks>();
+		public DbSet<AttestationTypes> AttestationTypes => Set<AttestationTypes>();
 		public DbSet<Brigades> Brigades => Set<Brigades>();
 		public DbSet<Departments> Departments => Set<Departments>();
 		public DbSet<Disciplines> Disciplines => Set<Disciplines>();
