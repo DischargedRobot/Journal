@@ -1,0 +1,28 @@
+root = true
+
+[*.cs]
+indent_style = tab
+tab_width = 4
+
+# открывающую { ставим на новой строке.
+csharp_new_line_before_open_brace = all
+# правила отступов в switch/case.
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+# сортировка и разделением импортов
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = true
+
+# подсказка требовать модификаторы доступа.
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+# предпочитать явный тип вместо var
+csharp_style_var_for_built_in_types = false:suggestion
+#  если тип явно виден в правой части присвоения (тип «явен»), 
+# предпочтительнее писать явный тип, а не var
+csharp_style_var_when_type_is_apparent = false:suggestion
+# когда тип НЕ очевиден из правой части тоже предпочтительнее явный тип
+csharp_style_var_elsewhere = false:suggestion
+
+[*.{csproj,props,targets,sln}]
+indent_style = space
+indent_size = 2
