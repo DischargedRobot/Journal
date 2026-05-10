@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
@@ -10,10 +11,10 @@ namespace MainService
         [Required]
         public required string Mark { get; set; }
 
-        public int AttestationId { get; set; }
-        public Attestations? Attestation { get; set; }
+        public ICollection<Attestations>? Attestation { get; set; }
 
-        public int AttestationTypeId { get; set; }
+        public required int AttestationTypeId { get; set; }
+        [ForeignKey("AttestationTypeId")]
         public AttestationTypes? AttestationType { get; set; }
     }
 }

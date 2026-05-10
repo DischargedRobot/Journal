@@ -9,5 +9,7 @@ namespace MainService
 
 		[Required]
 		public required DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
+
+		public ICollection<Disciplines>? Disciplines { get; set; } = [];
 	}
 }

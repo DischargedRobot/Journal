@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
-    public class StudentNotes
+    public class NotesAboutStudent
     {
         [Key]
         public int StudentNoteId { get; set; }
@@ -10,7 +11,8 @@ namespace MainService
         [Required]
         public required string NoteText { get; set; }
 
-        public int StudentId { get; set; }
+        public required int StudentId { get; set; }
+        [ForeignKey("StudentId")]
         public Students? Student { get; set; }
     }
 }

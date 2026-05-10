@@ -12,5 +12,7 @@ namespace MainService
 
 		[Required]
 		public required int SemesterCode { get; set; }
+
+		public ICollection<Disciplines>? Disciplines { get; set; }
 	}
 }

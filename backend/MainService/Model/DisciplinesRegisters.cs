@@ -9,5 +9,7 @@ namespace MainService
 
         [Required]
         public required string DisciplineName { get; set; }
+
+        public ICollection<Disciplines>? Disciplines { get; set; }
     }
 }

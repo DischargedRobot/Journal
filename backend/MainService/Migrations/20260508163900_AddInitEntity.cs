@@ -1,5 +1,7 @@
 ﻿using System;
+
 using Microsoft.EntityFrameworkCore.Migrations;
+
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -123,16 +125,16 @@ namespace MainService.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TypeOfAssessments",
+                name: "MarkTypes",
                 columns: table => new
                 {
-                    TypeOfAssessmentId = table.Column<int>(type: "integer", nullable: false)
+                    MarkTypeId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TypeOfAssessments", x => x.TypeOfAssessmentId);
+                    table.PrimaryKey("PK_MarkTypes", x => x.MarkTypeId);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,16 +185,16 @@ namespace MainService.Migrations
                     MarkId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Value = table.Column<string>(type: "text", nullable: false),
-                    TypeOfAssessmentId = table.Column<int>(type: "integer", nullable: true)
+                    MarkTypeId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Marks", x => x.MarkId);
                     table.ForeignKey(
-                        name: "FK_Marks_TypeOfAssessments_TypeOfAssessmentId",
-                        column: x => x.TypeOfAssessmentId,
-                        principalTable: "TypeOfAssessments",
-                        principalColumn: "TypeOfAssessmentId");
+                        name: "FK_Marks_MarkTypes_MarkTypeId",
+                        column: x => x.MarkTypeId,
+                        principalTable: "MarkTypes",
+                        principalColumn: "MarkTypeId");
                 });
 
             migrationBuilder.CreateTable(
@@ -495,9 +497,9 @@ namespace MainService.Migrations
                 column: "StudentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Marks_TypeOfAssessmentId",
+                name: "IX_Marks_MarkTypeId",
                 table: "Marks",
-                column: "TypeOfAssessmentId");
+                column: "MarkTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Professors_DepartmentId",
@@ -594,7 +596,7 @@ namespace MainService.Migrations
                 name: "UniversityEmployers");
 
             migrationBuilder.DropTable(
-                name: "TypeOfAssessments");
+                name: "MarkTypes");
 
             migrationBuilder.DropTable(
                 name: "Faculties");

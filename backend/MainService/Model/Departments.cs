@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
@@ -10,10 +11,17 @@ namespace MainService
         [Required]
         public required string Name { get; set; }
 
-        [Required]
+        [Required] // == MinLength(1) || != null
         public required string ShortName { get; set; }
 
         [Required]
         public required string Code { get; set; }
+
+        [Required]
+        public required int FacultyId { get; set; }
+        [ForeignKey("FacultyId")]
+        public Faculties? Faculty { get; set; }
+
+        public ICollection<Professors>? Professors { get; set; } = [];
     }
 }

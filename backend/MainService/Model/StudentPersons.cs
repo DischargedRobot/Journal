@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
@@ -7,7 +8,10 @@ namespace MainService
         [Key]
         public int StudentPersonId { get; set; }
 
-        public int UserId { get; set; }
+        public required int UserId { get; set; }
+        [ForeignKey("UserId")]
         public required Users User { get; set; }
+
+        public ICollection<Students>? Students { get; set; } = [];
     }
 }

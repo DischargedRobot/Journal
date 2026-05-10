@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
@@ -9,13 +10,16 @@ namespace MainService
 
         public bool IsPresent { get; set; }
 
-        public int LessonId { get; set; }
+        public required int LessonId { get; set; }
+        [ForeignKey("LessonId")]
         public Lessons? Lesson { get; set; }
 
-        public int StudentId { get; set; }
+        public required int StudentId { get; set; }
+        [ForeignKey("StudentId")]
         public Students? Student { get; set; }
 
-        public int? PresenceStatusId { get; set; }
+        public required int PresenceStatusId { get; set; }
+        [ForeignKey("PresenceStatusId")]
         public PresenceStatuses? PresenceStatus { get; set; }
     }
 }

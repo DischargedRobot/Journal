@@ -7,11 +7,12 @@ namespace MainService
         [Key]
         public int FacultyId { get; set; }
 
-        [Required]
         public required string Name { get; set; }
 
         public required string ShortName { get; set; }
 
-        public ICollection<Departments>? Departments { get; set; }
+        public ICollection<Departments>? Departments { get; set; } = [];
+
+        public ICollection<Groups>? Groups { get; set; } = [];
     }
 }
