@@ -70,6 +70,10 @@ namespace MainService
 				lessonMark.MarkId
 			});
 
+			// Составной ключ для таблицы Curators (ProfessorId, GroupId)
+			modelBuilder.Entity<Curators>()
+				.HasKey(c => new { c.ProfessorId, c.GroupId });
+
 		}
 
 	}
