@@ -40,9 +40,7 @@ namespace MainService
 
         public ICollection<Lessons>? Lessons { get; set; } = [];
 
-        public required int SelectedMarkTypeId { get; set; }
-        [ForeignKey("SelectedMarkTypeId")]
-        public SelectedMarkTypes? SelectedMarkType { get; set; }
+        public ICollection<SelectedMarkTypes>? SelectedMarkTypes { get; set; } = [];
 
         public ICollection<Attestations>? Attestations { get; set; } = [];
     }

@@ -28,8 +28,6 @@ namespace MainService
 
         public ICollection<Disciplines>? Disciplines { get; set; } = [];
 
-        public required int CuratorId { get; set; }
-        [ForeignKey("CuratorId")]
-        public Curators? Curator { get; set; }
+        public ICollection<Professors>? Curators { get; set; }
     }
 }

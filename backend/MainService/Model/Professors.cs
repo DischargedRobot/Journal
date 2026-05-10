@@ -24,7 +24,7 @@ namespace MainService
         [ForeignKey("UniversityEmployerId")]
         public UniversityEmployers? UniversityEmployer { get; set; }
 
-        public Curators? Curators { get; set; }
+        public ICollection<Groups>? GroupCurator { get; set; }
 
         public ICollection<Disciplines>? Disciplines { get; set; } = [];
     }

@@ -4,6 +4,7 @@ namespace MainService
 {
     public class LessonTypes
     {
+        [Key]
         public int LessonTypeId { get; set; }
 
         [Required]

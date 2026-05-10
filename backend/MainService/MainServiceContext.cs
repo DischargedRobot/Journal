@@ -61,6 +61,27 @@ namespace MainService
 						join.ToTable("DisciplinesGroups");
 					});
 
+			// Таблица кураторов
+			modelBuilder.Entity<Groups>()
+				.HasMany(group => group.Curators)
+				.WithMany(professor => professor.GroupCurator)
+				.UsingEntity<Curators>(
+					right => right
+						.HasOne(curator => curator.Professor)
+						.WithMany()
+						.HasForeignKey(curator => curator.ProfessorId)
+						.OnDelete(DeleteBehavior.Cascade),
+					left => left
+						.HasOne(curator => curator.Group)
+						.WithMany()
+						.HasForeignKey(curator => curator.GroupId)
+						.OnDelete(DeleteBehavior.Cascade),
+					join =>
+					{
+						join.HasKey(curator => new { curator.ProfessorId, curator.GroupId });
+						join.ToTable("Curators");
+					});
+
 			// Составной ключ для таблицы LessonMarks
 			modelBuilder.Entity<LessonMarks>()
 			.HasKey(lessonMark => new
@@ -74,6 +95,22 @@ namespace MainService
 			modelBuilder.Entity<Curators>()
 				.HasKey(c => new { c.ProfessorId, c.GroupId });
 
+			// Каскадным удаление для Curators 
+			// при удалении Professor или Group
+			modelBuilder.Entity<Curators>()
+				.HasOne(c => c.Group)
+				.WithMany()
+				.HasForeignKey(c => c.GroupId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Curators>()
+				.HasOne(c => c.Professor)
+				.WithMany()
+				.HasForeignKey(c => c.ProfessorId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<SelectedMarkTypes>()
+				.HasKey(smt => new { smt.DisciplineId, smt.MarkTypeId });
 		}
 
 	}
