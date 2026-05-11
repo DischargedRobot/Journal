@@ -1,14 +1,31 @@
 using MainService;
+using MainService.Errors;
 
 using Microsoft.EntityFrameworkCore;
 
+using Swashbuckle.AspNetCore.Filters;
+
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // Регистрируем генератор Swagger только вне продакшена
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.EnableAnnotations();
+        options.ExampleFilters();
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        {
+            Version = "v1",
+            Title = "MainService API",
+            Description = "API для управления журналом успеваемости студентов"
+        });
+    });
+    builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
 }
 
 DotNetEnv.Env.Load();
@@ -42,6 +59,8 @@ if (app.Environment.IsDevelopment())
 
 // перенаправляем с http на https
 app.UseHttpsRedirection();
+
+app.MapControllers();
 
 app.Run();
 

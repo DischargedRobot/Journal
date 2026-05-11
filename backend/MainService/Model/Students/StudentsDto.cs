@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class StudentsDto
@@ -16,10 +18,14 @@ namespace MainService
 
         public StudentsDto() { }
 
+        [SetsRequiredMembers] // в этом конструкторе все обязательные свойства инициализированы
         public StudentsDto(Students student)
         {
             Uuid = student.Uuid;
             StudentCode = student.StudentCode;
+            FirstName = student.StudentPerson!.User!.FirstName;
+            LastName = student.StudentPerson.User.LastName;
+            Patronymic = student.StudentPerson.User.Patronymic ?? string.Empty;
             GroupUuid = student.Group!.Uuid;
             BrigadesUuids = student.Brigades?.Select(b => b.Uuid).ToArray() ?? [];
             NotesAboutStudentUuids = student.NotesAboutStudent?.Select(n => n.Uuid).ToArray() ?? [];
