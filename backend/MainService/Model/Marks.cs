@@ -9,6 +9,7 @@ namespace MainService
     {
         [Key]
         public int MarkId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]
         public required string Value { get; set; }

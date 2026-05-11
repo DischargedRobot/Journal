@@ -6,6 +6,7 @@ namespace MainService
     {
         [Key]
         public int UniversityEmployerId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required int UserId { get; set; }
         [ForeignKey("UserId")]

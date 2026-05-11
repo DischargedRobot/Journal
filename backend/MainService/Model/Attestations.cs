@@ -7,6 +7,7 @@ namespace MainService
     {
         [Key]
         public int AttestationId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]
         public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);

@@ -1,12 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace MainService
 {
+    [PrimaryKey(nameof(LessonMarkId), nameof(MarkId), nameof(StudentId))]
     public class LessonMarks
     {
         [Key]
-        public int LessonId { get; set; }
+        public int LessonMarkId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
         public Lessons? Lesson { get; set; }
 
         public required int MarkId { get; set; }

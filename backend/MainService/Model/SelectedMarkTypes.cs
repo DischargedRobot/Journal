@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace MainService
 {
-
+    [PrimaryKey(nameof(LessonTypeId), nameof(MarkTypeId), nameof(DisciplineId))]
     public class SelectedMarkTypes
     {
 

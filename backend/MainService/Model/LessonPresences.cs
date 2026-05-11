@@ -7,6 +7,7 @@ namespace MainService
     {
         [Key]
         public int LessonPresenceId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public bool IsPresent { get; set; }
 

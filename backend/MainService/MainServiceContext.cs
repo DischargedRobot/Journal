@@ -82,35 +82,32 @@ namespace MainService
 						join.ToTable("Curators");
 					});
 
-			// Составной ключ для таблицы LessonMarks
-			modelBuilder.Entity<LessonMarks>()
-			.HasKey(lessonMark => new
-			{
-				lessonMark.LessonId,
-				lessonMark.StudentId,
-				lessonMark.MarkId
-			});
-
-			// Составной ключ для таблицы Curators (ProfessorId, GroupId)
-			modelBuilder.Entity<Curators>()
-				.HasKey(c => new { c.ProfessorId, c.GroupId });
-
-			// Каскадным удаление для Curators 
-			// при удалении Professor или Group
-			modelBuilder.Entity<Curators>()
-				.HasOne(c => c.Group)
-				.WithMany()
-				.HasForeignKey(c => c.GroupId)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<Curators>()
-				.HasOne(c => c.Professor)
-				.WithMany()
-				.HasForeignKey(c => c.ProfessorId)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<SelectedMarkTypes>()
-				.HasKey(smt => new { smt.DisciplineId, smt.MarkTypeId });
+			// Альтернативные ключи (UUID) для всех сущностей
+			modelBuilder.Entity<AcademicYears>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Attestations>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<AttestationMarks>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<AttestationTypes>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Brigades>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Departments>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Disciplines>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<DisciplinesRegisters>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<EmployeePosts>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Faculties>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Groups>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Lessons>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<LessonTypes>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<LessonPresences>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Marks>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<MarkTypes>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<NotesAboutStudent>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<PresenceStatuses>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Professors>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Semesters>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<StudentPersons>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Students>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<TrainingDirections>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<UniversityEmployers>().HasAlternateKey(e => e.Uuid);
+			modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
 		}
 
 	}

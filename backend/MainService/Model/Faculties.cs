@@ -6,6 +6,7 @@ namespace MainService
     {
         [Key]
         public int FacultyId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required string Name { get; set; }
 

@@ -6,6 +6,7 @@ namespace MainService
 	{
 		[Key]
 		public int AcademicYearId { get; set; }
+		public Guid Uuid { get; set; } = Guid.NewGuid();
 
 		[Required]
 		public required DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);

@@ -1,14 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace MainService
 {
     public class Disciplines
     {
+        [SwaggerSchema("Уникальный идентификатор дисциплины")]
         [Key]
         public int DisciplineId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required] // == MinLength(1) || != null
+        [SwaggerSchema("Название дисциплины")]
         public required string Name { get; set; }
 
         [Required] // == MinLength(1) || != null

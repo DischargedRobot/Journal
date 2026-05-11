@@ -8,6 +8,7 @@ namespace MainService
     {
         [Key]
         public int LessonId { get; set; }
+        public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]
         public int Code { get; set; }
