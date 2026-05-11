@@ -5,7 +5,7 @@ namespace MainService
     public class AttestationTypes
     {
         [Key]
-        public required int AttestationTypeId { get; set; }
+        public int AttestationTypeId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

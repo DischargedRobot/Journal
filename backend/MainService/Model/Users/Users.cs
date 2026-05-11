@@ -5,7 +5,7 @@ namespace MainService
     public class Users
     {
         [Key]
-        public required int UserId { get; set; }
+        public int UserId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required string FirstName { get; set; }

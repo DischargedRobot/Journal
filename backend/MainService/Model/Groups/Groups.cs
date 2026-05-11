@@ -6,7 +6,7 @@ namespace MainService
     public class Groups
     {
         [Key]
-        public required int GroupId { get; set; }
+        public int GroupId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

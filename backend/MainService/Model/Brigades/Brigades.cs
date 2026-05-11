@@ -6,7 +6,7 @@ namespace MainService
     public class Brigades
     {
         [Key]
-        public required int BrigadeId { get; set; }
+        public int BrigadeId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required string Name { get; set; }

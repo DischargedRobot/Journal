@@ -6,7 +6,7 @@ namespace MainService
     public class Departments
     {
         [Key]
-        public required int DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

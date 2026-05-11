@@ -5,7 +5,7 @@ namespace MainService
     public class EmployeePosts
     {
         [Key]
-        public required int PostId { get; set; }
+        public int PostId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

@@ -5,7 +5,7 @@ namespace MainService
     public class DisciplinesRegisters
     {
         [Key]
-        public required int DisciplineRegisterId { get; set; }
+        public int DisciplineRegisterId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

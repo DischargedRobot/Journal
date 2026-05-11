@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class FacultiesDto
@@ -10,6 +12,7 @@ namespace MainService
 
         public FacultiesDto() { }
 
+        [SetsRequiredMembers]
         public FacultiesDto(Faculties faculty)
         {
             Uuid = faculty.Uuid;

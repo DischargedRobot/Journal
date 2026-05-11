@@ -9,7 +9,7 @@ namespace MainService
     {
         [SwaggerSchema("Уникальный идентификатор дисциплины")]
         [Key]
-        public required int DisciplineId { get; set; }
+        public int DisciplineId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required] // == MinLength(1) || != null

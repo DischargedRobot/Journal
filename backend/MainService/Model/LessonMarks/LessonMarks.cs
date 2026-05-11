@@ -9,7 +9,7 @@ namespace MainService
     public class LessonMarks
     {
         [Key]
-        public required int LessonMarkId { get; set; }
+        public int LessonMarkId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required int LessonId { get; set; }

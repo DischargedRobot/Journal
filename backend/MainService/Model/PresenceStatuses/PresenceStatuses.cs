@@ -5,7 +5,7 @@ namespace MainService
     public class PresenceStatuses
     {
         [Key]
-        public required int PresenceStatusId { get; set; }
+        public int PresenceStatusId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]

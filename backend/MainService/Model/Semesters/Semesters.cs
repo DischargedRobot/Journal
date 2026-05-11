@@ -5,7 +5,7 @@ namespace MainService
 	public class Semesters
 	{
 		[Key]
-		public required int SemesterId { get; set; }
+		public int SemesterId { get; set; }
 		public Guid Uuid { get; set; } = Guid.NewGuid();
 
 		[Required]

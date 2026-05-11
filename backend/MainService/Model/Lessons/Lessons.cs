@@ -7,7 +7,7 @@ namespace MainService
     public class Lessons
     {
         [Key]
-        public required int LessonId { get; set; }
+        public int LessonId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         [Required]
