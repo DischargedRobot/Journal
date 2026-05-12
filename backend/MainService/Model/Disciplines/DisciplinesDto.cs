@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class DisciplinesDto
@@ -6,7 +8,7 @@ namespace MainService
         public required string Name { get; set; }
         public required string ShortName { get; set; }
         public required bool IsArchived { get; set; }
-        public required Guid DisciplineRegisterUuid { get; set; }
+        public Guid? DisciplineRegisterUuid { get; set; }
         public required Guid SemesterUuid { get; set; }
         public required Guid AcademicYearUuid { get; set; }
         public Guid[]? BrigadesUuids { get; set; } = [];
@@ -17,6 +19,7 @@ namespace MainService
 
         public DisciplinesDto() { }
 
+        [SetsRequiredMembers]
         public DisciplinesDto(Disciplines discipline)
         {
             Uuid = discipline.Uuid;

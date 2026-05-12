@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class DisciplinesRegistersDto
@@ -10,6 +12,7 @@ namespace MainService
 
         public DisciplinesRegistersDto() { }
 
+        [SetsRequiredMembers]
         public DisciplinesRegistersDto(DisciplinesRegisters disciplineRegister)
         {
             Uuid = disciplineRegister.Uuid;

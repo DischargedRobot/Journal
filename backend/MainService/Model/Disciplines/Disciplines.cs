@@ -21,7 +21,7 @@ namespace MainService
 
         public required bool IsArchived { get; set; } = false;
 
-        public required int DisciplineRegisterId { get; set; }
+        public int? DisciplineRegisterId { get; set; }
         [ForeignKey("DisciplineRegisterId")]
         public DisciplinesRegisters? DisciplineRegister { get; set; }
 

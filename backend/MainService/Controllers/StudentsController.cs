@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Filters;
 
 using Z.EntityFramework.Plus;
 
@@ -23,25 +24,37 @@ namespace MainService.Controllers
         }
 
         [HttpGet("{Uuid}")]
-        [SwaggerResponse(200, "Студенты найдены", typeof(StudentsDto))]
+        [SwaggerResponse(200, "Студент найден", typeof(StudentsDto))]
         [SwaggerResponse(404, "Студенты не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Получить студента по ID",
             Description = "Возвращает студента по указанному ID"
         )]
-        public async Task<IActionResult> GetStudent(Guid Uuid)
+        public async Task<IActionResult> GetStudent(Guid uuid)
         {
-            var student = await _context.Students.FindAsync(Uuid);
+            if (uuid == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.0",
+                    Title = "Неверный запрос",
+                    Message = "UUID студента не может быть пустым"
+                });
+            }
+            var student = await _context.Students.FindAsync(uuid);
             if (student == null)
             {
                 return NotFound(new ApiError
                 {
                     StatusCode = "0.0",
                     Title = "Студент не найден",
-                    Message = $"Студент с UUID \"{Uuid}\" не найден"
+                    Message = $"Студент с UUID \"{uuid}\" не найден"
                 });
             }
-            return Ok(student);
+            return Ok(new StudentsDto(student));
         }
 
         // [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -60,13 +73,16 @@ namespace MainService.Controllers
         // }
 
         [HttpGet("group/{groupUuid}")]
-        [SwaggerResponse(200, "Студенты найдены", typeof(StudentsDto))]
+        [SwaggerResponse(200, "Студенты найдены", typeof(PagedResult<StudentsDto>))]
         [SwaggerResponse(404, "Студенты не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Получить студентов по группе",
             Description = "Возвращает список студентов по указанной группе"
         )]
-        public async Task<ActionResult<StudentsDto>> GetStudentsByGroup(
+        public async Task<ActionResult<PagedResult<StudentsDto>>> GetStudentsByGroup(
             Guid groupUuid,
             [FromQuery] int offset = 0,
             [FromQuery] int size = 50,
@@ -75,6 +91,15 @@ namespace MainService.Controllers
         // [FromQuery] SortOrder[]? sortOrder = null
         )
         {
+            if (groupUuid == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.0",
+                    Title = "Неверный запрос",
+                    Message = "UUID группы не может быть пустым"
+                });
+            }
             var group = await _context.Groups
             .FirstOrDefaultAsync(g => g.Uuid == groupUuid);
             if (group == null)
@@ -87,8 +112,15 @@ namespace MainService.Controllers
                 });
             }
 
-            if (offset < 0) offset = 0;
-            if (size <= 0) size = 50;
+            if (offset < 0)
+            {
+                offset = 0;
+            }
+
+            if (size <= 0)
+            {
+                size = 50;
+            }
 
             var baseQuery = _context.Students
                 .Where(s => s.GroupId == group.GroupId
@@ -108,10 +140,10 @@ namespace MainService.Controllers
                 .Take(size)
                 .Future();
 
-            List<Students> students = futureItems.ToList();
+            List<Students> studentsList = futureItems.ToList();
             int total = futureCount.Value;
 
-            if (students == null || students.Count == 0)
+            if (studentsList.Count == 0)
             {
                 return NotFound(new ApiError
                 {
@@ -121,9 +153,9 @@ namespace MainService.Controllers
                 });
             }
 
-            List<StudentsDto> studentsDto = students.Select(s => new StudentsDto(s)).ToList();
+            List<StudentsDto> studentsDtoList = studentsList.Select(s => new StudentsDto(s)).ToList();
 
-            return Ok(new PagedResult<StudentsDto>(total, offset, studentsDto.Count, studentsDto));
+            return Ok(new PagedResult<StudentsDto>(total, offset, studentsDtoList.Count, studentsDtoList));
         }
 
 

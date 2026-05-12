@@ -17,5 +17,8 @@ namespace MainService
         public required int AttestationTypeId { get; set; }
         [ForeignKey("AttestationTypeId")]
         public AttestationTypes? AttestationType { get; set; }
+
+        public AttestationMarks() { }
+
     }
 }
