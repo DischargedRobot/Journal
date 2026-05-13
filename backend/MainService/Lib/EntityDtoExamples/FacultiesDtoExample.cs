@@ -4,11 +4,11 @@ using MainService;
 
 namespace MainService.EntityDtoExamples
 {
-    public class FacultiesDtoExample : IExamplesProvider<FacultiesDto>
+    public class FacultiesDtoExample : IExamplesProvider<FacultiesResponseDto>
     {
-        public FacultiesDto GetExamples()
+        public FacultiesResponseDto GetExamples()
         {
-            return new FacultiesDto
+            return new FacultiesResponseDto
             {
                 Uuid = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
                 Name = "Факультет математики",

@@ -8,8 +8,28 @@ using Swashbuckle.AspNetCore.Filters;
 var builder = WebApplication.CreateBuilder(args);
 
 
+// Генерация по шаблону для всех контроллеров 
+// на случай когда нету обязательно параметра в теле запроса
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .ToDictionary(
+                    e => e.Key,
+                    e => e.Value!.Errors.Select(x => x.ErrorMessage).ToArray()
+                );
 
-builder.Services.AddControllers();
+            return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new ApiError
+            {
+                StatusCode = "0.0",
+                Title = "Неверный запрос",
+                Message = string.Join("; ", errors.SelectMany(e => e.Value))
+            });
+        };
+    });
 builder.Services.AddEndpointsApiExplorer();
 // Регистрируем генератор Swagger только вне продакшена
 if (builder.Environment.IsDevelopment())

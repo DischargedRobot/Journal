@@ -113,7 +113,9 @@ namespace MainService
 		private void IncrementVersions()
 		{
 			foreach (var entry in ChangeTracker.Entries<BaseEntity>()
-				.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+				.Where(e => e.State == EntityState.Added ||
+					(e.State == EntityState.Modified &&
+					 e.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(BaseEntity.Version)))))
 			{
 				entry.Entity.Version++;
 			}
