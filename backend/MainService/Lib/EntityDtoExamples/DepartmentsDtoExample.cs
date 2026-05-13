@@ -15,7 +15,6 @@ namespace MainService.EntityDtoExamples
                 ShortName = "ПМ",
                 Code = "PM",
                 FacultyUuid = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                ProfessorsUuids = [Guid.Parse("3fa37864-5717-4562-3333-2c963f66afa6")]
             };
         }
     }

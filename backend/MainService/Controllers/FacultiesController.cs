@@ -55,9 +55,9 @@ namespace MainService.Controllers
                 .AsNoTracking();
 
             Task<int> totalTask = _context.Faculties.CountAsync();
-            Task<List<FacultiesResponseDto>> facultiesTask = query.ToListAsync();
+            Task<List<FacultiesResponseDto>> listTask = query.ToListAsync();
 
-            List<FacultiesResponseDto> faculties = await facultiesTask;
+            List<FacultiesResponseDto> faculties = await listTask;
             int totalCount = await totalTask;
 
             if (totalCount == 0)
@@ -240,11 +240,15 @@ namespace MainService.Controllers
         [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Обновить факультет",
-            Description = "Обновляет факультет по его UUID"
+            Description = "Обновляет факультет по его UUID. Все поля необязательны. " +
+                          "Если передать shortName как пустую строку — аббревиатура будет сгенерирована автоматически из названия. " +
+                          "Если не передавать shortName вовсе — текущее значение останется без изменений."
         )]
         public async Task<ActionResult<FacultiesResponseDto>> UpdateFaculty(
-            [SwaggerParameter("UUID факультета")] Guid uuid,
-            [FromBody] FacultiesUpdateDto updateDto
+            [SwaggerParameter("UUID факультета")] 
+            Guid uuid,
+            [FromBody, SwaggerParameter("Данные для обновления факультета")] 
+            FacultiesUpdateDto updateDto
         )
         {
             if (uuid == Guid.Empty)
@@ -280,7 +284,8 @@ namespace MainService.Controllers
                     });
                 }
 
-                if (_context.Faculties.Any(f => f.Name == updateDto.Name && f.Uuid != uuid))
+                if (_context.Faculties.Any(f => f.Name == updateDto.Name
+                    && f.Uuid != uuid))
                 {
                     return BadRequest(new ApiError
                     {
@@ -293,15 +298,19 @@ namespace MainService.Controllers
                 faculty.Name = updateDto.Name.Trim();
             }
 
-            if (updateDto.ShortName != null && updateDto.ShortName.Trim() != string.Empty)
+            // Если не передаётся — текущее значение остаётся без изменений
+            if (updateDto.ShortName != null)
             {
-                faculty.ShortName = updateDto.ShortName.Trim();
-            }
-            else if (updateDto.ShortName != null) // если указано, но пустое, то генерируем аббревиатуру из названия
-            {
-                faculty.ShortName = string.Concat(faculty.Name
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(w => w[0]));
+                if (updateDto.ShortName.Trim() != string.Empty)
+                {
+                    faculty.ShortName = updateDto.ShortName.Trim();
+                }
+                else // если указано, но пустое, то генерируем аббревиатуру из названия
+                {
+                    faculty.ShortName = string.Concat(faculty.Name
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(w => w[0]));
+                }
             }
 
             await _context.SaveChangesAsync();

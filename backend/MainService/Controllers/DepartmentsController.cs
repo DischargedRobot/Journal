@@ -53,13 +53,10 @@ namespace MainService
                     Code = d.Code,
                     FacultyUuid = d.Faculty!.Uuid,
                     Version = d.Version
-                })
-                .AsNoTracking();
+                });
 
             Task<int> totalTask = _context.Departments.CountAsync();
             Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
-
-            await Task.WhenAll(totalTask, departmentsTask);
 
             List<DepartmentsResponseDto> departments = await departmentsTask;
             int totalCount = await totalTask;
@@ -206,8 +203,7 @@ namespace MainService
                     Code = d.Code,
                     FacultyUuid = d.Faculty!.Uuid,
                     Version = d.Version
-                })
-                .AsNoTracking();
+                });
 
             Task<int> totalTask = _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
             Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
@@ -403,12 +399,30 @@ namespace MainService
 
             if (updateDto.Name != null)
             {
+                if (string.IsNullOrWhiteSpace(updateDto.Name))
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2",
+                        Title = "Неверный запрос",
+                        Message = "Название кафедры не может быть пустым"
+                    });
+                }
                 department.Name = updateDto.Name;
             }
 
             if (updateDto.ShortName != null)
             {
-                department.ShortName = updateDto.ShortName;
+                if (updateDto.ShortName.Trim() != string.Empty)
+                {
+                    department.ShortName = updateDto.ShortName.Trim();
+                }
+                else
+                {
+                    department.ShortName = string.Concat(department.Name
+                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(w => w[0]));
+                }
             }
 
             if (updateDto.Code != null)
