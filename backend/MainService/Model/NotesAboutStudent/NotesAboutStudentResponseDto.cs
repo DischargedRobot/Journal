@@ -1,0 +1,20 @@
+namespace MainService
+{
+    public class NotesAboutStudentResponseDto
+    {
+        public required Guid Uuid { get; set; }
+        public required string NoteText { get; set; }
+        public required Guid StudentUuid { get; set; }
+
+        public int Version { get; set; }
+        public NotesAboutStudentResponseDto() { }
+
+        public NotesAboutStudentResponseDto(NotesAboutStudent note)
+        {
+            Uuid = note.Uuid;
+            NoteText = note.NoteText;
+            StudentUuid = note.Student!.Uuid;
+            Version = note.Version;
+        }
+    }
+}
