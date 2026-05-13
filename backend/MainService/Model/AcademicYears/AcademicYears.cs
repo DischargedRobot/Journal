@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MainService
 {
-	public class AcademicYears
+	public class AcademicYears : BaseEntity
 	{
 		[Key]
 		public int AcademicYearId { get; set; }

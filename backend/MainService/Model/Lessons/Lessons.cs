@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
-    public class Lessons
+    public class Lessons : BaseEntity
     {
         [Key]
         public int LessonId { get; set; }

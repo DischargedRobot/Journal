@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MainService
 {
-    public class EmployeePosts
+    public class EmployeePosts : BaseEntity
     {
         [Key]
         public int PostId { get; set; }

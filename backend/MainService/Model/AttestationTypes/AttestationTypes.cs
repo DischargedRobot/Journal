@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MainService
 {
-    public class AttestationTypes
+    public class AttestationTypes : BaseEntity
     {
         [Key]
         public int AttestationTypeId { get; set; }

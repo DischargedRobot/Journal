@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace MainService
 {
-    public class Disciplines
+    public class Disciplines : BaseEntity
     {
         [SwaggerSchema("Уникальный идентификатор дисциплины")]
         [Key]

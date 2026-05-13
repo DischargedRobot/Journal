@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MainService
 {
     [PrimaryKey(nameof(ProfessorId), nameof(GroupId))]
-    public class Curators
+    public class Curators : BaseEntity
     {
         [Required] //  каскадное удаление
         public required int ProfessorId { get; set; }

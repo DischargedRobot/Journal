@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MainService
 {
     [Index(nameof(MarkTypeId), nameof(Value), IsUnique = true)]
-    public class Marks
+    public class Marks : BaseEntity
     {
         [Key]
         public int MarkId { get; set; }

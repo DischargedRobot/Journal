@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MainService
 {
-    public class TrainingDirections
+    public class TrainingDirections : BaseEntity
     {
         [Key]
         public int TrainingDirectionId { get; set; }

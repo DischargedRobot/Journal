@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MainService
 {
-    public class MarkTypes
+    public class MarkTypes : BaseEntity
     {
         [Key]
         public int MarkTypeId { get; set; }

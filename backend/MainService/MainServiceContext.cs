@@ -110,5 +110,25 @@ namespace MainService
 			modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
 		}
 
+		private void IncrementVersions()
+		{
+			foreach (var entry in ChangeTracker.Entries<BaseEntity>()
+				.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified))
+			{
+				entry.Entity.Version++;
+			}
+		}
+
+		public override int SaveChanges()
+		{
+			IncrementVersions();
+			return base.SaveChanges();
+		}
+
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			IncrementVersions();
+			return base.SaveChangesAsync(cancellationToken);
+		}
 	}
 }

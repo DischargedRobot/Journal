@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MainService
 {
     [PrimaryKey(nameof(LessonMarkId), nameof(MarkId), nameof(StudentId))]
-    public class LessonMarks
+    public class LessonMarks : BaseEntity
     {
         [Key]
         public int LessonMarkId { get; set; }
