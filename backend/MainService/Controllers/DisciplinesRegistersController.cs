@@ -1,6 +1,7 @@
 using MainService.Enums;
 using MainService.Errors;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,9 +22,9 @@ namespace MainService.Controllers
         }
 
         [HttpGet]
-        [SwaggerResponse(200, "Записи реестра дисциплин найдены", typeof(IEnumerable<DisciplinesRegistersResponseDto>))]
-        [SwaggerResponse(404, "Записи реестра дисциплин не найдены", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Записи реестра дисциплин найдены", typeof(IEnumerable<DisciplinesRegistersResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Записи реестра дисциплин не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Получить список записей реестра дисциплин",
             Description = "Возвращает все записи реестра дисциплин"
@@ -86,11 +87,11 @@ namespace MainService.Controllers
         }
 
         [HttpGet("{uuid}")]
-        [SwaggerResponse(200, "Запись реестра дисциплин найдена", typeof(DisciplinesRegistersResponseDto))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Запись реестра дисциплин не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Запись реестра дисциплин найдена", typeof(DisciplinesRegistersResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Запись реестра дисциплин не найдена", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Получить запись реестра дисциплин по идентификатору",
             Description = "Возвращает одну запись реестра дисциплин по её UUID"
@@ -136,9 +137,9 @@ namespace MainService.Controllers
         }
 
         [HttpPost]
-        [SwaggerResponse(201, "Запись реестра дисциплин создана", typeof(DisciplinesRegistersResponseDto))]
-        [SwaggerResponse(400, "Некорректные данные", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status201Created, "Запись реестра дисциплин создана", typeof(DisciplinesRegistersResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Создать новую запись в реестре дисциплин",
             Description = "Создает новую запись в реестре дисциплин"
@@ -181,11 +182,11 @@ namespace MainService.Controllers
         }
 
         [HttpDelete("{uuid}")]
-        [SwaggerResponse(204, "Запись реестра дисциплин удалена")]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Запись реестра дисциплин не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Запись реестра дисциплин удалена")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Запись реестра дисциплин не найдена", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить запись реестра дисциплин по идентификатору"
         )]
@@ -223,11 +224,11 @@ namespace MainService.Controllers
 
 
         [HttpPatch("{uuid}")]
-        [SwaggerResponse(200, "Запись реестра дисциплин обновлена", typeof(DisciplinesRegistersResponseDto))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Запись реестра дисциплин не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Запись реестра дисциплин обновлена", typeof(DisciplinesRegistersResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Запись реестра дисциплин не найдена", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Обновить запись реестра дисциплин",
             Description = "Обновляет данные записи реестра дисциплин по её UUID. Все поля необязательны"
@@ -262,7 +263,7 @@ namespace MainService.Controllers
 
             if (updateDto.Name != null)
             {
-                if (string.IsNullOrWhiteSpace(updateDto.Name))
+                if (updateDto.Name.Trim() == string.Empty)
                 {
                     return BadRequest(new ApiError
                     {

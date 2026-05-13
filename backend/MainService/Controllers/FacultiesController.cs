@@ -2,7 +2,6 @@ using MainService.EntityDtoExamples;
 using MainService.Errors;
 
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 using Swashbuckle.AspNetCore.Annotations;
@@ -24,9 +23,9 @@ namespace MainService.Controllers
 
 
         [HttpGet]
-        [SwaggerResponse(200, "Факультеты найдены", typeof(IEnumerable<FacultiesResponseDto>))]
-        [SwaggerResponse(404, "Факультеты не найдены", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Факультеты найдены", typeof(IEnumerable<FacultiesResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Факультеты не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Получить список всех факультетов",
             Description = "Возвращает список всех факультетов в системе"
@@ -90,12 +89,12 @@ namespace MainService.Controllers
 
 
         [HttpGet("{uuid}")]
-        [SwaggerResponse(200, "Факультет найден", typeof(FacultiesResponseDto))]
-        [SwaggerResponseExample(200, typeof(FacultiesDtoExample))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Факультет не найден", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Факультет найден", typeof(FacultiesResponseDto))]
+        [SwaggerResponseExample(StatusCodes.Status200OK, typeof(FacultiesDtoExample))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Факультет не найден", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Получить факультет по идентификатору",
             Description = "Возвращает один факультет по его UUID"
@@ -131,9 +130,10 @@ namespace MainService.Controllers
 
 
         [HttpPost]
-        [SwaggerResponse(201, "Факультет создан", typeof(FacultiesResponseDto))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status201Created, "Факультет создан", typeof(FacultiesResponseDto))]
+        [SwaggerResponseExample(StatusCodes.Status201Created, typeof(FacultiesDtoExample))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Создать новый факультет",
             Description = "Создает новый факультет в системе"
@@ -186,16 +186,20 @@ namespace MainService.Controllers
             _context.Faculties.Add(faculty);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetFaculty), new { uuid = faculty.Uuid }, new FacultiesResponseDto(faculty));
+            return CreatedAtAction(
+                nameof(GetFaculty),
+                new { uuid = faculty.Uuid },
+                new FacultiesResponseDto(faculty)
+                );
         }
 
 
         [HttpDelete("{uuid}")]
-        [SwaggerResponse(204, "Факультет удален")]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Факультет не найден", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Факультет удален")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Факультет не найден", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить факультет",
             Description = "Удаляет факультет по его UUID"
@@ -233,11 +237,11 @@ namespace MainService.Controllers
 
 
         [HttpPatch("{uuid}")]
-        [SwaggerResponse(200, "Факультет обновлен", typeof(FacultiesResponseDto))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(404, "Факультет не найден", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Факультет обновлен", typeof(FacultiesResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Факультет не найден", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Обновить факультет",
             Description = "Обновляет факультет по его UUID. Все поля необязательны. " +
@@ -245,9 +249,9 @@ namespace MainService.Controllers
                           "Если не передавать shortName вовсе — текущее значение останется без изменений."
         )]
         public async Task<ActionResult<FacultiesResponseDto>> UpdateFaculty(
-            [SwaggerParameter("UUID факультета")] 
+            [SwaggerParameter("UUID факультета")]
             Guid uuid,
-            [FromBody, SwaggerParameter("Данные для обновления факультета")] 
+            [FromBody, SwaggerParameter("Данные для обновления факультета")]
             FacultiesUpdateDto updateDto
         )
         {
@@ -301,16 +305,13 @@ namespace MainService.Controllers
             // Если не передаётся — текущее значение остаётся без изменений
             if (updateDto.ShortName != null)
             {
-                if (updateDto.ShortName.Trim() != string.Empty)
-                {
-                    faculty.ShortName = updateDto.ShortName.Trim();
-                }
-                else // если указано, но пустое, то генерируем аббревиатуру из названия
-                {
-                    faculty.ShortName = string.Concat(faculty.Name
-                        .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(w => w[0]));
-                }
+                // если указано, но пустое, то генерируем аббревиатуру из названия
+                string shortNameDto = updateDto.ShortName.Trim();
+                faculty.ShortName = shortNameDto != string.Empty
+                    ? shortNameDto
+                    : string.Concat(faculty.Name
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(w => w[0]));
             }
 
             await _context.SaveChangesAsync();
