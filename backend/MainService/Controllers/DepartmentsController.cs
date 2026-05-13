@@ -41,19 +41,27 @@ namespace MainService
         )
         {
 
-            IQueryable<Departments> query = _context.Departments
-                .AsQueryable()
+            IQueryable<DepartmentsResponseDto> query = _context.Departments
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
+                .Select(d => new DepartmentsResponseDto
+                {
+                    Uuid = d.Uuid,
+                    Name = d.Name,
+                    ShortName = d.ShortName,
+                    Code = d.Code,
+                    FacultyUuid = d.Faculty!.Uuid,
+                    Version = d.Version
+                })
                 .AsNoTracking();
 
             Task<int> totalTask = _context.Departments.CountAsync();
-            Task<List<Departments>> departmentsTask = query.ToListAsync();
+            Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
 
             await Task.WhenAll(totalTask, departmentsTask);
 
-            List<Departments> departments = await departmentsTask;
+            List<DepartmentsResponseDto> departments = await departmentsTask;
             int totalCount = await totalTask;
 
             if (totalCount == 0)
@@ -80,7 +88,7 @@ namespace MainService
                 Total: totalCount,
                 Offset: offset,
                 Size: size,
-                Items: departments.Select(d => new DepartmentsResponseDto(d))
+                Items: departments
             ));
         }
 
@@ -112,7 +120,18 @@ namespace MainService
                 });
             }
 
-            Departments? department = await _context.Departments.FirstOrDefaultAsync(d => d.Uuid == uuid);
+            DepartmentsResponseDto? department = await _context.Departments
+                .Where(d => d.Uuid == uuid)
+                .Select(d => new DepartmentsResponseDto
+                {
+                    Uuid = d.Uuid,
+                    Name = d.Name,
+                    ShortName = d.ShortName,
+                    Code = d.Code,
+                    FacultyUuid = d.Faculty!.Uuid,
+                    Version = d.Version
+                })
+                .FirstOrDefaultAsync();
 
             if (department == null)
             {
@@ -124,7 +143,7 @@ namespace MainService
                 });
             }
 
-            return Ok(new DepartmentsResponseDto(department));
+            return Ok(department);
         }
 
 
@@ -174,17 +193,26 @@ namespace MainService
                 });
             }
 
-            IQueryable<Departments> query = _context.Departments
+            IQueryable<DepartmentsResponseDto> query = _context.Departments
                 .Where(d => d.FacultyId == faculty.FacultyId
                     && (string.IsNullOrEmpty(name) || d.Name.Contains(name)))
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
+                .Select(d => new DepartmentsResponseDto
+                {
+                    Uuid = d.Uuid,
+                    Name = d.Name,
+                    ShortName = d.ShortName,
+                    Code = d.Code,
+                    FacultyUuid = d.Faculty!.Uuid,
+                    Version = d.Version
+                })
                 .AsNoTracking();
 
             Task<int> totalTask = _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
-            Task<List<Departments>> departmentsTask = query.ToListAsync();
+            Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
 
-            List<Departments> departments = await departmentsTask;
+            List<DepartmentsResponseDto> departments = await departmentsTask;
             int totalCount = await totalTask;
 
             if (totalCount == 0)
@@ -211,7 +239,7 @@ namespace MainService
                 Total: totalCount,
                 Offset: offset,
                 Size: size,
-                Items: departments.Select(d => new DepartmentsResponseDto(d))
+                Items: departments
             ));
         }
 
@@ -281,7 +309,15 @@ namespace MainService
             _context.Departments.Add(newDepartment);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetDepartment), new { uuid = newDepartment.Uuid }, new DepartmentsResponseDto(newDepartment));
+            return CreatedAtAction(nameof(GetDepartment), new { uuid = newDepartment.Uuid }, new DepartmentsResponseDto
+            {
+                Uuid = newDepartment.Uuid,
+                Name = newDepartment.Name,
+                ShortName = newDepartment.ShortName,
+                Code = newDepartment.Code,
+                FacultyUuid = faculty.Uuid,
+                Version = newDepartment.Version
+            });
         }
 
         [HttpDelete("{uuid}")]
@@ -353,7 +389,8 @@ namespace MainService
                 });
             }
 
-            Departments? department = await _context.Departments.FirstOrDefaultAsync(d => d.Uuid == uuid);
+            Departments? department = await _context.Departments
+                .FirstOrDefaultAsync(d => d.Uuid == uuid);
             if (department == null)
             {
                 return NotFound(new ApiError
@@ -405,7 +442,18 @@ namespace MainService
 
             await _context.SaveChangesAsync();
 
-            return Ok(new DepartmentsResponseDto(department));
+            return Ok(await _context.Departments
+                .Where(d => d.Uuid == uuid)
+                .Select(d => new DepartmentsResponseDto
+                {
+                    Uuid = d.Uuid,
+                    Name = d.Name,
+                    ShortName = d.ShortName,
+                    Code = d.Code,
+                    FacultyUuid = d.Faculty!.Uuid,
+                    Version = d.Version
+                })
+                .FirstAsync());
         }
 
     }

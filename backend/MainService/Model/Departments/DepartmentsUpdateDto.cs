@@ -6,6 +6,7 @@ namespace MainService
         public string? ShortName { get; set; }
         public string? Code { get; set; }
         public Guid? FacultyUuid { get; set; }
-        public Guid[]? ProfessorsUuids { get; set; }
+        public int Version { get; set; }
+
     }
 }

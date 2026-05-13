@@ -42,16 +42,22 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
-            IQueryable<Faculties> query = _context.Faculties
-                .AsQueryable()
+            IQueryable<FacultiesResponseDto> query = _context.Faculties
                 .SortByKey(f => string.IsNullOrWhiteSpace(name) || f.Name.Contains(name), sortOrder)
                 .TakeWithOffset(offset, size)
+                .Select(f => new FacultiesResponseDto
+                {
+                    Uuid = f.Uuid,
+                    Name = f.Name,
+                    ShortName = f.ShortName,
+                    Version = f.Version
+                })
                 .AsNoTracking();
 
             Task<int> totalTask = _context.Faculties.CountAsync();
-            Task<List<Faculties>> facultiesTask = query.ToListAsync();
+            Task<List<FacultiesResponseDto>> facultiesTask = query.ToListAsync();
 
-            List<Faculties> faculties = await facultiesTask;
+            List<FacultiesResponseDto> faculties = await facultiesTask;
             int totalCount = await totalTask;
 
             if (totalCount == 0)
@@ -78,7 +84,7 @@ namespace MainService.Controllers
                 Total: totalCount,
                 Offset: offset,
                 Size: size,
-                Items: faculties.Select(f => new FacultiesResponseDto(f))
+                Items: faculties
             ));
         }
 

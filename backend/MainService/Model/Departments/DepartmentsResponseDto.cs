@@ -9,7 +9,6 @@ namespace MainService
         public required string ShortName { get; set; }
         public required string Code { get; set; }
         public required Guid FacultyUuid { get; set; }
-        public Guid[]? ProfessorsUuids { get; set; } = [];
 
         public int Version { get; set; }
         public DepartmentsResponseDto() { }
@@ -22,7 +21,6 @@ namespace MainService
             ShortName = department.ShortName;
             Code = department.Code;
             FacultyUuid = department.Faculty!.Uuid;
-            ProfessorsUuids = department.Professors?.Select(p => p.Uuid).ToArray() ?? [];
             Version = department.Version;
         }
     }
