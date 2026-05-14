@@ -71,7 +71,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = "В системе не найдено ни одной дисциплины",
                     Field = string.Empty
@@ -82,7 +82,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = "В системе не найдено ни одной дисциплины для указанных параметров запроса",
                     Field = string.Empty
@@ -144,7 +144,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплина не найдена",
                     Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -222,7 +222,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для группы с UUID \"{uuid}\" не найдено ни одной дисциплины",
                     Field = nameof(uuid)
@@ -233,7 +233,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для группы с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
                     Field = nameof(uuid)
@@ -315,7 +315,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для преподавателя с UUID \"{uuid}\" не найдено ни одной дисциплины",
                     Field = nameof(uuid)
@@ -326,7 +326,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для преподавателя с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
                     Field = nameof(uuid)
@@ -426,7 +426,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Некорректные данные",
                     Message = "Семестр с указанным UUID не найден",
                     Field = nameof(createDto.SemesterUuid)
@@ -438,7 +438,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Некорректные данные",
                     Message = "Учебный год с указанным UUID не найден",
                     Field = nameof(createDto.AcademicYearUuid)
@@ -453,7 +453,7 @@ namespace MainService.Controllers
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Реестр дисциплин с указанным UUID не найден",
                         Field = nameof(createDto.DisciplineRegisterUuid)
@@ -470,7 +470,7 @@ namespace MainService.Controllers
                 Guid[] notFoundGroups = createDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Некорректные данные",
                     Message = "Одна или несколько групп с указанными UUID не найдены",
                     Details = string.Join(", ", notFoundGroups),
@@ -489,7 +489,7 @@ namespace MainService.Controllers
                     Guid[] notFoundProfessors = createDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Один или несколько преподавателей с указанными UUID не найдены",
                         Details = string.Join(", ", notFoundProfessors),
@@ -553,7 +553,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплина не найдена",
                     Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -652,7 +652,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Дисциплина не найдена",
                     Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -686,7 +686,7 @@ namespace MainService.Controllers
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Семестр с указанным UUID не найден",
                         Field = nameof(updateDto.SemesterUuid)
@@ -702,7 +702,7 @@ namespace MainService.Controllers
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Учебный год с указанным UUID не найден",
                         Field = nameof(updateDto.AcademicYearUuid)
@@ -724,7 +724,7 @@ namespace MainService.Controllers
                     {
                         return BadRequest(new ApiError
                         {
-                            StatusCode = "0.2.3",
+                            StatusCode = "1.2.3",
                             Title = "Некорректные данные",
                             Message = "Реестр дисциплин с указанным UUID не найден",
                             Field = nameof(updateDto.DisciplineRegisterUuid)
@@ -744,7 +744,7 @@ namespace MainService.Controllers
                     Guid[] notFoundGroups = updateDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Одна или несколько групп с указанными UUID не найдены",
                         Field = nameof(updateDto.GroupsUuids),
@@ -764,7 +764,7 @@ namespace MainService.Controllers
                     Guid[] notFoundProfessors = updateDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Один или несколько преподавателей с указанными UUID не найдены",
                         Field = nameof(updateDto.ProfessorsUuids),

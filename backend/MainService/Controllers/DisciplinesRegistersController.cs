@@ -62,7 +62,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Записи реестра дисциплин не найдены",
                     Message = "В системе не найдено ни одной записи реестра дисциплин",
                     Field = string.Empty
@@ -73,7 +73,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Записи реестра дисциплин не найдены",
                     Message = "В системе не найдено ни одной записи реестра дисциплин для указанных параметров запроса",
                     Field = string.Empty
@@ -130,7 +130,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -216,7 +216,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -276,7 +276,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)

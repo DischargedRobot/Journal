@@ -40,7 +40,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Группы не найдены",
                     Message = "В системе не найдено ни одной группы",
                     Field = string.Empty
@@ -87,7 +87,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -152,7 +152,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Некорректные данные",
                     Message = "Направление подготовки с указанным UUID не найдено",
                     Field = nameof(createDto.TrainingDirectionUuid)
@@ -165,7 +165,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Некорректные данные",
                     Message = "Факультет с указанным UUID не найден",
                     Field = nameof(createDto.FacultyUuid)
@@ -183,7 +183,7 @@ namespace MainService.Controllers
                     Guid[] notFound = createDto.CuratorsUuids.Except(curators.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Один или несколько кураторов с указанными UUID не найдены",
                         Details = string.Join(", ", notFound),
@@ -248,7 +248,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -335,7 +335,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -360,7 +360,7 @@ namespace MainService.Controllers
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = "Направление подготовки с указанным UUID не найдено",
                         Field = nameof(updateDto.TrainingDirectionUuid)
@@ -379,7 +379,7 @@ namespace MainService.Controllers
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = $"Факультет с указанным UUID \"{updateDto.FacultyUuid}\" не найден",
                         Field = nameof(updateDto.FacultyUuid)
@@ -399,7 +399,7 @@ namespace MainService.Controllers
                     Guid[] notFound = updateDto.CuratorsUuids.Except(curators.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Некорректные данные",
                         Message = $"Один или несколько кураторов с указанными UUID \"{string.Join(", ", notFound)}\" не найдены",
                         Details = string.Join(", ", notFound),

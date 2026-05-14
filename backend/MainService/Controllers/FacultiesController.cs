@@ -63,7 +63,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультеты не найдены",
                     Message = "В системе не найдено ни одного факультета",
                     Field = string.Empty
@@ -74,7 +74,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультеты не найдены",
                     Message = "В системе не найдено ни одного факультета для указанных параметров запроса",
                     Field = string.Empty
@@ -122,7 +122,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)
@@ -234,7 +234,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)
@@ -296,7 +296,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)

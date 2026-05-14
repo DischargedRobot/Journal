@@ -10,7 +10,7 @@ namespace MainService.Errors
         {
             return new ApiError
             {
-                StatusCode = "0.0.3",
+                StatusCode = "1.0.3",
                 Title = "Не найдено",
                 Message = "Ресурс не найден",
                 Field = string.Empty

@@ -66,7 +66,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедры не найдены",
                     Message = "В системе не найдено ни одной кафедры",
                     Field = string.Empty
@@ -77,7 +77,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедры не найдены",
                     Message = "В системе не найдено ни одной кафедры для указанных параметров запроса",
                     Field = string.Empty
@@ -138,7 +138,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедра не найдена",
                     Message = $"Кафедра с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -190,7 +190,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Факультет не найден",
                     Message = $"Факультет с UUID \"{facultyUuid}\" не найден",
                     Field = nameof(facultyUuid)
@@ -222,7 +222,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедры не найдены",
                     Message = $"В системе не найдено ни одной кафедры для факультета с UUID \"{facultyUuid}\"",
                     Field = nameof(facultyUuid)
@@ -233,7 +233,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедры не найдены",
                     Message = $"В системе не найдено ни одной кафедры для указанного факультета и параметров запроса",
                     Field = nameof(facultyUuid)
@@ -279,7 +279,7 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.3",
+                    StatusCode = "1.2.3",
                     Title = "Неверный запрос",
                     Message = $"Факультет с UUID \"{departmentDto.FacultyUuid}\" не найден",
                     Field = nameof(departmentDto.FacultyUuid)
@@ -359,7 +359,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Кафедра не найдена",
                     Message = $"Кафедра с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -426,7 +426,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0.3",
+                    StatusCode = "1.0.3",
                     Title = "Запись не найдена",
                     Message = $"Запись с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -474,7 +474,7 @@ namespace MainService
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.3",
+                        StatusCode = "1.2.3",
                         Title = "Факультет не найден",
                         Message = $"Факультет с UUID \"{updateDto.FacultyUuid}\" не найден",
                         Field = nameof(updateDto.FacultyUuid)
