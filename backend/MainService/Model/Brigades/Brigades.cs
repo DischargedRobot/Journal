@@ -10,6 +10,7 @@ namespace MainService
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
         public required string Name { get; set; }
+        public bool IsTemplateForGroup { get; set; } = false;
 
         public int? GroupId { get; set; }
         [ForeignKey("GroupId")]
