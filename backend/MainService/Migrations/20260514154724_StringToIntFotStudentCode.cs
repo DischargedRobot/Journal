@@ -10,13 +10,7 @@ namespace MainService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<int>(
-                name: "StudentCode",
-                table: "Students",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            migrationBuilder.Sql(@"ALTER TABLE ""Students"" ALTER COLUMN ""StudentCode"" TYPE integer USING (""StudentCode""::integer);");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_StudentCode",
