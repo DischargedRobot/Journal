@@ -324,7 +324,63 @@ namespace MainService.Controllers
                 });
             }
 
-            // Загрузка сущности и проверка ссылок в БД после проверки
+            // Загрузка сущности и проверка ссылка в БД
+            TrainingDirections? trainingDirection = null;
+            Faculties? faculty = null;
+            List<Professors>? curators = null;
+
+            if (updateDto.TrainingDirectionUuid != null)
+            {
+                trainingDirection = await _context.TrainingDirections
+                    .FirstOrDefaultAsync(t => t.Uuid == updateDto.TrainingDirectionUuid.Value);
+                if (trainingDirection == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Направление подготовки с указанным UUID не найдено",
+                        Field = nameof(updateDto.TrainingDirectionUuid)
+                    });
+                }
+            }
+
+            if (updateDto.FacultyUuid != null)
+            {
+                faculty = await _context.Faculties
+                    .FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid.Value);
+                if (faculty == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = $"Факультет с указанным UUID \"{updateDto.FacultyUuid}\" не найден",
+                        Field = nameof(updateDto.FacultyUuid)
+                    });
+                }
+            }
+
+            if (updateDto.CuratorsUuids != null)
+            {
+                curators = await _context.Professors
+                    .Where(p => updateDto.CuratorsUuids.Contains(p.Uuid))
+                    .ToListAsync();
+                if (curators.Count != updateDto.CuratorsUuids.Length)
+                {
+                    Guid[] notFound = updateDto.CuratorsUuids.Except(curators.Select(p => p.Uuid)).ToArray();
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = $"Один или несколько кураторов с указанными UUID \"{string.Join(", ", notFound)}\" не найдены",
+                        Details = string.Join(", ", notFound),
+                        Field = nameof(updateDto.CuratorsUuids)
+                    });
+                }
+            }
+
+            // Загрузка сущности после проверок
             Groups? group = await _context.Groups
                 .Include(g => g.TrainingDirection)
                 .Include(g => g.Faculty)
@@ -352,60 +408,20 @@ namespace MainService.Controllers
                 group.AdmissionDate = updateDto.AdmissionDate.Value;
             }
 
-            if (updateDto.TrainingDirectionUuid != null)
+            if (trainingDirection != null)
             {
-                TrainingDirections? trainingDirection = await _context.TrainingDirections
-                    .FirstOrDefaultAsync(t => t.Uuid == updateDto.TrainingDirectionUuid.Value);
-                if (trainingDirection == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Направление подготовки с указанным UUID не найдено",
-                        Field = nameof(updateDto.TrainingDirectionUuid)
-                    });
-                }
-
                 group.TrainingDirectionId = trainingDirection.TrainingDirectionId;
                 group.TrainingDirection = trainingDirection;
             }
 
-            if (updateDto.FacultyUuid != null)
+            if (faculty != null)
             {
-                Faculties? faculty = await _context.Faculties
-                    .FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid.Value);
-                if (faculty == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = $"Факультет с указанным UUID \"{updateDto.FacultyUuid}\" не найден",
-                        Field = nameof(updateDto.FacultyUuid)
-                    });
-                }
                 group.FacultyId = faculty.FacultyId;
                 group.Faculty = faculty;
             }
 
-            if (updateDto.CuratorsUuids != null)
+            if (curators != null)
             {
-                List<Professors> curators = await _context.Professors
-                    .Where(p => updateDto.CuratorsUuids.Contains(p.Uuid))
-                    .ToListAsync();
-                if (curators.Count != updateDto.CuratorsUuids.Length)
-                {
-                    Guid[] notFound = updateDto.CuratorsUuids.Except(curators.Select(p => p.Uuid)).ToArray();
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = $"Один или несколько кураторов с указанными UUID \"{string.Join(", ", notFound)}\" не найдены",
-                        Details = string.Join(", ", notFound),
-                        Field = nameof(updateDto.CuratorsUuids)
-                    });
-                }
                 group.Curators = curators;
             }
 

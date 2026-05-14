@@ -638,14 +638,104 @@ namespace MainService.Controllers
                     Field = nameof(updateDto.GroupsUuids)
                 });
             }
+            // Загрузка сущности из БД и дальнейшие проверки
+            Semesters? semester = null;
+            AcademicYears? academicYear = null;
+            DisciplinesRegisters? register = null;
+            List<Groups>? groups = null;
+            List<Professors>? professors = null;
 
-            // Только после валидации — загрузка сущности
+            if (updateDto.SemesterUuid != null)
+            {
+                semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == updateDto.SemesterUuid.Value);
+                // проверка ответа БД
+                if (semester == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Семестр с указанным UUID не найден",
+                        Field = nameof(updateDto.SemesterUuid)
+                    });
+                }
+            }
+
+            if (updateDto.AcademicYearUuid != null)
+            {
+                academicYear = await _context.AcademicYears.FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid.Value);
+                if (academicYear == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Учебный год с указанным UUID не найден",
+                        Field = nameof(updateDto.AcademicYearUuid)
+                    });
+                }
+            }
+
+            if (updateDto.DisciplineRegisterUuid != null)
+            {
+                if (updateDto.DisciplineRegisterUuid.Value != Guid.Empty)
+                {
+                    register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == updateDto.DisciplineRegisterUuid.Value);
+                    if (register == null)
+                    {
+                        return BadRequest(new ApiError
+                        {
+                            StatusCode = "1.2.3",
+                            Title = "Некорректные данные",
+                            Message = "Реестр дисциплин с указанным UUID не найден",
+                            Field = nameof(updateDto.DisciplineRegisterUuid)
+                        });
+                    }
+                }
+            }
+
+            if (updateDto.GroupsUuids != null)
+            {
+                groups = await _context.Groups
+                    .Where(g => updateDto.GroupsUuids.Contains(g.Uuid))
+                    .ToListAsync();
+                if (groups.Count != updateDto.GroupsUuids.Length)
+                {
+                    Guid[] notFoundGroups = updateDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Одна или несколько групп с указанными UUID не найдены",
+                        Field = nameof(updateDto.GroupsUuids),
+                        Details = string.Join(", ", notFoundGroups)
+                    });
+                }
+            }
+
+            if (updateDto.ProfessorsUuids != null)
+            {
+                professors = await _context.Professors
+                    .Where(p => updateDto.ProfessorsUuids.Contains(p.Uuid))
+                    .ToListAsync();
+                if (professors.Count != updateDto.ProfessorsUuids.Length)
+                {
+                    Guid[] notFoundProfessors = updateDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Один или несколько преподавателей с указанными UUID не найдены",
+                        Field = nameof(updateDto.ProfessorsUuids),
+                        Details = string.Join(", ", notFoundProfessors)
+                    });
+                }
+            }
+
+            // Загрузка сущности
             Disciplines? discipline = await _context.Disciplines
                 .Include(d => d.Groups)
                 .Include(d => d.Professors)
-                .Include(d => d.DisciplineRegister)
-                .Include(d => d.Semester)
-                .Include(d => d.AcademicYear)
                 .FirstOrDefaultAsync(d => d.Uuid == uuid);
 
             if (discipline == null)
@@ -679,98 +769,35 @@ namespace MainService.Controllers
                 discipline.IsArchived = updateDto.IsArchived.Value;
             }
 
-            if (updateDto.SemesterUuid != null)
+            if (semester != null)
             {
-                Semesters? semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == updateDto.SemesterUuid.Value);
-                if (semester == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Семестр с указанным UUID не найден",
-                        Field = nameof(updateDto.SemesterUuid)
-                    });
-                }
                 discipline.SemesterId = semester.SemesterId;
             }
 
-            if (updateDto.AcademicYearUuid != null)
+            if (academicYear != null)
             {
-                AcademicYears? academicYear = await _context.AcademicYears.FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid.Value);
-                if (academicYear == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Учебный год с указанным UUID не найден",
-                        Field = nameof(updateDto.AcademicYearUuid)
-                    });
-                }
                 discipline.AcademicYearId = academicYear.AcademicYearId;
             }
 
             if (updateDto.DisciplineRegisterUuid != null)
             {
-                if (updateDto.DisciplineRegisterUuid.Value == Guid.Empty)
+                if (updateDto.DisciplineRegisterUuid == Guid.Empty)
                 {
                     discipline.DisciplineRegisterId = null;
                 }
-                else
+                else if (register != null)
                 {
-                    DisciplinesRegisters? register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == updateDto.DisciplineRegisterUuid.Value);
-                    if (register == null)
-                    {
-                        return BadRequest(new ApiError
-                        {
-                            StatusCode = "1.2.3",
-                            Title = "Некорректные данные",
-                            Message = "Реестр дисциплин с указанным UUID не найден",
-                            Field = nameof(updateDto.DisciplineRegisterUuid)
-                        });
-                    }
                     discipline.DisciplineRegisterId = register.DisciplineRegisterId;
                 }
             }
 
-            if (updateDto.GroupsUuids != null)
+            if (groups != null)
             {
-                List<Groups> groups = await _context.Groups
-                    .Where(g => updateDto.GroupsUuids.Contains(g.Uuid))
-                    .ToListAsync();
-                if (groups.Count != updateDto.GroupsUuids.Length)
-                {
-                    Guid[] notFoundGroups = updateDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Одна или несколько групп с указанными UUID не найдены",
-                        Field = nameof(updateDto.GroupsUuids),
-                        Details = string.Join(", ", notFoundGroups)
-                    });
-                }
                 discipline.Groups = groups;
             }
 
-            if (updateDto.ProfessorsUuids != null)
+            if (professors != null)
             {
-                List<Professors> professors = await _context.Professors
-                    .Where(p => updateDto.ProfessorsUuids.Contains(p.Uuid))
-                    .ToListAsync();
-                if (professors.Count != updateDto.ProfessorsUuids.Length)
-                {
-                    Guid[] notFoundProfessors = updateDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Один или несколько преподавателей с указанными UUID не найдены",
-                        Field = nameof(updateDto.ProfessorsUuids),
-                        Details = string.Join(", ", notFoundProfessors)
-                    });
-                }
                 discipline.Professors = professors;
             }
 

@@ -464,6 +464,39 @@ namespace MainService.Controllers
                 });
             }
 
+            // проверка ответа БД
+            Groups? group = null;
+
+            if (updateDto.StudentCode != null)
+            {
+                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == updateDto.StudentCode.Value && s.Uuid != uuid);
+                if (codeExists)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = $"Студент с кодом {updateDto.StudentCode.Value} уже существует",
+                        Field = nameof(updateDto.StudentCode)
+                    });
+                }
+            }
+
+            if (updateDto.GroupUuid != null)
+            {
+                group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid.Value);
+                if (group == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Группа с указанным UUID не найдена",
+                        Field = nameof(updateDto.GroupUuid)
+                    });
+                }
+            }
+
             Students? student = await _context.Students
                 .Include(s => s.StudentPerson)
                     .ThenInclude(sp => sp!.User)
@@ -483,17 +516,6 @@ namespace MainService.Controllers
 
             if (updateDto.StudentCode != null)
             {
-                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == updateDto.StudentCode.Value && s.Uuid != uuid);
-                if (codeExists)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2.1",
-                        Title = "Неверный запрос",
-                        Message = $"Студент с кодом {updateDto.StudentCode.Value} уже существует",
-                        Field = nameof(updateDto.StudentCode)
-                    });
-                }
                 student.StudentCode = updateDto.StudentCode.Value;
             }
 
@@ -514,19 +536,8 @@ namespace MainService.Controllers
                     : updateDto.Patronymic.Trim();
             }
 
-            if (updateDto.GroupUuid != null)
+            if (group != null)
             {
-                Groups? group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid.Value);
-                if (group == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Некорректные данные",
-                        Message = "Группа с указанным UUID не найдена",
-                        Field = nameof(updateDto.GroupUuid)
-                    });
-                }
                 student.GroupId = group.GroupId;
                 student.Group = group;
             }

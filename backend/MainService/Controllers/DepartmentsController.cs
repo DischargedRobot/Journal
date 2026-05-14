@@ -398,7 +398,7 @@ namespace MainService
                 {
                     StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID записи не может быть пустым",
+                    Message = "UUID кафедры не может быть пустым",
                     Field = nameof(uuid)
                 });
             }
@@ -409,17 +409,43 @@ namespace MainService
                 {
                     StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "Название записи не может быть пустым",
+                    Message = "Название кафедры не может быть пустым",
                     Field = nameof(updateDto.Name)
                 });
             }
 
-            if (updateDto.ShortName != null)
+            // Загрузка сущности из БД и дальнейшие проверки
+            Faculties? faculty = null;
+
+            if (updateDto.Code != null)
             {
-                // нет обращений к БД, простая логика обработки строки
+                if (_context.Departments.Any(d => d.Code == updateDto.Code && d.Uuid != uuid))
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Код уже используется",
+                        Message = $"Кафедра с кодом \"{updateDto.Code}\" уже существует",
+                        Field = nameof(updateDto.Code)
+                    });
+                }
             }
 
-            // Загрузка сущности из БД и дальнейшие проверки
+            if (updateDto.FacultyUuid != null)
+            {
+                faculty = await _context.Faculties.FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid);
+                if (faculty == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Факультет не найден",
+                        Message = $"Факультет с UUID \"{updateDto.FacultyUuid}\" не найден",
+                        Field = nameof(updateDto.FacultyUuid)
+                    });
+                }
+            }
+
             Departments? department = await _context.Departments
                 .FirstOrDefaultAsync(d => d.Uuid == uuid);
             if (department == null)
@@ -427,8 +453,8 @@ namespace MainService
                 return NotFound(new ApiError
                 {
                     StatusCode = "1.0.3",
-                    Title = "Запись не найдена",
-                    Message = $"Запись с UUID \"{uuid}\" не найдена",
+                    Title = "Кафедра не найдена",
+                    Message = $"Кафедра с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
                 });
             }
@@ -454,49 +480,17 @@ namespace MainService
 
             if (updateDto.Code != null)
             {
-                if (_context.Departments.Any(d => d.Code == updateDto.Code && d.DepartmentId != department.DepartmentId))
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2.1",
-                        Title = "Код уже используется",
-                        Message = $"Кафедра с кодом \"{updateDto.Code}\" уже существует",
-                        Field = nameof(updateDto.Code)
-                    });
-                }
                 department.Code = updateDto.Code;
             }
 
-            if (updateDto.FacultyUuid != null)
+            if (faculty != null)
             {
-                Faculties? faculty = await _context.Faculties.FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid);
-                if (faculty == null)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Факультет не найден",
-                        Message = $"Факультет с UUID \"{updateDto.FacultyUuid}\" не найден",
-                        Field = nameof(updateDto.FacultyUuid)
-                    });
-                }
                 department.FacultyId = faculty.FacultyId;
             }
 
             await _context.SaveChangesAsync();
 
-            return Ok(await _context.Departments
-                .Where(d => d.Uuid == uuid)
-                .Select(d => new DepartmentsResponseDto
-                {
-                    Uuid = d.Uuid,
-                    Name = d.Name,
-                    ShortName = d.ShortName,
-                    Code = d.Code,
-                    FacultyUuid = d.Faculty!.Uuid,
-                    Version = d.Version
-                })
-                .FirstAsync());
+            return Ok(new DepartmentsResponseDto(department));
         }
 
     }

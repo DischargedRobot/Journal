@@ -290,6 +290,21 @@ namespace MainService.Controllers
                 });
             }
 
+            if (updateDto.Name != null)
+            {
+                if (_context.Faculties.Any(f => f.Name == updateDto.Name
+                    && f.Uuid != uuid))
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверное название факультета",
+                        Message = $"Факультет с названием \"{updateDto.Name}\" уже существует",
+                        Field = nameof(updateDto.Name)
+                    });
+                }
+            }
+
             // Загрузка сущности и дальнейшие проверки
             Faculties? faculty = await _context.Faculties.FirstOrDefaultAsync(f => f.Uuid == uuid);
             if (faculty == null)
@@ -305,18 +320,6 @@ namespace MainService.Controllers
 
             if (updateDto.Name != null)
             {
-                if (_context.Faculties.Any(f => f.Name == updateDto.Name
-                    && f.Uuid != uuid))
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2.1",
-                        Title = "Неверное название факультета",
-                        Message = $"Факультет с названием \"{updateDto.Name}\" уже существует",
-                        Field = nameof(updateDto.Name)
-                    });
-                }
-
                 faculty.Name = updateDto.Name.Trim();
             }
 
