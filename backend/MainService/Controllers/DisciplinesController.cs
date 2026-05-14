@@ -71,9 +71,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = "В системе не найдено ни одной дисциплины"
+                    Message = "В системе не найдено ни одной дисциплины",
+                    Field = string.Empty
                 });
             }
 
@@ -81,9 +82,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = "В системе не найдено ни одной дисциплины для указанных параметров запроса"
+                    Message = "В системе не найдено ни одной дисциплины для указанных параметров запроса",
+                    Field = string.Empty
                 });
             }
 
@@ -114,9 +116,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID дисциплины не может быть пустым"
+                    Message = "UUID дисциплины не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -141,9 +144,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплина не найдена",
-                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена"
+                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -180,9 +184,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID группы не может быть пустым"
+                    Message = "UUID группы не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -217,9 +222,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = $"Для группы с UUID \"{uuid}\" не найдено ни одной дисциплины"
+                    Message = $"Для группы с UUID \"{uuid}\" не найдено ни одной дисциплины",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -227,9 +233,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = $"Для группы с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса"
+                    Message = $"Для группы с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -270,9 +277,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID преподавателя не может быть пустым"
+                    Message = "UUID преподавателя не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -307,9 +315,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = $"Для преподавателя с UUID \"{uuid}\" не найдено ни одной дисциплины"
+                    Message = $"Для преподавателя с UUID \"{uuid}\" не найдено ни одной дисциплины",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -317,9 +326,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплины не найдены",
-                    Message = $"Для преподавателя с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса"
+                    Message = $"Для преподавателя с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -343,13 +353,15 @@ namespace MainService.Controllers
             DisciplinesCreateDto createDto
         )
         {
+            // проверка перед запросом к БД
             if (string.IsNullOrWhiteSpace(createDto.Name))
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "Название дисциплины не может быть пустым"
+                    Message = "Название дисциплины не может быть пустым",
+                    Field = nameof(createDto.Name)
                 });
             }
 
@@ -357,20 +369,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "SemesterUuid обязателен"
-                });
-            }
-
-            Semesters? semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == createDto.SemesterUuid);
-            if (semester == null)
-            {
-                return BadRequest(new ApiError
-                {
-                    StatusCode = "1.1",
-                    Title = "Некорректные данные",
-                    Message = "Семестр с указанным UUID не найден"
+                    Message = "SemesterUuid обязателен",
+                    Field = nameof(createDto.SemesterUuid)
                 });
             }
 
@@ -378,9 +380,56 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.3",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "AcademicYearUuid обязателен"
+                    Message = "AcademicYearUuid обязателен",
+                    Field = nameof(createDto.AcademicYearUuid)
+                });
+            }
+
+            if (createDto.GroupsUuids == null || createDto.GroupsUuids.Length == 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Необходимо указать хотя бы одну группу",
+                    Field = nameof(createDto.GroupsUuids)
+                });
+            }
+
+            if (createDto.DisciplineRegisterUuid != null && createDto.DisciplineRegisterUuid == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Если привязано с дисциплиной из реестра, Реестр дисциплин не может быть пустым",
+                    Field = nameof(createDto.DisciplineRegisterUuid)
+                });
+            }
+
+            if (createDto.ProfessorsUuids != null && createDto.ProfessorsUuids.Length == 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Если указано поле ProfessorsUuids, оно не может быть пустым",
+                    Field = nameof(createDto.ProfessorsUuids)
+                });
+            }
+
+            // запросы к БД и проверки существования связанных сущностей
+            Semesters? semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == createDto.SemesterUuid);
+            if (semester == null)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.3",
+                    Title = "Некорректные данные",
+                    Message = "Семестр с указанным UUID не найден",
+                    Field = nameof(createDto.SemesterUuid)
                 });
             }
 
@@ -389,33 +438,25 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.2.3",
                     Title = "Некорректные данные",
-                    Message = "Учебный год с указанным UUID не найден"
-                });
-            }
-
-            if (createDto.GroupsUuids == null || createDto.GroupsUuids.Length == 0)
-            {
-                return BadRequest(new ApiError
-                {
-                    StatusCode = "0.4",
-                    Title = "Неверный запрос",
-                    Message = "Необходимо указать хотя бы одну группу"
+                    Message = "Учебный год с указанным UUID не найден",
+                    Field = nameof(createDto.AcademicYearUuid)
                 });
             }
 
             DisciplinesRegisters? disciplineRegister = null;
-            if (createDto.DisciplineRegisterUuid.HasValue && createDto.DisciplineRegisterUuid.Value != Guid.Empty)
+            if (createDto.DisciplineRegisterUuid != null && createDto.DisciplineRegisterUuid != Guid.Empty)
             {
                 disciplineRegister = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == createDto.DisciplineRegisterUuid.Value);
                 if (disciplineRegister == null)
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.3",
+                        StatusCode = "0.2.3",
                         Title = "Некорректные данные",
-                        Message = "Реестр дисциплин с указанным UUID не найден"
+                        Message = "Реестр дисциплин с указанным UUID не найден",
+                        Field = nameof(createDto.DisciplineRegisterUuid)
                     });
                 }
             }
@@ -429,14 +470,15 @@ namespace MainService.Controllers
                 Guid[] notFoundGroups = createDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "1.4",
+                    StatusCode = "0.2.3",
                     Title = "Некорректные данные",
                     Message = "Одна или несколько групп с указанными UUID не найдены",
-                    Details = string.Join(", ", notFoundGroups)
+                    Details = string.Join(", ", notFoundGroups),
+                    Field = nameof(createDto.GroupsUuids)
                 });
             }
 
-            List<Professors> professors = [];
+            List<Professors> professors = new List<Professors>();
             if (createDto.ProfessorsUuids != null && createDto.ProfessorsUuids.Length > 0)
             {
                 professors = await _context.Professors
@@ -447,10 +489,11 @@ namespace MainService.Controllers
                     Guid[] notFoundProfessors = createDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.6",
+                        StatusCode = "0.2.3",
                         Title = "Некорректные данные",
                         Message = "Один или несколько преподавателей с указанными UUID не найдены",
-                        Details = string.Join(", ", notFoundProfessors)
+                        Details = string.Join(", ", notFoundProfessors),
+                        Field = nameof(createDto.ProfessorsUuids)
                     });
                 }
             }
@@ -498,9 +541,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID дисциплины не может быть пустым"
+                    Message = "UUID дисциплины не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -509,9 +553,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплина не найдена",
-                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена"
+                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -538,16 +583,63 @@ namespace MainService.Controllers
             DisciplinesUpdateDto updateDto
         )
         {
+            // Предварительная валидация DTO (без БД)
             if (uuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID дисциплины не может быть пустым"
+                    Message = "UUID дисциплины не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
+            if (updateDto.Name != null && updateDto.Name.Trim() == string.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Название дисциплины не может быть пустым",
+                    Field = nameof(updateDto.Name)
+                });
+            }
+
+            if (updateDto.SemesterUuid != null && updateDto.SemesterUuid.Value == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "SemesterUuid не может быть пустым",
+                    Field = nameof(updateDto.SemesterUuid)
+                });
+            }
+
+            if (updateDto.AcademicYearUuid != null && updateDto.AcademicYearUuid.Value == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "AcademicYearUuid не может быть пустым",
+                    Field = nameof(updateDto.AcademicYearUuid)
+                });
+            }
+
+            if (updateDto.GroupsUuids != null && updateDto.GroupsUuids.Length == 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Необходимо указать хотя бы одну группу",
+                    Field = nameof(updateDto.GroupsUuids)
+                });
+            }
+
+            // Только после валидации — загрузка сущности
             Disciplines? discipline = await _context.Disciplines
                 .Include(d => d.Groups)
                 .Include(d => d.Professors)
@@ -560,23 +652,16 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Дисциплина не найдена",
-                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена"
+                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
+            // Применяем изменения, сначала имя (т.к. shortName может зависеть от имени)
             if (updateDto.Name != null)
             {
-                if (updateDto.Name.Trim() == string.Empty)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2",
-                        Title = "Неверный запрос",
-                        Message = "Название дисциплины не может быть пустым"
-                    });
-                }
                 discipline.Name = updateDto.Name.Trim();
             }
 
@@ -589,35 +674,39 @@ namespace MainService.Controllers
                         .Select(w => w[0]));
             }
 
-            if (updateDto.IsArchived.HasValue)
+            if (updateDto.IsArchived != null)
             {
                 discipline.IsArchived = updateDto.IsArchived.Value;
             }
 
-            if (updateDto.SemesterUuid.HasValue)
+            if (updateDto.SemesterUuid != null)
             {
-                if (updateDto.SemesterUuid.Value == Guid.Empty)
-                {
-                    return BadRequest(new ApiError { StatusCode = "0.3", Title = "Неверный запрос", Message = "SemesterUuid не может быть пустым" });
-                }
                 Semesters? semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == updateDto.SemesterUuid.Value);
                 if (semester == null)
                 {
-                    return BadRequest(new ApiError { StatusCode = "1.2", Title = "Некорректные данные", Message = "Семестр с указанным UUID не найден" });
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Семестр с указанным UUID не найден",
+                        Field = nameof(updateDto.SemesterUuid)
+                    });
                 }
                 discipline.SemesterId = semester.SemesterId;
             }
 
-            if (updateDto.AcademicYearUuid.HasValue)
+            if (updateDto.AcademicYearUuid != null)
             {
-                if (updateDto.AcademicYearUuid.Value == Guid.Empty)
-                {
-                    return BadRequest(new ApiError { StatusCode = "0.4", Title = "Неверный запрос", Message = "AcademicYearUuid не может быть пустым" });
-                }
                 AcademicYears? academicYear = await _context.AcademicYears.FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid.Value);
                 if (academicYear == null)
                 {
-                    return BadRequest(new ApiError { StatusCode = "1.3", Title = "Некорректные данные", Message = "Учебный год с указанным UUID не найден" });
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Учебный год с указанным UUID не найден",
+                        Field = nameof(updateDto.AcademicYearUuid)
+                    });
                 }
                 discipline.AcademicYearId = academicYear.AcademicYearId;
             }
@@ -633,7 +722,13 @@ namespace MainService.Controllers
                     DisciplinesRegisters? register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == updateDto.DisciplineRegisterUuid.Value);
                     if (register == null)
                     {
-                        return BadRequest(new ApiError { StatusCode = "1.4", Title = "Некорректные данные", Message = "Реестр дисциплин с указанным UUID не найден" });
+                        return BadRequest(new ApiError
+                        {
+                            StatusCode = "0.2.3",
+                            Title = "Некорректные данные",
+                            Message = "Реестр дисциплин с указанным UUID не найден",
+                            Field = nameof(updateDto.DisciplineRegisterUuid)
+                        });
                     }
                     discipline.DisciplineRegisterId = register.DisciplineRegisterId;
                 }
@@ -641,17 +736,20 @@ namespace MainService.Controllers
 
             if (updateDto.GroupsUuids != null)
             {
-                if (updateDto.GroupsUuids.Length == 0)
-                {
-                    return BadRequest(new ApiError { StatusCode = "0.5", Title = "Неверный запрос", Message = "Необходимо указать хотя бы одну группу" });
-                }
                 List<Groups> groups = await _context.Groups
                     .Where(g => updateDto.GroupsUuids.Contains(g.Uuid))
                     .ToListAsync();
                 if (groups.Count != updateDto.GroupsUuids.Length)
                 {
                     Guid[] notFoundGroups = updateDto.GroupsUuids.Except(groups.Select(g => g.Uuid)).ToArray();
-                    return BadRequest(new ApiError { StatusCode = "1.5", Title = "Некорректные данные", Message = "Одна или несколько групп с указанными UUID не найдены", Details = string.Join(", ", notFoundGroups) });
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Одна или несколько групп с указанными UUID не найдены",
+                        Field = nameof(updateDto.GroupsUuids),
+                        Details = string.Join(", ", notFoundGroups)
+                    });
                 }
                 discipline.Groups = groups;
             }
@@ -666,9 +764,10 @@ namespace MainService.Controllers
                     Guid[] notFoundProfessors = updateDto.ProfessorsUuids.Except(professors.Select(p => p.Uuid)).ToArray();
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.7",
+                        StatusCode = "0.2.3",
                         Title = "Некорректные данные",
                         Message = "Один или несколько преподавателей с указанными UUID не найдены",
+                        Field = nameof(updateDto.ProfessorsUuids),
                         Details = string.Join(", ", notFoundProfessors)
                     });
                 }

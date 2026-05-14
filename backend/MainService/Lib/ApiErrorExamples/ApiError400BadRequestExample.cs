@@ -10,9 +10,10 @@ namespace MainService.Errors
         {
             return new ApiError
             {
-                StatusCode = "400",
+                StatusCode = "0.1.1",
                 Title = "Неверный запрос",
-                Message = "Неправильный или некорректный запрос"
+                Message = "Неправильный или некорректный запрос",
+                Field = "BODY"
             };
         }
     }

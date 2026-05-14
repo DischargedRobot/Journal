@@ -24,9 +24,10 @@ builder.Services.AddControllers()
 
             return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new ApiError
             {
-                StatusCode = "0.0",
+                StatusCode = "0.2.1",
                 Title = "Неверный запрос",
-                Message = string.Join("; ", errors.SelectMany(e => e.Value))
+                Message = string.Join("; ", errors.SelectMany(e => e.Value)),
+                Field = "BODY"
             });
         };
     });

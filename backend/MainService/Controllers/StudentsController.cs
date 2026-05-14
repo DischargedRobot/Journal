@@ -1,12 +1,11 @@
 using MainService.Errors;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
-
-using Z.EntityFramework.Plus;
 
 using System.Text.Json.Serialization;
 
@@ -24,11 +23,11 @@ namespace MainService.Controllers
         }
 
         [HttpGet("{Uuid}")]
-        [SwaggerResponse(200, "Студент найден", typeof(StudentsDto))]
-        [SwaggerResponse(404, "Студенты не найдены", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Студент найден", typeof(StudentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Студенты не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Получить студента по ID",
             Description = "Возвращает студента по указанному ID"
@@ -39,9 +38,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.0",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID студента не может быть пустым"
+                    Message = "UUID студента не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
             var student = await _context.Students.FindAsync(uuid);
@@ -49,12 +49,13 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0",
+                    StatusCode = "0.0.3",
                     Title = "Студент не найден",
-                    Message = $"Студент с UUID \"{uuid}\" не найден"
+                    Message = $"Студент с UUID \"{uuid}\" не найден",
+                    Field = nameof(uuid)
                 });
             }
-            return Ok(new StudentsDto(student));
+            return Ok(new StudentsResponseDto(student));
         }
 
         // [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -73,16 +74,16 @@ namespace MainService.Controllers
         // }
 
         [HttpGet("group/{groupUuid}")]
-        [SwaggerResponse(200, "Студенты найдены", typeof(PagedResult<StudentsDto>))]
-        [SwaggerResponse(404, "Студенты не найдены", typeof(ApiError))]
-        [SwaggerResponseExample(404, typeof(ApiError404NotFoundExample))]
-        [SwaggerResponse(400, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponseExample(400, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Студенты найдены", typeof(PagedResult<StudentsResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Студенты не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
             Summary = "Получить студентов по группе",
             Description = "Возвращает список студентов по указанной группе"
         )]
-        public async Task<ActionResult<PagedResult<StudentsDto>>> GetStudentsByGroup(
+        public async Task<ActionResult<PagedResult<StudentsResponseDto>>> GetStudentsByGroup(
             Guid groupUuid,
             [FromQuery] int offset = 0,
             [FromQuery] int size = 50,
@@ -95,9 +96,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.0",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID группы не может быть пустым"
+                    Message = "UUID группы не может быть пустым",
+                    Field = nameof(groupUuid)
                 });
             }
             var group = await _context.Groups
@@ -106,9 +108,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.0.3",
                     Title = "Группа не найдена",
-                    Message = $"Группа с UUID \"{groupUuid}\" не найдена"
+                    Message = $"Группа с UUID \"{groupUuid}\" не найдена",
+                    Field = nameof(groupUuid)
                 });
             }
 
@@ -133,29 +136,32 @@ namespace MainService.Controllers
                 .Include(s => s.Group)
                 .AsNoTracking();
 
-            var futureCount = baseQuery.DeferredCount().FutureValue();
-            var futureItems = baseQuery
+            Task<int> totalTask = baseQuery.CountAsync();
+            var itemsQuery = baseQuery
                 .OrderBy(s => s.StudentId)
                 .Skip(offset)
-                .Take(size)
-                .Future();
+                .Take(size);
 
-            List<Students> studentsList = futureItems.ToList();
-            int total = futureCount.Value;
+            Task<List<Students>> itemsTask = itemsQuery.ToListAsync();
+
+
+            List<Students> studentsList = await itemsTask;
+            int total = await totalTask;
 
             if (studentsList.Count == 0)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.0",
+                    StatusCode = "0.0.3",
                     Title = "Студенты не найдены",
-                    Message = $"Студенты в группе с UUID \"{groupUuid}\" не найдены"
+                    Message = $"Студенты в группе с UUID \"{groupUuid}\" не найдены",
+                    Field = nameof(groupUuid)
                 });
             }
 
-            List<StudentsDto> studentsDtoList = studentsList.Select(s => new StudentsDto(s)).ToList();
+            List<StudentsResponseDto> studentsDtoList = studentsList.Select(s => new StudentsResponseDto(s)).ToList();
 
-            return Ok(new PagedResult<StudentsDto>(total, offset, studentsDtoList.Count, studentsDtoList));
+            return Ok(new PagedResult<StudentsResponseDto>(total, offset, studentsDtoList.Count, studentsDtoList));
         }
 
 

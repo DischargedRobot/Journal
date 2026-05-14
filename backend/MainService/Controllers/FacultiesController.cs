@@ -63,9 +63,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Факультеты не найдены",
-                    Message = "В системе не найдено ни одного факультета"
+                    Message = "В системе не найдено ни одного факультета",
+                    Field = string.Empty
                 });
             }
 
@@ -73,9 +74,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.0.3",
                     Title = "Факультеты не найдены",
-                    Message = "В системе не найдено ни одного факультета для указанных параметров запроса"
+                    Message = "В системе не найдено ни одного факультета для указанных параметров запроса",
+                    Field = string.Empty
                 });
             }
 
@@ -108,9 +110,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID факультета не может быть пустым"
+                    Message = "UUID факультета не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -119,9 +122,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Факультет не найден",
-                    Message = "В системе не найден факультет с указанным UUID"
+                    Message = "В системе не найден факультет с указанным UUID",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -142,13 +146,16 @@ namespace MainService.Controllers
             [FromBody] FacultiesCreateDto createDto
         )
         {
+            // проверка перед запросом к бд
+
             if (createDto == null)
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.1.0",
                     Title = "Неверный запрос",
-                    Message = "Тело запроса не может быть пустым"
+                    Message = "Тело запроса не может быть пустым",
+                    Field = "BODY"
                 });
             }
 
@@ -156,9 +163,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2",
+                    StatusCode = "0.2.0",
                     Title = "Неверное название факультета",
-                    Message = "Название факультета не может быть пустым"
+                    Message = "Название факультета не может быть пустым",
+                    Field = nameof(createDto.Name)
                 });
             }
 
@@ -166,16 +174,18 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.2.1",
                     Title = "Неверное название факультета",
-                    Message = $"Факультет с названием \"{createDto.Name}\" уже существует"
+                    Message = $"Факультет с названием \"{createDto.Name}\" уже существует",
+                    Field = nameof(createDto.Name)
                 });
             }
 
             Faculties faculty = new()
             {
                 Name = createDto.Name.Trim(),
-                // создаём авбревиатуру из первых букв слов названия, если название не указано
+                // создаём авбревиатуру из первых букв слов названия, 
+                // если сокращение не указано
                 ShortName = string.IsNullOrWhiteSpace(createDto.ShortName)
                     ? string.Concat(createDto.Name
                         .Split(' ', StringSplitOptions.RemoveEmptyEntries)
@@ -212,9 +222,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID факультета не может быть пустым"
+                    Message = "UUID факультета не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -223,9 +234,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Факультет не найден",
-                    Message = "В системе не найден факультет с указанным UUID"
+                    Message = "В системе не найден факультет с указанным UUID",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -259,43 +271,49 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID факультета не может быть пустым"
+                    Message = "UUID факультета не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
+            // Предварительная валидация DTO (без обращения к БД)
+            if (updateDto.Name != null && updateDto.Name.Trim() == string.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверное название факультета",
+                    Message = "Название факультета не может быть пустым",
+                    Field = nameof(updateDto.Name)
+                });
+            }
+
+            // Загрузка сущности и дальнейшие проверки
             Faculties? faculty = await _context.Faculties.FirstOrDefaultAsync(f => f.Uuid == uuid);
             if (faculty == null)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Факультет не найден",
-                    Message = "В системе не найден факультет с указанным UUID"
+                    Message = "В системе не найден факультет с указанным UUID",
+                    Field = nameof(uuid)
                 });
             }
 
             if (updateDto.Name != null)
             {
-                if (updateDto.Name.Trim() == string.Empty)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2",
-                        Title = "Неверное название факультета",
-                        Message = "Название факультета не может быть пустым"
-                    });
-                }
-
                 if (_context.Faculties.Any(f => f.Name == updateDto.Name
                     && f.Uuid != uuid))
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.2",
+                        StatusCode = "0.2.1",
                         Title = "Неверное название факультета",
-                        Message = $"Факультет с названием \"{updateDto.Name}\" уже существует"
+                        Message = $"Факультет с названием \"{updateDto.Name}\" уже существует",
+                        Field = nameof(updateDto.Name)
                     });
                 }
 

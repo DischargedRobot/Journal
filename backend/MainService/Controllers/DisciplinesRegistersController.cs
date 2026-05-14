@@ -62,9 +62,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Записи реестра дисциплин не найдены",
-                    Message = "В системе не найдено ни одной записи реестра дисциплин"
+                    Message = "В системе не найдено ни одной записи реестра дисциплин",
+                    Field = string.Empty
                 });
             }
 
@@ -72,9 +73,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
+                    StatusCode = "0.0.3",
                     Title = "Записи реестра дисциплин не найдены",
-                    Message = "В системе не найдено ни одной записи реестра дисциплин для указанных параметров запроса"
+                    Message = "В системе не найдено ни одной записи реестра дисциплин для указанных параметров запроса",
+                    Field = string.Empty
                 });
             }
 
@@ -105,9 +107,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID записи реестра дисциплин не может быть пустым"
+                    Message = "UUID записи реестра дисциплин не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -127,9 +130,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Запись реестра дисциплин не найдена",
-                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена"
+                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -153,9 +157,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "Название записи реестра дисциплин не может быть пустым"
+                    Message = "Название записи реестра дисциплин не может быть пустым",
+                    Field = nameof(createDto.Name)
                 });
             }
 
@@ -199,9 +204,10 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID записи реестра дисциплин не может быть пустым"
+                    Message = "UUID записи реестра дисциплин не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -210,9 +216,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Запись реестра дисциплин не найдена",
-                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена"
+                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -240,38 +247,44 @@ namespace MainService.Controllers
             DisciplinesRegistersUpdateDto updateDto
         )
         {
+            // Предварительная валидация без обращения к БД
             if (uuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
+                    StatusCode = "0.2.0",
                     Title = "Неверный запрос",
-                    Message = "UUID записи реестра дисциплин не может быть пустым"
+                    Message = "UUID записи реестра дисциплин не может быть пустым",
+                    Field = nameof(uuid)
                 });
             }
 
+            if (updateDto.Name != null && updateDto.Name.Trim() == string.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Название записи реестра дисциплин не может быть пустым",
+                    Field = nameof(updateDto.Name)
+                });
+            }
+
+            // Загрузка сущности и дальнейшие проверки
             DisciplinesRegisters? register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == uuid);
             if (register == null)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
+                    StatusCode = "0.0.3",
                     Title = "Запись реестра дисциплин не найдена",
-                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена"
+                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
                 });
             }
 
             if (updateDto.Name != null)
             {
-                if (updateDto.Name.Trim() == string.Empty)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2",
-                        Title = "Неверный запрос",
-                        Message = "Название записи реестра дисциплин не может быть пустым"
-                    });
-                }
                 register.Name = updateDto.Name.Trim();
             }
 

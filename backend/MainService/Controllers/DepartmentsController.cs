@@ -22,22 +22,22 @@ namespace MainService
 
 
         [HttpGet]
-        [SwaggerResponse(StatusCodes.Status200OK, "Кафедры найдены", typeof(IEnumerable<DepartmentsResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status200OK, "РљР°С„РµРґСЂС‹ РЅР°Р№РґРµРЅС‹", typeof(IEnumerable<DepartmentsResponseDto>))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PagedResult<DepartmentsResponseDto>))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедры не найдены", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
-            Summary = "Получить список всех кафедр",
-            Description = "Возвращает список всех кафедр в системе"
+            Summary = "РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РІСЃРµС… РєР°С„РµРґСЂ",
+            Description = "Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РІСЃРµС… РєР°С„РµРґСЂ РІ СЃРёСЃС‚РµРјРµ"
         )]
         public async Task<ActionResult<PagedResult<DepartmentsResponseDto>>> GetDepartments(
-            [FromQuery, SwaggerParameter("Количество записей")]
+            [FromQuery, SwaggerParameter("РљРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°РїРёСЃРµР№")]
             int size = 100,
-            [FromQuery, SwaggerParameter("Сдвиг от начала")]
+            [FromQuery, SwaggerParameter("РЎРјРµС‰РµРЅРёРµ РѕС‚ РЅР°С‡Р°Р»Р°")]
             int offset = 0,
-            [FromQuery, SwaggerParameter("Название")]
+            [FromQuery, SwaggerParameter("РќР°Р·РІР°РЅРёРµ")]
             string? name = null,
-            [FromQuery, SwaggerParameter("Порядок сортировки по названию")]
+            [FromQuery, SwaggerParameter("РџРѕСЂСЏРґРѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё РїРѕ РЅР°Р·РІР°РЅРёСЋ")]
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
@@ -66,9 +66,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Кафедры не найдены",
-                    Message = "В системе не найдено ни одной кафедры"
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹",
+                    Message = "Р’ СЃРёСЃС‚РµРјРµ РЅРµ РЅР°Р№РґРµРЅРѕ РЅРё РѕРґРЅРѕР№ РєР°С„РµРґСЂС‹",
+                    Field = string.Empty
                 });
             }
 
@@ -76,9 +77,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Кафедры не найдены",
-                    Message = "В системе не найдено ни одной кафедры для указанных параметров запроса"
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹",
+                    Message = "Р’ СЃРёСЃС‚РµРјРµ РЅРµ РЅР°Р№РґРµРЅРѕ РЅРё РѕРґРЅРѕР№ РєР°С„РµРґСЂС‹ РґР»СЏ СѓРєР°Р·Р°РЅРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСЂРѕСЃР°",
+                    Field = string.Empty
                 });
             }
 
@@ -92,18 +94,18 @@ namespace MainService
 
 
         [HttpGet("{uuid}")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Кафедра найдена", typeof(DepartmentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status200OK, "РљР°С„РµРґСЂР° РЅР°Р№РґРµРЅР°", typeof(DepartmentsResponseDto))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(DepartmentsResponseDto))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедра не найдена", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "РљР°С„РµРґСЂР° РЅРµ РЅР°Р№РґРµРЅР°", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
-            Summary = "Получить кафедру по идентификатору",
-            Description = "Возвращает одну кафедру по её uuid"
+            Summary = "РџРѕР»СѓС‡РёС‚СЊ РєР°С„РµРґСЂСѓ РїРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ",
+            Description = "Р’РѕР·РІСЂР°С‰Р°РµС‚ РѕРґРЅСѓ РєР°С„РµРґСЂСѓ РїРѕ РµС‘ UUID"
         )]
         public async Task<ActionResult<DepartmentsResponseDto>> GetDepartment(
-            [SwaggerParameter("UUID кафедры")]
+            [SwaggerParameter("UUID РєР°С„РµРґСЂС‹")]
             Guid uuid
         )
         {
@@ -112,9 +114,10 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Неверный запрос",
-                    Message = "UUID кафедры не может быть пустым"
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "UUID РєР°С„РµРґСЂС‹ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -135,9 +138,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Кафедра не найдена",
-                    Message = $"Кафедра с UUID \"{uuid}\" не найдена"
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂР° РЅРµ РЅР°Р№РґРµРЅР°",
+                    Message = $"РљР°С„РµРґСЂР° СЃ UUID \"{uuid}\" РЅРµ РЅР°Р№РґРµРЅР°",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -147,26 +151,26 @@ namespace MainService
 
 
         [HttpGet("faculty/{facultyUuid}")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Кафедры найдены", typeof(PagedResult<DepartmentsResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status200OK, "РљР°С„РµРґСЂС‹ РЅР°Р№РґРµРЅС‹", typeof(PagedResult<DepartmentsResponseDto>))]
         [SwaggerResponseExample(StatusCodes.Status200OK, typeof(PagedResult<DepartmentsResponseDto>))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедры не найдены", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
-            Summary = "Получить кафедры по факультету",
-            Description = "Возвращает список кафедр для указанного факультета"
+            Summary = "РџРѕР»СѓС‡РёС‚СЊ РєР°С„РµРґСЂС‹ РїРѕ С„Р°РєСѓР»СЊС‚РµС‚Сѓ",
+            Description = "Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє РєР°С„РµРґСЂ, РїСЂРёРЅР°РґР»РµР¶Р°С‰РёС… СѓРєР°Р·Р°РЅРЅРѕРјСѓ С„Р°РєСѓР»СЊС‚РµС‚Сѓ"
         )]
         public async Task<ActionResult<PagedResult<DepartmentsResponseDto>>> GetDepartmentsByFaculty(
-            [SwaggerParameter("UUID факультета")]
+            [SwaggerParameter("UUID С„Р°РєСѓР»СЊС‚РµС‚Р°")]
             Guid facultyUuid,
-            [FromQuery, SwaggerParameter("Количество записей")]
+            [FromQuery, SwaggerParameter("РљРѕР»РёС‡РµСЃС‚РІРѕ Р·Р°РїРёСЃРµР№")]
             int size = 100,
-            [FromQuery, SwaggerParameter("Сдвиг от начала")]
+            [FromQuery, SwaggerParameter("РЎРјРµС‰РµРЅРёРµ РѕС‚ РЅР°С‡Р°Р»Р° СЃРїРёСЃРєР°")]
             int offset = 0,
-            [FromQuery, SwaggerParameter("Название")]
+            [FromQuery, SwaggerParameter("РќР°Р·РІР°РЅРёРµ")]
             string? name = null,
-            [FromQuery, SwaggerParameter("Порядок сортировки по названию")]
+            [FromQuery, SwaggerParameter("РџРѕСЂСЏРґРѕРє СЃРѕСЂС‚РёСЂРѕРІРєРё РїРѕ РЅР°Р·РІР°РЅРёСЋ")]
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
@@ -174,9 +178,10 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Неверный запрос",
-                    Message = "UUID факультета не может быть пустым"
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "UUID С„Р°РєСѓР»СЊС‚РµС‚Р° РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(facultyUuid)
                 });
             }
 
@@ -185,9 +190,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Факультет не найден",
-                    Message = $"Факультет с UUID \"{facultyUuid}\" не найден"
+                    StatusCode = "0.0.3",
+                    Title = "Р¤Р°РєСѓР»СЊС‚РµС‚ РЅРµ РЅР°Р№РґРµРЅ",
+                    Message = $"Р¤Р°РєСѓР»СЊС‚РµС‚ СЃ UUID \"{facultyUuid}\" РЅРµ РЅР°Р№РґРµРЅ",
+                    Field = nameof(facultyUuid)
                 });
             }
 
@@ -216,9 +222,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Кафедры не найдены",
-                    Message = $"В системе не найдено ни одной кафедры для факультета с UUID \"{facultyUuid}\""
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹",
+                    Message = $"Р’ СЃРёСЃС‚РµРјРµ РЅРµ РЅР°Р№РґРµРЅРѕ РЅРё РѕРґРЅРѕР№ РєР°С„РµРґСЂС‹ РґР»СЏ С„Р°РєСѓР»СЊС‚РµС‚Р° СЃ UUID \"{facultyUuid}\"",
+                    Field = nameof(facultyUuid)
                 });
             }
 
@@ -226,9 +233,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.2",
-                    Title = "Кафедры не найдены",
-                    Message = $"В системе не найдено ни одной кафедры для указанных параметров запроса"
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂС‹ РЅРµ РЅР°Р№РґРµРЅС‹",
+                    Message = $"Р’ СЃРёСЃС‚РµРјРµ РЅРµ РЅР°Р№РґРµРЅРѕ РЅРё РѕРґРЅРѕР№ РєР°С„РµРґСЂС‹ РґР»СЏ СѓРєР°Р·Р°РЅРЅРѕРіРѕ С„Р°РєСѓР»СЊС‚РµС‚Р° Рё РїР°СЂР°РјРµС‚СЂРѕРІ Р·Р°РїСЂРѕСЃР°",
+                    Field = nameof(facultyUuid)
                 });
             }
 
@@ -241,27 +249,28 @@ namespace MainService
         }
 
         [HttpPost]
-        [SwaggerResponse(StatusCodes.Status201Created, "Кафедра успешно создана", typeof(DepartmentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status201Created, "РљР°С„РµРґСЂР° СЃРѕР·РґР°РЅР°", typeof(DepartmentsResponseDto))]
         [SwaggerResponseExample(StatusCodes.Status201Created, typeof(DepartmentsResponseDto))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные для создания кафедры", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
-            Summary = "Создать новую кафедру",
-            Description = "Создает новую кафедру в системе"
+            Summary = "РЎРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ РєР°С„РµРґСЂСѓ",
+            Description = "РЎРѕР·РґР°РµС‚ РЅРѕРІСѓСЋ РєР°С„РµРґСЂСѓ РІ СЃРёСЃС‚РµРјРµ"
         )]
         public async Task<ActionResult<DepartmentsResponseDto>> CreateDepartment(
-            [FromBody, SwaggerParameter("Данные новой кафедры")]
+            [FromBody, SwaggerParameter("Р”Р°РЅРЅС‹Рµ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РєР°С„РµРґСЂС‹")]
             DepartmentsCreateDto departmentDto
         )
         {
-
+            // РїСЂРѕРІРµСЂРєР° РїРµСЂРµРґ Р·Р°РїСЂРѕСЃРѕРј Рє Р±Рґ
             if (string.IsNullOrWhiteSpace(departmentDto.Name))
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Не все поля заполнены",
-                    Message = "Название кафедры не может быть пустым"
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "РќР°Р·РІР°РЅРёРµ Р·Р°РїРёСЃРё РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(departmentDto.Name)
                 });
             }
 
@@ -270,9 +279,10 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Неверные данные",
-                    Message = $"Факультет с UUID \"{departmentDto.FacultyUuid}\" не найден"
+                    StatusCode = "0.2.3",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = $"Р¤Р°РєСѓР»СЊС‚РµС‚ СЃ UUID \"{departmentDto.FacultyUuid}\" РЅРµ РЅР°Р№РґРµРЅ",
+                    Field = nameof(departmentDto.FacultyUuid)
                 });
             }
 
@@ -281,13 +291,14 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "1.2",
-                    Title = "Кафедра с таким кодом уже существует",
-                    Message = $"Кафедра с кодом \"{departmentDto.Code}\" уже существует"
+                    StatusCode = "0.2.1",
+                    Title = "РљРѕРґ СѓР¶Рµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ",
+                    Message = $"РљР°С„РµРґСЂР° СЃ РєРѕРґРѕРј \"{departmentDto.Code}\" СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚",
+                    Field = nameof(departmentDto.Code)
                 });
             }
 
-            // Если код не отравили, то будет равен последнему айди в базе + 1
+            // РµСЃР»Рё РєРѕРґ РЅРµ СѓРєР°Р·Р°РЅ, РІС‹С‡РёСЃР»СЏРµРј СЃР»РµРґСѓСЋС‰РёР№ РєРѕРґ РєР°Рє max(DepartmentId) + 1
             string departmentCode = departmentDto.Code != null
                 ? departmentDto.Code
                 : _context.Departments.Any()
@@ -318,17 +329,17 @@ namespace MainService
         }
 
         [HttpDelete("{uuid}")]
-        [SwaggerResponse(StatusCodes.Status204NoContent, "Кафедра успешно удалена")]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "РљР°С„РµРґСЂР° СѓРґР°Р»РµРЅР°")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедра не найдена", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "РљР°С„РµРґСЂР° РЅРµ РЅР°Р№РґРµРЅР°", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
-            Summary = "Удалить кафедру",
-            Description = "Удаляет кафедру по её UUID"
+            Summary = "РЈРґР°Р»РёС‚СЊ РєР°С„РµРґСЂСѓ",
+            Description = "РЈРґР°Р»СЏРµС‚ РєР°С„РµРґСЂСѓ РїРѕ РµС‘ UUID"
         )]
         public async Task<IActionResult> DeleteDepartment(
-            [SwaggerParameter("UUID кафедры")]
+            [SwaggerParameter("UUID РєР°С„РµРґСЂС‹")]
             Guid uuid
         )
         {
@@ -336,9 +347,10 @@ namespace MainService
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Неверный запрос",
-                    Message = "UUID кафедры не может быть пустым"
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "UUID РєР°С„РµРґСЂС‹ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -347,9 +359,10 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Кафедра не найдена",
-                    Message = $"Кафедра с UUID \"{uuid}\" не найдена"
+                    StatusCode = "0.0.3",
+                    Title = "РљР°С„РµРґСЂР° РЅРµ РЅР°Р№РґРµРЅР°",
+                    Message = $"РљР°С„РµРґСЂР° СЃ UUID \"{uuid}\" РЅРµ РЅР°Р№РґРµРЅР°",
+                    Field = nameof(uuid)
                 });
             }
 
@@ -360,55 +373,68 @@ namespace MainService
         }
 
         [HttpPatch("{uuid}")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Кафедра успешно обновлена", typeof(DepartmentsResponseDto))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status200OK, "РљР°С„РµРґСЂР° РѕР±РЅРѕРІР»РµРЅР°", typeof(DepartmentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедра не найдена", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "РљР°С„РµРґСЂР° РЅРµ РЅР°Р№РґРµРЅР°", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
-            Summary = "Обновить кафедру",
-            Description = "Обновляет данные кафедры по её UUID. Все поля являются необязательными, но хотя бы одно должно быть указано"
+            Summary = "РћР±РЅРѕРІРёС‚СЊ РєР°С„РµРґСЂСѓ",
+            Description = "РћР±РЅРѕРІР»СЏРµС‚ РєР°С„РµРґСЂСѓ РїРѕ РµС‘ UUID. Р’СЃРµ РїРѕР»СЏ РЅРµРѕР±СЏР·Р°С‚РµР»СЊРЅС‹. " +
+                          "Р•СЃР»Рё РїРµСЂРµРґР°С‚СЊ shortName РєР°Рє РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ вЂ” Р°Р±Р±СЂРµРІРёР°С‚СѓСЂР° Р±СѓРґРµС‚ СЃРіРµРЅРµСЂРёСЂРѕРІР°РЅР° Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё РёР· РЅР°Р·РІР°РЅРёСЏ. " +
+                          "Р•СЃР»Рё РЅРµ РїРµСЂРµРґР°РІР°С‚СЊ shortName РІРѕРІСЃРµ вЂ” С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ РѕСЃС‚Р°РЅРµС‚СЃСЏ Р±РµР· РёР·РјРµРЅРµРЅРёР№."
         )]
         public async Task<ActionResult<DepartmentsResponseDto>> UpdateDepartment(
-            [SwaggerParameter("UUID кафедры")]
+            [SwaggerParameter("UUID РєР°С„РµРґСЂС‹")]
             Guid uuid,
-            [FromBody, SwaggerParameter("Данные для обновления кафедры")]
+            [FromBody, SwaggerParameter("Р”Р°РЅРЅС‹Рµ РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РєР°С„РµРґСЂС‹")]
             DepartmentsUpdateDto updateDto
         )
         {
+            // РџСЂРµРґРІР°СЂРёС‚РµР»СЊРЅР°СЏ РІР°Р»РёРґР°С†РёСЏ Р±РµР· РѕР±СЂР°С‰РµРЅРёСЏ Рє Р‘Р”
             if (uuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.1",
-                    Title = "Неверный запрос",
-                    Message = "UUID кафедры не может быть пустым"
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "UUID Р·Р°РїРёСЃРё РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(uuid)
                 });
             }
 
+            if (updateDto.Name != null && updateDto.Name.Trim() == string.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "РќРµРІРµСЂРЅС‹Р№ Р·Р°РїСЂРѕСЃ",
+                    Message = "РќР°Р·РІР°РЅРёРµ Р·Р°РїРёСЃРё РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РїСѓСЃС‚С‹Рј",
+                    Field = nameof(updateDto.Name)
+                });
+            }
+
+            if (updateDto.ShortName != null)
+            {
+                // РЅРµС‚ РѕР±СЂР°С‰РµРЅРёР№ Рє Р‘Р”, РїСЂРѕСЃС‚Р°СЏ Р»РѕРіРёРєР° РѕР±СЂР°Р±РѕС‚РєРё СЃС‚СЂРѕРєРё
+            }
+
+            // Р—Р°РіСЂСѓР·РєР° СЃСѓС‰РЅРѕСЃС‚Рё РёР· Р‘Р” Рё РґР°Р»СЊРЅРµР№С€РёРµ РїСЂРѕРІРµСЂРєРё
             Departments? department = await _context.Departments
                 .FirstOrDefaultAsync(d => d.Uuid == uuid);
             if (department == null)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.1",
-                    Title = "Кафедра не найдена",
-                    Message = $"Кафедра с UUID \"{uuid}\" не найдена"
+                    StatusCode = "0.0.3",
+                    Title = "Р—Р°РїРёСЃСЊ РЅРµ РЅР°Р№РґРµРЅР°",
+                    Message = $"Р—Р°РїРёСЃСЊ СЃ UUID \"{uuid}\" РЅРµ РЅР°Р№РґРµРЅР°",
+                    Field = nameof(uuid)
                 });
             }
 
             if (updateDto.Name != null)
             {
-                if (updateDto.Name.Trim() == string.Empty)
-                {
-                    return BadRequest(new ApiError
-                    {
-                        StatusCode = "0.2",
-                        Title = "Неверный запрос",
-                        Message = "Название кафедры не может быть пустым"
-                    });
-                }
                 department.Name = updateDto.Name;
             }
 
@@ -432,9 +458,10 @@ namespace MainService
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.2",
-                        Title = "Кафедра с таким кодом уже существует",
-                        Message = $"Кафедра с кодом \"{updateDto.Code}\" уже существует"
+                        StatusCode = "0.2.1",
+                        Title = "РљРѕРґ СѓР¶Рµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ",
+                        Message = $"РљР°С„РµРґСЂР° СЃ РєРѕРґРѕРј \"{updateDto.Code}\" СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚",
+                        Field = nameof(updateDto.Code)
                     });
                 }
                 department.Code = updateDto.Code;
@@ -447,9 +474,10 @@ namespace MainService
                 {
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "1.3",
-                        Title = "Неверные данные",
-                        Message = $"Факультет с UUID \"{updateDto.FacultyUuid}\" не найден"
+                        StatusCode = "0.2.3",
+                        Title = "Р¤Р°РєСѓР»СЊС‚РµС‚ РЅРµ РЅР°Р№РґРµРЅ",
+                        Message = $"Р¤Р°РєСѓР»СЊС‚РµС‚ СЃ UUID \"{updateDto.FacultyUuid}\" РЅРµ РЅР°Р№РґРµРЅ",
+                        Field = nameof(updateDto.FacultyUuid)
                     });
                 }
                 department.FacultyId = faculty.FacultyId;
