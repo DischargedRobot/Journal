@@ -15,7 +15,7 @@ namespace MainService
         [Required]
         public required string UserUuid { get; set; }
 
-        public Students? Student { get; set; }
+        public StudentPersons? StudentPerson { get; set; }
         public UniversityEmployers? UniversityEmployer { get; set; }
     }
 }
