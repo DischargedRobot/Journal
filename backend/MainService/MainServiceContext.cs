@@ -29,6 +29,7 @@ namespace MainService
 		public DbSet<Professors> Professors => Set<Professors>();
 		public DbSet<Semesters> Semesters => Set<Semesters>();
 		public DbSet<Students> Students => Set<Students>();
+		public DbSet<StudentPersons> StudentPersons => Set<StudentPersons>();
 		public DbSet<NotesAboutStudent> StudentNotes => Set<NotesAboutStudent>();
 		public DbSet<TrainingDirections> TrainingDirections => Set<TrainingDirections>();
 		public DbSet<MarkTypes> MarkTypes => Set<MarkTypes>();
