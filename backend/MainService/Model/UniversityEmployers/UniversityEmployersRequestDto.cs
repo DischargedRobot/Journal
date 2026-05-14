@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class UniversityEmployersRequestDto
@@ -10,6 +12,7 @@ namespace MainService
         public int Version { get; set; }
         public UniversityEmployersRequestDto() { }
 
+        [SetsRequiredMembers]
         public UniversityEmployersRequestDto(UniversityEmployers employer)
         {
             Uuid = employer.Uuid;

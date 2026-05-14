@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace MainService
@@ -18,6 +19,7 @@ namespace MainService
         public int Version { get; set; }
         public ProfessorsResponseDto() { }
 
+        [SetsRequiredMembers]
         public ProfessorsResponseDto(Professors professor)
         {
             Uuid = professor.Uuid;
@@ -25,6 +27,10 @@ namespace MainService
             PostUuid = professor.Post!.Uuid;
             PostName = professor.Post.Name;
             AcademicYearUuid = professor.AcademicYear!.Uuid;
+
+            FirstName = professor.UniversityEmployer?.User?.FirstName ?? string.Empty;
+            LastName = professor.UniversityEmployer?.User?.LastName ?? string.Empty;
+            Patronymic = professor.UniversityEmployer?.User?.Patronymic ?? string.Empty;
 
             GroupCuratorUuids = professor.GroupCurator?.Select(g => g.Uuid).ToArray() ?? [];
             DisciplinesUuids = professor.Disciplines?.Select(d => d.Uuid).ToArray() ?? [];

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class UniversityEmployersResponseDto
@@ -10,6 +12,7 @@ namespace MainService
         public int Version { get; set; }
         public UniversityEmployersResponseDto() { }
 
+        [SetsRequiredMembers]
         public UniversityEmployersResponseDto(UniversityEmployers employer)
         {
             Uuid = employer.Uuid;

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace MainService
@@ -18,6 +19,7 @@ namespace MainService
         public int Version { get; set; }
         public ProfessorsRequestDto() { }
 
+        [SetsRequiredMembers]
         public ProfessorsRequestDto(Professors professor)
         {
             Uuid = professor.Uuid;
