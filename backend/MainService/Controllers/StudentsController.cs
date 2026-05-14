@@ -53,7 +53,7 @@ namespace MainService.Controllers
                 .AsNoTracking();
 
             Task<int> totalTask = baseQuery.CountAsync();
-            var itemsQuery = baseQuery
+            IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(s => new StudentsResponseDto
@@ -98,7 +98,7 @@ namespace MainService.Controllers
 
         [HttpGet("{Uuid}")]
         [SwaggerResponse(StatusCodes.Status200OK, "Студент найден", typeof(StudentsResponseDto))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Студенты не найдены", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Студент не найден", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
@@ -118,7 +118,7 @@ namespace MainService.Controllers
                     Field = nameof(uuid)
                 });
             }
-            var student = await _context.Students.FindAsync(uuid);
+            Students? student = await _context.Students.FindAsync(uuid);
             if (student == null)
             {
                 return NotFound(new ApiError
@@ -170,7 +170,7 @@ namespace MainService.Controllers
                     Field = nameof(groupUuid)
                 });
             }
-            var group = await _context.Groups
+            Groups? group = await _context.Groups
             .FirstOrDefaultAsync(g => g.Uuid == groupUuid);
             if (group == null)
             {
@@ -193,7 +193,7 @@ namespace MainService.Controllers
                 size = 50;
             }
 
-            var baseQuery = _context.Students
+            IQueryable<Students> baseQuery = _context.Students
                 .Where(s => s.GroupId == group.GroupId
                 // TODO: подумать нужен ли тут фильтр и как именно будет идти фильтраци на клиенте
                 // (каждый ввод = запрос или по кнопке)
@@ -206,7 +206,7 @@ namespace MainService.Controllers
                 .AsNoTracking();
 
             Task<int> totalTask = baseQuery.CountAsync();
-            var itemsQuery = baseQuery
+            IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(s => new StudentsResponseDto
