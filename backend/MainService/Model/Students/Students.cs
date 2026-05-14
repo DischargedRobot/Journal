@@ -1,16 +1,17 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace MainService
 {
+    [Index(nameof(StudentCode), IsUnique = true)]
     public class Students : BaseEntity
     {
         [Key]
         public int StudentId { get; set; }
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
-        [Required]
-        public required string StudentCode { get; set; }
+        public int StudentCode { get; set; }
 
         public required int StudentPersonId { get; set; }
         [ForeignKey("StudentPersonId")]
