@@ -320,18 +320,24 @@ namespace MainService.Controllers
                 UserUuid = Guid.NewGuid().ToString()
             };
 
+            _context.Users.Add(newUser);
+            await _context.SaveChangesAsync();
+
             StudentPersons newStudentPerson = new()
             {
                 Uuid = Guid.NewGuid(),
-                UserId = 0,
+                UserId = newUser.UserId,
                 User = newUser
             };
+
+            _context.StudentPersons.Add(newStudentPerson);
+            await _context.SaveChangesAsync();
 
             Students newStudent = new()
             {
                 Uuid = Guid.NewGuid(),
                 StudentCode = createDto.StudentCode ?? 0,
-                StudentPersonId = 0,
+                StudentPersonId = newStudentPerson.StudentPersonId,
                 StudentPerson = newStudentPerson,
                 GroupId = group.GroupId
             };
