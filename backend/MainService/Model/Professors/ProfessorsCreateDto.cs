@@ -8,5 +8,6 @@ namespace MainService
         public required Guid AcademicYearUuid { get; set; }
         public Guid? DepartmentUuid { get; set; }
         public Guid? PostUuid { get; set; }
+        public required UserRole Role { get; set; }
     }
 }

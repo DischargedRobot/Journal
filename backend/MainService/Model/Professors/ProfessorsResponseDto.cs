@@ -12,7 +12,7 @@ namespace MainService
         public required Guid AcademicYearUuid { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
-        public required string Patronymic { get; set; }
+        public string? Patronymic { get; set; }
         public Guid[]? GroupCuratorUuids { get; set; } = [];
         public Guid[]? DisciplinesUuids { get; set; } = [];
 
@@ -28,9 +28,9 @@ namespace MainService
             PostName = professor.Post.Name;
             AcademicYearUuid = professor.AcademicYear!.Uuid;
 
-            FirstName = professor.UniversityEmployer?.User?.FirstName ?? string.Empty;
-            LastName = professor.UniversityEmployer?.User?.LastName ?? string.Empty;
-            Patronymic = professor.UniversityEmployer?.User?.Patronymic ?? string.Empty;
+            FirstName = professor.UniversityEmployer?.FirstName ?? string.Empty;
+            LastName = professor.UniversityEmployer?.LastName ?? string.Empty;
+            Patronymic = professor.UniversityEmployer?.Patronymic;
 
             GroupCuratorUuids = professor.GroupCurator?.Select(g => g.Uuid).ToArray() ?? [];
             DisciplinesUuids = professor.Disciplines?.Select(d => d.Uuid).ToArray() ?? [];

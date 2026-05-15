@@ -101,10 +101,8 @@ namespace MainService.Controllers
             Users newUser = new()
             {
                 Uuid = Guid.NewGuid(),
-                FirstName = createDto.FirstName.Trim(),
-                LastName = createDto.LastName.Trim(),
-                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) ? null : createDto.Patronymic.Trim(),
-                UserUuid = Guid.NewGuid().ToString()
+                UserUuid = Guid.NewGuid().ToString(),
+                Role = createDto.Role
             };
 
             _context.Users.Add(newUser);
@@ -113,6 +111,11 @@ namespace MainService.Controllers
             UniversityEmployers newEmployee = new()
             {
                 Uuid = Guid.NewGuid(),
+                FirstName = createDto.FirstName.Trim(),
+                LastName = createDto.LastName.Trim(),
+                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) 
+                    ? null 
+                    : createDto.Patronymic.Trim(),
                 UserId = newUser.UserId,
                 User = newUser
             };
@@ -239,17 +242,17 @@ namespace MainService.Controllers
 
             if (updateDto.FirstName != null)
             {
-                employee.User!.FirstName = updateDto.FirstName.Trim();
+                employee.FirstName = updateDto.FirstName.Trim();
             }
 
             if (updateDto.LastName != null)
             {
-                employee.User!.LastName = updateDto.LastName.Trim();
+                employee.LastName = updateDto.LastName.Trim();
             }
 
             if (updateDto.Patronymic != null)
             {
-                employee.User!.Patronymic = updateDto.Patronymic.Trim() == string.Empty
+                employee.Patronymic = updateDto.Patronymic.Trim() == string.Empty
                     ? null
                     : updateDto.Patronymic.Trim();
             }

@@ -43,12 +43,12 @@ namespace MainService.Controllers
         {
             IQueryable<Professors> baseQuery = _context.Professors
                 .Where(p => filterFullName == null
-                    || p.UniversityEmployer!.User!.FirstName.Contains(filterFullName)
-                    || p.UniversityEmployer.User.LastName.Contains(filterFullName));
+                    || p.UniversityEmployer!.FirstName.Contains(filterFullName)
+                    || p.UniversityEmployer.LastName.Contains(filterFullName));
 
             Task<int> totalTask = baseQuery.CountAsync();
             Task<List<ProfessorsResponseDto>> listTask = baseQuery
-                .SortByKey(p => p.UniversityEmployer!.User!.LastName, sortOrder)
+                .SortByKey(p => p.UniversityEmployer!.LastName, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(p => new ProfessorsResponseDto
                 {
@@ -57,9 +57,9 @@ namespace MainService.Controllers
                     PostUuid = p.Post!.Uuid,
                     PostName = p.Post.Name,
                     AcademicYearUuid = p.AcademicYear!.Uuid,
-                    FirstName = p.UniversityEmployer!.User!.FirstName,
-                    LastName = p.UniversityEmployer.User.LastName,
-                    Patronymic = p.UniversityEmployer.User.Patronymic ?? string.Empty,
+                    FirstName = p.UniversityEmployer!.FirstName,
+                    LastName = p.UniversityEmployer.LastName,
+                    Patronymic = p.UniversityEmployer.Patronymic ?? string.Empty,
                     GroupCuratorUuids = p.GroupCurator!.Select(g => g.Uuid).ToArray(),
                     DisciplinesUuids = p.Disciplines!.Select(d => d.Uuid).ToArray(),
                     Version = p.Version
@@ -134,9 +134,9 @@ namespace MainService.Controllers
                     PostUuid = p.Post!.Uuid,
                     PostName = p.Post.Name,
                     AcademicYearUuid = p.AcademicYear!.Uuid,
-                    FirstName = p.UniversityEmployer!.User!.FirstName,
-                    LastName = p.UniversityEmployer.User.LastName,
-                    Patronymic = p.UniversityEmployer.User.Patronymic ?? string.Empty,
+                    FirstName = p.UniversityEmployer!.FirstName,
+                    LastName = p.UniversityEmployer.LastName,
+                    Patronymic = p.UniversityEmployer.Patronymic ?? string.Empty,
                     GroupCuratorUuids = p.GroupCurator!.Select(g => g.Uuid).ToArray(),
                     DisciplinesUuids = p.Disciplines!.Select(d => d.Uuid).ToArray(),
                     Version = p.Version
@@ -253,10 +253,8 @@ namespace MainService.Controllers
             Users newUser = new()
             {
                 Uuid = Guid.NewGuid(),
-                FirstName = createDto.FirstName.Trim(),
-                LastName = createDto.LastName.Trim(),
-                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) ? null : createDto.Patronymic.Trim(),
-                UserUuid = Guid.NewGuid().ToString()
+                UserUuid = Guid.NewGuid().ToString(),
+                Role = createDto.Role
             };
 
             _context.Users.Add(newUser);
@@ -266,6 +264,9 @@ namespace MainService.Controllers
             {
                 Uuid = Guid.NewGuid(),
                 UserId = newUser.UserId,
+                FirstName = createDto.FirstName.Trim(),
+                LastName = createDto.LastName.Trim(),
+                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) ? null : createDto.Patronymic.Trim(),
                 User = newUser
             };
 
@@ -423,17 +424,17 @@ namespace MainService.Controllers
 
             if (updateDto.FirstName != null)
             {
-                professor.UniversityEmployer!.User!.FirstName = updateDto.FirstName.Trim();
+                professor.UniversityEmployer!.FirstName = updateDto.FirstName.Trim();
             }
 
             if (updateDto.LastName != null)
             {
-                professor.UniversityEmployer!.User!.LastName = updateDto.LastName.Trim();
+                professor.UniversityEmployer!.LastName = updateDto.LastName.Trim();
             }
 
             if (updateDto.Patronymic != null)
             {
-                professor.UniversityEmployer!.User!.Patronymic = updateDto.Patronymic.Trim() == string.Empty
+                professor.UniversityEmployer!.Patronymic = updateDto.Patronymic.Trim() == string.Empty
                     ? null
                     : updateDto.Patronymic.Trim();
             }

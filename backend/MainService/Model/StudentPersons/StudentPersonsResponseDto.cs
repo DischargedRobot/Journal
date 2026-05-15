@@ -7,7 +7,7 @@ namespace MainService
         public required Guid Uuid { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
-        public string Patronymic { get; set; } = string.Empty;
+        public string? Patronymic { get; set; }
         public required int Version { get; set; }
 
         public StudentPersonsResponseDto() { }
@@ -16,9 +16,9 @@ namespace MainService
         public StudentPersonsResponseDto(StudentPersons studentPerson)
         {
             Uuid = studentPerson.Uuid;
-            FirstName = studentPerson.User?.FirstName ?? string.Empty;
-            LastName = studentPerson.User?.LastName ?? string.Empty;
-            Patronymic = studentPerson.User?.Patronymic ?? string.Empty;
+            FirstName = studentPerson.FirstName;
+            LastName = studentPerson.LastName;
+            Patronymic = studentPerson.Patronymic;
             Version = studentPerson.Version;
         }
     }

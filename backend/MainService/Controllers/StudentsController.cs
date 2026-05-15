@@ -45,9 +45,9 @@ namespace MainService.Controllers
         {
             IQueryable<Students> baseQuery = _context.Students
                 .Where(s => filterFullName == null
-                    || s.StudentPerson!.User!.FirstName.Contains(filterFullName)
-                    || s.StudentPerson.User.LastName.Contains(filterFullName)
-                    || (s.StudentPerson.User.Patronymic != null && s.StudentPerson.User.Patronymic.Contains(filterFullName)))
+                    || s.StudentPerson!.FirstName.Contains(filterFullName)
+                    || s.StudentPerson.LastName.Contains(filterFullName)
+                    || (s.StudentPerson.Patronymic != null && s.StudentPerson.Patronymic.Contains(filterFullName)))
                 .Include(s => s.Group)
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
@@ -60,9 +60,9 @@ namespace MainService.Controllers
                 {
                     Uuid = s.Uuid,
                     StudentCode = s.StudentCode,
-                    FirstName = s.StudentPerson!.User!.FirstName,
-                    LastName = s.StudentPerson.User.LastName,
-                    Patronymic = s.StudentPerson.User.Patronymic ?? string.Empty,
+                    FirstName = s.StudentPerson!.FirstName,
+                    LastName = s.StudentPerson.LastName,
+                    Patronymic = s.StudentPerson.Patronymic ?? string.Empty,
                     GroupUuid = s.Group!.Uuid,
                     BrigadesUuids = Array.Empty<Guid>(),
                     Version = s.Version
@@ -198,9 +198,9 @@ namespace MainService.Controllers
                 // TODO: подумать нужен ли тут фильтр и как именно будет идти фильтраци на клиенте
                 // (каждый ввод = запрос или по кнопке)
                 && (filterFullName == null
-                || s.StudentPerson!.User!.FirstName.Contains(filterFullName)
-                || s.StudentPerson.User.LastName.Contains(filterFullName)
-                || (s.StudentPerson.User.Patronymic != null && s.StudentPerson.User.Patronymic.Contains(filterFullName))))
+                || s.StudentPerson!.FirstName.Contains(filterFullName)
+                || s.StudentPerson.LastName.Contains(filterFullName)
+                || (s.StudentPerson.Patronymic != null && s.StudentPerson.Patronymic.Contains(filterFullName))))
                 .Include(s => s.Group)
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
@@ -213,9 +213,9 @@ namespace MainService.Controllers
                 {
                     Uuid = s.Uuid,
                     StudentCode = s.StudentCode,
-                    FirstName = s.StudentPerson!.User!.FirstName,
-                    LastName = s.StudentPerson.User.LastName,
-                    Patronymic = s.StudentPerson.User.Patronymic ?? string.Empty,
+                    FirstName = s.StudentPerson!.FirstName,
+                    LastName = s.StudentPerson.LastName,
+                    Patronymic = s.StudentPerson.Patronymic ?? string.Empty,
                     GroupUuid = s.Group!.Uuid,
                     BrigadesUuids = Array.Empty<Guid>(),
                     Version = s.Version
@@ -314,10 +314,8 @@ namespace MainService.Controllers
             Users newUser = new()
             {
                 Uuid = Guid.NewGuid(),
-                FirstName = createDto.FirstName.Trim(),
-                LastName = createDto.LastName.Trim(),
-                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) ? null : createDto.Patronymic.Trim(),
-                UserUuid = Guid.NewGuid().ToString()
+                UserUuid = Guid.NewGuid().ToString(),
+                Role = createDto.Role
             };
 
             _context.Users.Add(newUser);
@@ -327,6 +325,9 @@ namespace MainService.Controllers
             {
                 Uuid = Guid.NewGuid(),
                 UserId = newUser.UserId,
+                FirstName = createDto.FirstName.Trim(),
+                LastName = createDto.LastName.Trim(),
+                Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic) ? null : createDto.Patronymic.Trim(),
                 User = newUser
             };
 
@@ -521,17 +522,17 @@ namespace MainService.Controllers
 
             if (updateDto.FirstName != null)
             {
-                student.StudentPerson!.User!.FirstName = updateDto.FirstName.Trim();
+                student.StudentPerson!.FirstName = updateDto.FirstName.Trim();
             }
 
             if (updateDto.LastName != null)
             {
-                student.StudentPerson!.User!.LastName = updateDto.LastName.Trim();
+                student.StudentPerson!.LastName = updateDto.LastName.Trim();
             }
 
             if (updateDto.Patronymic != null)
             {
-                student.StudentPerson!.User!.Patronymic = updateDto.Patronymic.Trim() == string.Empty
+                student.StudentPerson!.Patronymic = updateDto.Patronymic.Trim() == string.Empty
                     ? null
                     : updateDto.Patronymic.Trim();
             }

@@ -5,5 +5,6 @@ namespace MainService
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
         public string? Patronymic { get; set; }
+        public required UserRole Role { get; set; }
     }
 }

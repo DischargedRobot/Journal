@@ -24,9 +24,9 @@ namespace MainService
         {
             Uuid = student.Uuid;
             StudentCode = student.StudentCode;
-            FirstName = student.StudentPerson!.User!.FirstName;
-            LastName = student.StudentPerson.User.LastName;
-            Patronymic = student.StudentPerson.User.Patronymic ?? string.Empty;
+            FirstName = student.StudentPerson!.FirstName;
+            LastName = student.StudentPerson.LastName;
+            Patronymic = student.StudentPerson.Patronymic ?? string.Empty;
             GroupUuid = student.Group!.Uuid;
             BrigadesUuids = student.Brigades?.Select(b => b.Uuid).ToArray() ?? [];
             NotesAboutStudentUuids = student.NotesAboutStudent?.Select(n => n.Uuid).ToArray() ?? [];

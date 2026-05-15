@@ -7,5 +7,6 @@ namespace MainService
         public required string LastName { get; set; }
         public string? Patronymic { get; set; }
         public required Guid GroupUuid { get; set; }
+        public required UserRole Role { get; set; }
     }
 }
