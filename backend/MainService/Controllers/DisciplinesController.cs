@@ -176,6 +176,125 @@ namespace MainService.Controllers
         }
 
 
+        [HttpGet("{uuid}/lessons")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Занятия найдены", typeof(PagedResult<LessonsResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Занятия не найдены", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
+        [SwaggerOperation(
+            Summary = "Получить занятия по дисциплине",
+            Description = "Возвращает список занятий по UUID дисциплины"
+        )]
+        public async Task<ActionResult<PagedResult<LessonsResponseDto>>> GetLessonsByDiscipline(
+            [SwaggerParameter("UUID дисциплины")]
+            Guid uuid,
+            [FromQuery, SwaggerParameter("Количество записей")]
+            int size = 50,
+            [FromQuery, SwaggerParameter("Смещение от начала списка")]
+            int offset = 0,
+            [FromQuery, SwaggerParameter("Порядок сортировки по дате занятий")]
+            SortOrder sortOrder = SortOrder.Ascending
+        )
+        {
+            if (uuid == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "UUID дисциплины не может быть пустым",
+                    Field = nameof(uuid)
+                });
+            }
+
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
+            bool disciplineExists = await _context.Disciplines.AnyAsync(d => d.Uuid == uuid);
+            if (!disciplineExists)
+            {
+                return NotFound(new ApiError
+                {
+                    StatusCode = "1.2.3",
+                    Title = "Дисциплина не найдена",
+                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
+                    Field = nameof(uuid)
+                });
+            }
+
+            IQueryable<Lessons> baseQuery = _context.Lessons
+                .Include(l => l.LessonType)
+                .Include(l => l.Discipline)
+                .Where(l => l.Discipline!.Uuid == uuid);
+
+            Task<int> totalRecord = baseQuery.CountAsync();
+            List<LessonsResponseDto> items = await baseQuery
+                .SortByKey(l => l.StartDate, sortOrder)
+                .TakeWithOffset(offset, size)
+                .Select(l => new LessonsResponseDto
+                {
+                    Uuid = l.Uuid,
+                    Code = l.Code,
+                    StartDate = l.StartDate,
+                    Name = l.Name,
+                    ShortName = l.ShortName,
+                    LessonTypeUuid = l.LessonType!.Uuid,
+                    DisciplineUuid = l.Discipline!.Uuid,
+                    Version = l.Version
+                })
+                .ToListAsync();
+
+            int total = await totalRecord;
+            if (total == 0)
+            {
+                return NotFound(new ApiError
+                {
+                    StatusCode = "1.2.3",
+                    Title = "Занятия не найдены",
+                    Message = $"Для дисциплины с UUID \"{uuid}\" не найдено ни одного занятия",
+                    Field = nameof(uuid)
+                });
+            }
+
+            if (items.Count == 0)
+            {
+                return NotFound(new ApiError
+                {
+                    StatusCode = "1.2.3",
+                    Title = "Занятия не найдены",
+                    Message = $"Для дисциплины с UUID \"{uuid}\" не найдено занятий для указанных параметров запроса",
+                    Field = nameof(uuid)
+                });
+            }
+
+            return Ok(new PagedResult<LessonsResponseDto>(
+                Total: total,
+                Offset: offset,
+                Size: items.Count,
+                Items: items
+            ));
+        }
+
         [HttpGet("group/{uuid}")]
         [SwaggerResponse(StatusCodes.Status200OK, "Дисциплины найдены", typeof(PagedResult<DisciplinesResponseDto>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
@@ -216,7 +335,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.0",
+                    StatusCode = "0.2.1",
                     Title = "Неверный запрос",
                     Message = "Параметр offset не может быть отрицательным",
                     Field = nameof(offset)
@@ -227,7 +346,7 @@ namespace MainService.Controllers
             {
                 return BadRequest(new ApiError
                 {
-                    StatusCode = "0.2.0",
+                    StatusCode = "0.2.1",
                     Title = "Неверный запрос",
                     Message = "Параметр size не может быть отрицательным",
                     Field = nameof(size)

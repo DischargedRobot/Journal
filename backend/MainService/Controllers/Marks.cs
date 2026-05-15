@@ -198,13 +198,13 @@ namespace MainService.Controllers
                 });
             }
 
-            IQueryable<Marks> baseQueryable = _context.Marks
+            IQueryable<Marks> baseQuery = _context.Marks
                 .AsNoTracking()
                 .Where(m => m.MarkTypeId == markType.MarkTypeId);
 
-            Task<int> totalRecord = baseQueryable.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
 
-            List<MarksResponseDto> items = await baseQueryable
+            List<MarksResponseDto> items = await baseQuery
                 .SortByKey(m => m.Value, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(m => new MarksResponseDto
