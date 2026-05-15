@@ -5,8 +5,8 @@ namespace MainService
         public required Guid Uuid { get; set; }
         public required int Code { get; set; }
         public required DateTime StartDate { get; set; }
-        public required string Name { get; set; } = string.Empty;
-        public required string ShortName { get; set; } = string.Empty;
+        public string? Name { get; set; }
+        public string? ShortName { get; set; }
         public required Guid LessonTypeUuid { get; set; }
         public required Guid DisciplineUuid { get; set; }
         public Guid[]? LessonPresencesUuids { get; set; } = [];

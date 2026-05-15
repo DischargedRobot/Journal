@@ -16,11 +16,9 @@ namespace MainService
         [Required]
         public required DateTime StartDate { get; set; } = DateTime.UtcNow;
 
-        [Required]
-        public required string Name { get; set; }
+        public string? Name { get; set; }
 
-        [Required]
-        public required string ShortName { get; set; }
+        public string? ShortName { get; set; }
 
         public required int LessonTypeId { get; set; }
         [ForeignKey("LessonTypeId")]
