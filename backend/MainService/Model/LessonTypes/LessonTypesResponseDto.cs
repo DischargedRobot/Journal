@@ -9,8 +9,6 @@ namespace MainService
 
         public string? ShortName { get; set; }
 
-        public Guid[]? LessonsUuids { get; set; } = [];
-
         public int Version { get; set; }
         public LessonTypesResponseDto() { }
 
@@ -20,7 +18,6 @@ namespace MainService
             Uuid = lessonType.Uuid;
             Name = lessonType.Name;
             ShortName = lessonType.ShortName;
-            LessonsUuids = lessonType.Lessons?.Select(l => l.Uuid).ToArray() ?? [];
             Version = lessonType.Version;
         }
     }

@@ -1,3 +1,4 @@
+using MainService.Enums;
 using MainService.Errors;
 
 using Microsoft.AspNetCore.Mvc;
@@ -20,21 +21,39 @@ namespace MainService.Controllers
         }
 
         [HttpGet]
-        [SwaggerResponse(StatusCodes.Status200OK, "Статусы присутствия найдены", typeof(IEnumerable<PresenceStatusesResponseDto>))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Статусы присутствия найдены", typeof(PagedResult<PresenceStatusesResponseDto>))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Статусы присутствия не найдены", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Получить список всех статусов присутствия",
             Description = "Возвращает список всех статусов присутствия в системе"
         )]
-        public async Task<ActionResult<IEnumerable<PresenceStatusesResponseDto>>> GetPresenceStatuses()
+        public async Task<ActionResult<PagedResult<PresenceStatusesResponseDto>>> GetPresenceStatuses(
+            [FromQuery, SwaggerParameter("Количество записей")]
+            int size = 50,
+            [FromQuery, SwaggerParameter("Смещение от начала списка")]
+            int offset = 0,
+            [FromQuery, SwaggerParameter("Фильтр по названию")]
+            string? filterName = null,
+            [FromQuery, SwaggerParameter("Порядок сортировки по имени")]
+            SortOrder sortOrder = SortOrder.Ascending
+        )
         {
-            List<PresenceStatuses> statuses = await _context.PresenceStatuses
-                .Include(ps => ps.LessonPresences)
-                .AsNoTracking()
+            IQueryable<PresenceStatuses> baseQuery = _context.PresenceStatuses
+                .Where(ps => filterName == null || ps.Name.Contains(filterName))
+                .AsNoTracking();
+
+            Task<int> totalTask = baseQuery.CountAsync();
+
+            List<PresenceStatusesResponseDto> items = await baseQuery
+                .SortByKey(ps => ps.Name, sortOrder)
+                .TakeWithOffset(offset, size)
+                .Select(ps => new PresenceStatusesResponseDto(ps))
                 .ToListAsync();
 
-            if (statuses.Count == 0)
+            int total = await totalTask;
+
+            if (total == 0)
             {
                 return NotFound(new ApiError
                 {
@@ -45,7 +64,22 @@ namespace MainService.Controllers
                 });
             }
 
-            return Ok(statuses.Select(s => new PresenceStatusesResponseDto(s)));
+            if (items.Count == 0)
+            {
+                return NotFound(new ApiError
+                {
+                    StatusCode = "1.0.3",
+                    Title = "Статусы присутствия не найдены",
+                    Message = "В системе не найдено ни одного статуса присутствия для указанных параметров запроса",
+                    Field = string.Empty
+                });
+            }
+
+            return Ok(new PagedResult<PresenceStatusesResponseDto>(
+                Total: total,
+                Offset: offset,
+                Size: items.Count,
+                Items: items));
         }
 
         [HttpGet("{uuid}")]
@@ -75,7 +109,6 @@ namespace MainService.Controllers
             }
 
             PresenceStatuses? status = await _context.PresenceStatuses
-                .Include(ps => ps.LessonPresences)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ps => ps.Uuid == uuid);
 
