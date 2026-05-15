@@ -340,7 +340,7 @@ namespace MainService.Controllers
                 {
                     return Conflict(new ApiError
                     {
-                        StatusCode = "0.2.1",
+                        StatusCode = "1.2.1",
                         Title = "Неверный запрос",
                         Message = $"Студент с кодом {createDto.StudentCode} уже существует",
                         Field = nameof(createDto.StudentCode)
@@ -514,8 +514,8 @@ namespace MainService.Controllers
                 {
                     return Conflict(new ApiError
                     {
-                        StatusCode = "0.2.1",
-                        Title = "Неверный запрос",
+                        StatusCode = "1.2.1",
+                        Title = "Повторяющийся запрос",
                         Message = $"Студент с кодом {updateDto.StudentCode} уже существует",
                         Field = nameof(updateDto.StudentCode)
                     });

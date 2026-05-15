@@ -336,7 +336,7 @@ namespace MainService
             {
                 return Conflict(new ApiError
                 {
-                    StatusCode = "0.2.1",
+                    StatusCode = "1.2.1",
                     Title = "Код уже используется",
                     Message = $"Кафедра с кодом \"{departmentDto.Code}\" уже существует",
                     Field = nameof(departmentDto.Code)
@@ -470,7 +470,7 @@ namespace MainService
                 {
                     return Conflict(new ApiError
                     {
-                        StatusCode = "0.2.1",
+                        StatusCode = "1.2.1",
                         Title = "Код уже используется",
                         Message = $"Кафедра с кодом \"{updateDto.Code}\" уже существует",
                         Field = nameof(updateDto.Code)

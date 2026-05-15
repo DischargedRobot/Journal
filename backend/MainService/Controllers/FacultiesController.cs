@@ -197,7 +197,7 @@ namespace MainService.Controllers
             {
                 return Conflict(new ApiError
                 {
-                    StatusCode = "0.2.1",
+                    StatusCode = "1.2.1",
                     Title = "Неверное название факультета",
                     Message = $"Факультет с названием \"{createDto.Name}\" уже существует",
                     Field = nameof(createDto.Name)
@@ -322,7 +322,7 @@ namespace MainService.Controllers
                 {
                     return Conflict(new ApiError
                     {
-                        StatusCode = "0.2.1",
+                        StatusCode = "1.2.1",
                         Title = "Неверное название факультета",
                         Message = $"Факультет с названием \"{updateDto.Name}\" уже существует",
                         Field = nameof(updateDto.Name)
