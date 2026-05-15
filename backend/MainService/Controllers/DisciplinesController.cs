@@ -65,7 +65,7 @@ namespace MainService.Controllers
             }
             IQueryable<DisciplinesResponseDto> query = _context.Disciplines
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
-                .Where(d => isArchived == null || d.IsArchived == isArchived.Value)
+                .Where(d => isArchived == null || d.IsArchived == isArchived)
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(d => new DisciplinesResponseDto
@@ -513,7 +513,7 @@ namespace MainService.Controllers
             DisciplinesRegisters? disciplineRegister = null;
             if (createDto.DisciplineRegisterUuid != null && createDto.DisciplineRegisterUuid != Guid.Empty)
             {
-                disciplineRegister = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == createDto.DisciplineRegisterUuid.Value);
+                disciplineRegister = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == createDto.DisciplineRegisterUuid);
                 if (disciplineRegister == null)
                 {
                     return BadRequest(new ApiError
@@ -671,7 +671,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.SemesterUuid != null && updateDto.SemesterUuid.Value == Guid.Empty)
+            if (updateDto.SemesterUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -682,7 +682,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.AcademicYearUuid != null && updateDto.AcademicYearUuid.Value == Guid.Empty)
+            if (updateDto.AcademicYearUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -712,7 +712,7 @@ namespace MainService.Controllers
 
             if (updateDto.SemesterUuid != null)
             {
-                semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == updateDto.SemesterUuid.Value);
+                semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == updateDto.SemesterUuid);
                 // проверка ответа БД
                 if (semester == null)
                 {
@@ -728,7 +728,7 @@ namespace MainService.Controllers
 
             if (updateDto.AcademicYearUuid != null)
             {
-                academicYear = await _context.AcademicYears.FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid.Value);
+                academicYear = await _context.AcademicYears.FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid);
                 if (academicYear == null)
                 {
                     return BadRequest(new ApiError
@@ -743,9 +743,9 @@ namespace MainService.Controllers
 
             if (updateDto.DisciplineRegisterUuid != null)
             {
-                if (updateDto.DisciplineRegisterUuid.Value != Guid.Empty)
+                if (updateDto.DisciplineRegisterUuid != Guid.Empty)
                 {
-                    register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == updateDto.DisciplineRegisterUuid.Value);
+                    register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == updateDto.DisciplineRegisterUuid);
                     if (register == null)
                     {
                         return BadRequest(new ApiError

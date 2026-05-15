@@ -62,7 +62,7 @@ namespace MainService.Controllers
                     Field = nameof(size)
                 });
             }
-            
+
             IQueryable<Professors> baseQuery = _context.Professors
                 .Where(p => filterFullName == null
                     || p.UniversityEmployer!.FirstName.Contains(filterFullName)
@@ -241,7 +241,7 @@ namespace MainService.Controllers
             if (createDto.DepartmentUuid != null && createDto.DepartmentUuid != Guid.Empty)
             {
                 department = await _context.Departments
-                    .FirstOrDefaultAsync(d => d.Uuid == createDto.DepartmentUuid.Value);
+                    .FirstOrDefaultAsync(d => d.Uuid == createDto.DepartmentUuid);
                 if (department == null)
                 {
                     return BadRequest(new ApiError
@@ -258,7 +258,7 @@ namespace MainService.Controllers
             if (createDto.PostUuid != null && createDto.PostUuid != Guid.Empty)
             {
                 post = await _context.EmployeePosts
-                    .FirstOrDefaultAsync(p => p.Uuid == createDto.PostUuid.Value);
+                    .FirstOrDefaultAsync(p => p.Uuid == createDto.PostUuid);
                 if (post == null)
                 {
                     return BadRequest(new ApiError
@@ -414,7 +414,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.AcademicYearUuid != null && updateDto.AcademicYearUuid.Value == Guid.Empty)
+            if (updateDto.AcademicYearUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -464,7 +464,7 @@ namespace MainService.Controllers
             if (updateDto.AcademicYearUuid != null)
             {
                 AcademicYears? academicYear = await _context.AcademicYears
-                    .FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid.Value);
+                    .FirstOrDefaultAsync(a => a.Uuid == updateDto.AcademicYearUuid);
                 if (academicYear == null)
                 {
                     return BadRequest(new ApiError
@@ -481,7 +481,7 @@ namespace MainService.Controllers
 
             if (updateDto.DepartmentUuid != null)
             {
-                if (updateDto.DepartmentUuid.Value == Guid.Empty)
+                if (updateDto.DepartmentUuid == Guid.Empty)
                 {
                     professor.DepartmentId = null;
                     professor.Department = null;
@@ -489,7 +489,7 @@ namespace MainService.Controllers
                 else
                 {
                     Departments? department = await _context.Departments
-                        .FirstOrDefaultAsync(d => d.Uuid == updateDto.DepartmentUuid.Value);
+                        .FirstOrDefaultAsync(d => d.Uuid == updateDto.DepartmentUuid);
                     if (department == null)
                     {
                         return BadRequest(new ApiError
@@ -507,7 +507,7 @@ namespace MainService.Controllers
 
             if (updateDto.PostUuid != null)
             {
-                if (updateDto.PostUuid.Value == Guid.Empty)
+                if (updateDto.PostUuid == Guid.Empty)
                 {
                     professor.PostId = null;
                     professor.Post = null;
@@ -515,7 +515,7 @@ namespace MainService.Controllers
                 else
                 {
                     EmployeePosts? post = await _context.EmployeePosts
-                        .FirstOrDefaultAsync(p => p.Uuid == updateDto.PostUuid.Value);
+                        .FirstOrDefaultAsync(p => p.Uuid == updateDto.PostUuid);
                     if (post == null)
                     {
                         return BadRequest(new ApiError

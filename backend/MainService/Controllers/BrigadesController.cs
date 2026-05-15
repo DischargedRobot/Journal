@@ -348,7 +348,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.GroupUuid != null && updateDto.GroupUuid.Value == Guid.Empty)
+            if (updateDto.GroupUuid != null && updateDto.GroupUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -377,7 +377,7 @@ namespace MainService.Controllers
 
             if (updateDto.GroupUuid != null)
             {
-                group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid.Value);
+                group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid);
                 if (group == null)
                 {
                     return BadRequest(new ApiError
@@ -452,9 +452,9 @@ namespace MainService.Controllers
                 brigade.Name = updateDto.Name.Trim();
             }
 
-            if (updateDto.IsTemplateForGroup != null)
+            if (updateDto.IsTemplateForGroup != brigade.IsTemplateForGroup)
             {
-                brigade.IsTemplateForGroup = updateDto.IsTemplateForGroup.Value;
+                brigade.IsTemplateForGroup = updateDto.IsTemplateForGroup;
             }
 
             if (group != null)

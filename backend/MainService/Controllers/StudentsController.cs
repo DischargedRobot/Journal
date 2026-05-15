@@ -64,7 +64,7 @@ namespace MainService.Controllers
                     Field = nameof(size)
                 });
             }
-            
+
             IQueryable<Students> baseQuery = _context.Students
                 .Where(s => filterFullName == null
                     || s.StudentPerson!.FirstName.Contains(filterFullName)
@@ -276,6 +276,8 @@ namespace MainService.Controllers
 
         [HttpPost]
         [SwaggerResponse(StatusCodes.Status201Created, "Студент успешно создан", typeof(StudentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
@@ -333,14 +335,14 @@ namespace MainService.Controllers
 
             if (createDto.StudentCode != null)
             {
-                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == createDto.StudentCode.Value);
+                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == createDto.StudentCode);
                 if (codeExists)
                 {
-                    return BadRequest(new ApiError
+                    return Conflict(new ApiError
                     {
                         StatusCode = "0.2.1",
                         Title = "Неверный запрос",
-                        Message = $"Студент с кодом {createDto.StudentCode.Value} уже существует",
+                        Message = $"Студент с кодом {createDto.StudentCode} уже существует",
                         Field = nameof(createDto.StudentCode)
                     });
                 }
@@ -441,6 +443,8 @@ namespace MainService.Controllers
 
         [HttpPatch("{uuid}")]
         [SwaggerResponse(StatusCodes.Status200OK, "Студент обновлён", typeof(StudentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Студент не найден", typeof(ApiError))]
@@ -489,7 +493,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.GroupUuid != null && updateDto.GroupUuid.Value == Guid.Empty)
+            if (updateDto.GroupUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -505,14 +509,14 @@ namespace MainService.Controllers
 
             if (updateDto.StudentCode != null)
             {
-                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == updateDto.StudentCode.Value && s.Uuid != uuid);
+                bool codeExists = await _context.Students.AnyAsync(s => s.StudentCode == updateDto.StudentCode && s.Uuid != uuid);
                 if (codeExists)
                 {
-                    return BadRequest(new ApiError
+                    return Conflict(new ApiError
                     {
                         StatusCode = "0.2.1",
                         Title = "Неверный запрос",
-                        Message = $"Студент с кодом {updateDto.StudentCode.Value} уже существует",
+                        Message = $"Студент с кодом {updateDto.StudentCode} уже существует",
                         Field = nameof(updateDto.StudentCode)
                     });
                 }
@@ -520,7 +524,7 @@ namespace MainService.Controllers
 
             if (updateDto.GroupUuid != null)
             {
-                group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid.Value);
+                group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == updateDto.GroupUuid);
                 if (group == null)
                 {
                     return BadRequest(new ApiError

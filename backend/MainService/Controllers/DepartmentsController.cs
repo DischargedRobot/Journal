@@ -294,6 +294,8 @@ namespace MainService
         [HttpPost]
         [SwaggerResponse(StatusCodes.Status201Created, "Кафедра создана", typeof(DepartmentsResponseDto))]
         [SwaggerResponseExample(StatusCodes.Status201Created, typeof(DepartmentsResponseDto))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
@@ -332,7 +334,7 @@ namespace MainService
             if (departmentDto.Code != null
                 && _context.Departments.Any(d => d.Code == departmentDto.Code))
             {
-                return BadRequest(new ApiError
+                return Conflict(new ApiError
                 {
                     StatusCode = "0.2.1",
                     Title = "Код уже используется",
@@ -419,6 +421,8 @@ namespace MainService
         [SwaggerResponse(StatusCodes.Status200OK, "Кафедра обновлена", typeof(DepartmentsResponseDto))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедра не найдена", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
@@ -464,7 +468,7 @@ namespace MainService
             {
                 if (_context.Departments.Any(d => d.Code == updateDto.Code && d.Uuid != uuid))
                 {
-                    return BadRequest(new ApiError
+                    return Conflict(new ApiError
                     {
                         StatusCode = "0.2.1",
                         Title = "Код уже используется",

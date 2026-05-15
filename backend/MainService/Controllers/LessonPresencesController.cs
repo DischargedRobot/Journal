@@ -537,6 +537,8 @@ namespace MainService.Controllers
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Посещение не найдено", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerOperation(
             Summary = "Обновить посещение",
             Description = "Обновляет данные посещения по UUID. Все поля необязательны"

@@ -302,7 +302,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.TrainingDirectionUuid != null && updateDto.TrainingDirectionUuid.Value == Guid.Empty)
+            if (updateDto.TrainingDirectionUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -313,7 +313,7 @@ namespace MainService.Controllers
                 });
             }
 
-            if (updateDto.FacultyUuid != null && updateDto.FacultyUuid.Value == Guid.Empty)
+            if (updateDto.FacultyUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
                 {
@@ -332,7 +332,7 @@ namespace MainService.Controllers
             if (updateDto.TrainingDirectionUuid != null)
             {
                 trainingDirection = await _context.TrainingDirections
-                    .FirstOrDefaultAsync(t => t.Uuid == updateDto.TrainingDirectionUuid.Value);
+                    .FirstOrDefaultAsync(t => t.Uuid == updateDto.TrainingDirectionUuid);
                 if (trainingDirection == null)
                 {
                     return BadRequest(new ApiError
@@ -348,7 +348,7 @@ namespace MainService.Controllers
             if (updateDto.FacultyUuid != null)
             {
                 faculty = await _context.Faculties
-                    .FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid.Value);
+                    .FirstOrDefaultAsync(f => f.Uuid == updateDto.FacultyUuid);
                 if (faculty == null)
                 {
                     return BadRequest(new ApiError

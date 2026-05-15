@@ -157,6 +157,8 @@ namespace MainService.Controllers
         [HttpPost]
         [SwaggerResponse(StatusCodes.Status201Created, "Факультет создан", typeof(FacultiesResponseDto))]
         [SwaggerResponseExample(StatusCodes.Status201Created, typeof(FacultiesDtoExample))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
         [SwaggerOperation(
@@ -193,7 +195,7 @@ namespace MainService.Controllers
 
             if (_context.Faculties.Any(f => f.Name == createDto.Name))
             {
-                return BadRequest(new ApiError
+                return Conflict(new ApiError
                 {
                     StatusCode = "0.2.1",
                     Title = "Неверное название факультета",
@@ -273,6 +275,8 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status200OK, "Факультет обновлен", typeof(FacultiesResponseDto))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт", typeof(ApiError))]
+        [SwaggerResponseExample(StatusCodes.Status409Conflict, typeof(ApiError409ConflictExample))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Факультет не найден", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
@@ -316,7 +320,7 @@ namespace MainService.Controllers
                 if (_context.Faculties.Any(f => f.Name == updateDto.Name
                     && f.Uuid != uuid))
                 {
-                    return BadRequest(new ApiError
+                    return Conflict(new ApiError
                     {
                         StatusCode = "0.2.1",
                         Title = "Неверное название факультета",
