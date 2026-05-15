@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class PresenceStatusesResponseDto
@@ -8,7 +10,7 @@ namespace MainService
 
         public int Version { get; set; }
         public PresenceStatusesResponseDto() { }
-
+        [SetsRequiredMembers]
         public PresenceStatusesResponseDto(PresenceStatuses presenceStatus)
         {
             Uuid = presenceStatus.Uuid;
