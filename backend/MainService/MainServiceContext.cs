@@ -23,6 +23,7 @@ namespace MainService
 		public DbSet<Lessons> Lessons => Set<Lessons>();
 		public DbSet<LessonMarks> LessonMarks => Set<LessonMarks>();
 		public DbSet<LessonPresences> LessonPresences => Set<LessonPresences>();
+		public DbSet<LessonTypes> LessonTypes => Set<LessonTypes>();
 		public DbSet<Marks> Marks => Set<Marks>();
 		public DbSet<EmployeePosts> EmployeePosts => Set<EmployeePosts>();
 		public DbSet<PresenceStatuses> PresenceStatuses => Set<PresenceStatuses>();
