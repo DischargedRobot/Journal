@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class LessonTypesRequestDto
@@ -11,7 +13,8 @@ namespace MainService
 
         public int Version { get; set; }
         public LessonTypesRequestDto() { }
-
+        
+        [SetsRequiredMembers]
         public LessonTypesRequestDto(LessonTypes lessonType)
         {
             Uuid = lessonType.Uuid;
