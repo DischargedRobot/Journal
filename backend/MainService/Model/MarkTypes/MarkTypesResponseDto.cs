@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class MarkTypesResponseDto
@@ -10,6 +12,7 @@ namespace MainService
         public int Version { get; set; }
         public MarkTypesResponseDto() { }
 
+        [SetsRequiredMembers]
         public MarkTypesResponseDto(MarkTypes markType)
         {
             Uuid = markType.Uuid;
