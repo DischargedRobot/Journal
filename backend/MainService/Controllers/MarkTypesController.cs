@@ -37,19 +37,39 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
             IQueryable<MarkTypes> baseQuery = _context.MarkTypes
                 .Where(m => filterName == null || m.Name.Contains(filterName))
                 .AsNoTracking();
-
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
 
             List<MarkTypesResponseDto> items = await baseQuery
                 .SortByKey(m => m.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(m => new MarkTypesResponseDto(m))
                 .ToListAsync();
-
-            int total = await totalTask;
+            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -110,7 +130,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Тип оценки не найден",
                     Message = $"Тип оценки с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
@@ -144,19 +164,37 @@ namespace MainService.Controllers
                 });
             }
 
-            MarkTypes newEntity = new()
+            UniversityEmployers? employee = null;
+            if (createDto.UniversityEmployerUuid != null && createDto.UniversityEmployerUuid != Guid.Empty)
+            {
+                employee = await _context.UniversityEmployers
+                    .FirstOrDefaultAsync(e => e.Uuid == createDto.UniversityEmployerUuid.Value);
+                if (employee == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Сотрудник с указанным UUID не найден",
+                        Field = nameof(createDto.UniversityEmployerUuid)
+                    });
+                }
+            }
+
+            MarkTypes newMarkType = new()
             {
                 Uuid = Guid.NewGuid(),
                 Name = createDto.Name.Trim(),
+                UniversityEmployerId = employee?.UniversityEmployerId
             };
 
-            _context.MarkTypes.Add(newEntity);
+            _context.MarkTypes.Add(newMarkType);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(
                 nameof(GetMarkType),
-                new { uuid = newEntity.Uuid },
-                new MarkTypesResponseDto(newEntity)
+                new { uuid = newMarkType.Uuid },
+                new MarkTypesResponseDto(newMarkType)
             );
         }
 
@@ -185,19 +223,19 @@ namespace MainService.Controllers
                 });
             }
 
-            MarkTypes? entity = await _context.MarkTypes.FirstOrDefaultAsync(m => m.Uuid == uuid);
-            if (entity == null)
+            MarkTypes? markType = await _context.MarkTypes.FirstOrDefaultAsync(m => m.Uuid == uuid);
+            if (markType == null)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Тип оценки не найден",
                     Message = $"Тип оценки с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
                 });
             }
 
-            _context.MarkTypes.Remove(entity);
+            _context.MarkTypes.Remove(markType);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -209,8 +247,11 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Тип оценки не найден", typeof(ApiError))]
         [SwaggerOperation(Summary = "Частично обновить тип оценки")]
         public async Task<ActionResult<MarkTypesResponseDto>> UpdateMarkType(
-            [SwaggerParameter("UUID типа оценки")] Guid uuid,
-            [FromBody, SwaggerParameter("Данные для обновления")] MarkTypesUpdateDto updateDto)
+            [SwaggerParameter("UUID типа оценки")]
+            Guid uuid,
+            [FromBody, SwaggerParameter("Данные для обновления")]
+            MarkTypesUpdateDto updateDto
+        )
         {
             if (uuid == Guid.Empty)
             {
@@ -223,37 +264,70 @@ namespace MainService.Controllers
                 });
             }
 
-            MarkTypes? entity = await _context.MarkTypes.FirstOrDefaultAsync(m => m.Uuid == uuid);
-            if (entity == null)
+            if (updateDto.Name != null && updateDto.Name.Trim() == string.Empty)
             {
-                return NotFound(new ApiError
+                return BadRequest(new ApiError
                 {
-                    StatusCode = "1.0.3",
-                    Title = "Тип оценки не найден",
-                    Message = $"MarkType with UUID \"{uuid}\" not found",
-                    Field = nameof(uuid)
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Название не может быть пустым",
+                    Field = nameof(updateDto.Name)
                 });
             }
 
-            if (updateDto.Name != null)
+            UniversityEmployers? updEmployee = null;
+            if (updateDto.UniversityEmployerUuid != null)
             {
-                if (updateDto.Name.Trim() == string.Empty)
+                if (updateDto.UniversityEmployerUuid == Guid.Empty)
                 {
                     return BadRequest(new ApiError
                     {
                         StatusCode = "0.2.0",
                         Title = "Неверный запрос",
-                        Message = "Название не может быть пустым",
-                        Field = nameof(updateDto.Name)
+                        Message = "UUID сотрудника не может быть пустым",
+                        Field = nameof(updateDto.UniversityEmployerUuid)
                     });
                 }
 
-                entity.Name = updateDto.Name.Trim();
+                updEmployee = await _context.UniversityEmployers
+                    .FirstOrDefaultAsync(e => e.Uuid == updateDto.UniversityEmployerUuid.Value);
+                if (updEmployee == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Некорректные данные",
+                        Message = "Сотрудник с указанным UUID не найден",
+                        Field = nameof(updateDto.UniversityEmployerUuid)
+                    });
+                }
+            }
+
+            MarkTypes? markType = await _context.MarkTypes.FirstOrDefaultAsync(m => m.Uuid == uuid);
+            if (markType == null)
+            {
+                return NotFound(new ApiError
+                {
+                    StatusCode = "1.2.3",
+                    Title = "Тип оценки не найден",
+                    Message = $"Тип оценки с UUID \"{uuid}\" не найден",
+                    Field = nameof(uuid)
+                });
+            }
+
+            if (updEmployee != null)
+            {
+                markType.UniversityEmployerId = updEmployee.UniversityEmployerId;
+            }
+
+            if (updateDto.Name != null)
+            {
+                markType.Name = updateDto.Name.Trim();
             }
 
             await _context.SaveChangesAsync();
 
-            return Ok(new MarkTypesResponseDto(entity));
+            return Ok(new MarkTypesResponseDto(markType));
         }
     }
 }

@@ -41,12 +41,34 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+            
             IQueryable<Professors> baseQuery = _context.Professors
                 .Where(p => filterFullName == null
                     || p.UniversityEmployer!.FirstName.Contains(filterFullName)
                     || p.UniversityEmployer.LastName.Contains(filterFullName));
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
             Task<List<ProfessorsResponseDto>> listTask = baseQuery
                 .SortByKey(p => p.UniversityEmployer!.LastName, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -67,7 +89,7 @@ namespace MainService.Controllers
                 .ToListAsync();
 
             List<ProfessorsResponseDto> items = await listTask;
-            int total = await totalTask;
+            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -147,7 +169,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Преподаватель не найден",
                     Message = $"Преподаватель с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
@@ -329,7 +351,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Преподаватель не найден",
                     Message = $"Преподаватель с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)

@@ -43,6 +43,28 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+            
             IQueryable<Students> baseQuery = _context.Students
                 .Where(s => filterFullName == null
                     || s.StudentPerson!.FirstName.Contains(filterFullName)
@@ -52,7 +74,7 @@ namespace MainService.Controllers
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
             IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -69,7 +91,7 @@ namespace MainService.Controllers
                 });
 
             List<StudentsResponseDto> studentsDtoList = await itemsQuery.ToListAsync();
-            int total = await totalTask;
+            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -123,7 +145,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Студент не найден",
                     Message = $"Студент с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
@@ -160,6 +182,28 @@ namespace MainService.Controllers
         // [FromQuery] SortOrder[]? sortOrder = null
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
             if (groupUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
@@ -170,27 +214,18 @@ namespace MainService.Controllers
                     Field = nameof(groupUuid)
                 });
             }
+
             Groups? group = await _context.Groups
-            .FirstOrDefaultAsync(g => g.Uuid == groupUuid);
+                .FirstOrDefaultAsync(g => g.Uuid == groupUuid);
             if (group == null)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{groupUuid}\" не найдена",
                     Field = nameof(groupUuid)
                 });
-            }
-
-            if (offset < 0)
-            {
-                offset = 0;
-            }
-
-            if (size <= 0)
-            {
-                size = 50;
             }
 
             IQueryable<Students> baseQuery = _context.Students
@@ -205,7 +240,7 @@ namespace MainService.Controllers
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
             IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -222,13 +257,13 @@ namespace MainService.Controllers
                 });
 
             List<StudentsResponseDto> studentsDtoList = await itemsQuery.ToListAsync();
-            int total = await totalTask;
+            int total = await totalRecord;
 
             if (studentsDtoList.Count == 0)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Студенты не найдены",
                     Message = $"Студенты в группе с UUID \"{groupUuid}\" не найдены",
                     Field = nameof(groupUuid)
@@ -390,7 +425,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Студент не найден",
                     Message = $"Студент с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)

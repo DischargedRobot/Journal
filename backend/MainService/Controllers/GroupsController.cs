@@ -87,7 +87,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -248,7 +248,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Группа не найдена",
                     Message = $"Группа с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)

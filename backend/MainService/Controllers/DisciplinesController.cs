@@ -42,6 +42,27 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
             IQueryable<DisciplinesResponseDto> query = _context.Disciplines
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .Where(d => isArchived == null || d.IsArchived == isArchived.Value)
@@ -61,11 +82,11 @@ namespace MainService.Controllers
                     Version = d.Version
                 });
 
-            Task<int> totalTask = _context.Disciplines.CountAsync();
+            Task<int> totalRecord = _context.Disciplines.CountAsync();
             Task<List<DisciplinesResponseDto>> listTask = query.ToListAsync();
 
             List<DisciplinesResponseDto> disciplinesList = await listTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
@@ -144,7 +165,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплина не найдена",
                     Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -191,12 +212,34 @@ namespace MainService.Controllers
                 });
             }
 
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
             IQueryable<Disciplines> baseQuery = _context.Disciplines
                 .Where(d => d.Groups.Any(g => g.Uuid == uuid))
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .Where(d => isArchived == null || d.IsArchived == isArchived);
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
             Task<List<DisciplinesResponseDto>> listTask = baseQuery
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -216,13 +259,13 @@ namespace MainService.Controllers
                 .ToListAsync();
 
             List<DisciplinesResponseDto> disciplines = await listTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для группы с UUID \"{uuid}\" не найдено ни одной дисциплины",
                     Field = nameof(uuid)
@@ -233,7 +276,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для группы с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
                     Field = nameof(uuid)
@@ -284,12 +327,34 @@ namespace MainService.Controllers
                 });
             }
 
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
             IQueryable<Disciplines> baseQuery = _context.Disciplines
                 .Where(d => d.Professors!.Any(p => p.Uuid == uuid))
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .Where(d => isArchived == null || d.IsArchived == isArchived);
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
             Task<List<DisciplinesResponseDto>> listTask = baseQuery
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -309,13 +374,13 @@ namespace MainService.Controllers
                 .ToListAsync();
 
             List<DisciplinesResponseDto> disciplines = await listTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для преподавателя с UUID \"{uuid}\" не найдено ни одной дисциплины",
                     Field = nameof(uuid)
@@ -326,7 +391,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплины не найдены",
                     Message = $"Для преподавателя с UUID \"{uuid}\" не найдено дисциплин для указанных параметров запроса",
                     Field = nameof(uuid)
@@ -553,7 +618,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Дисциплина не найдена",
                     Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)

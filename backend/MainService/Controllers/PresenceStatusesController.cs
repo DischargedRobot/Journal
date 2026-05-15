@@ -39,11 +39,32 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
             IQueryable<PresenceStatuses> baseQuery = _context.PresenceStatuses
                 .Where(ps => filterName == null || ps.Name.Contains(filterName))
                 .AsNoTracking();
 
-            Task<int> totalTask = baseQuery.CountAsync();
+            Task<int> totalRecord = baseQuery.CountAsync();
 
             List<PresenceStatusesResponseDto> items = await baseQuery
                 .SortByKey(ps => ps.Name, sortOrder)
@@ -51,7 +72,7 @@ namespace MainService.Controllers
                 .Select(ps => new PresenceStatusesResponseDto(ps))
                 .ToListAsync();
 
-            int total = await totalTask;
+            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -116,7 +137,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Статус присутствия не найден",
                     Message = $"Статус присутствия с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)

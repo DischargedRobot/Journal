@@ -54,7 +54,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Сотрудник не найден",
                     Message = $"Сотрудник с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
@@ -162,7 +162,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Сотрудник не найден",
                     Message = $"Сотрудник с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)
@@ -233,7 +233,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Сотрудник не найден",
                     Message = $"Сотрудник с UUID \"{uuid}\" не найден",
                     Field = nameof(uuid)

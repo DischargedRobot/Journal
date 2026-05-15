@@ -41,6 +41,27 @@ namespace MainService
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
 
             IQueryable<DepartmentsResponseDto> query = _context.Departments
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
@@ -56,11 +77,11 @@ namespace MainService
                     Version = d.Version
                 });
 
-            Task<int> totalTask = _context.Departments.CountAsync();
+            Task<int> totalRecord = _context.Departments.CountAsync();
             Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
 
             List<DepartmentsResponseDto> departments = await departmentsTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
@@ -138,7 +159,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Кафедра не найдена",
                     Message = $"Кафедра с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -174,6 +195,28 @@ namespace MainService
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
             if (facultyUuid == Guid.Empty)
             {
                 return BadRequest(new ApiError
@@ -190,7 +233,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Факультет не найден",
                     Message = $"Факультет с UUID \"{facultyUuid}\" не найден",
                     Field = nameof(facultyUuid)
@@ -212,17 +255,17 @@ namespace MainService
                     Version = d.Version
                 });
 
-            Task<int> totalTask = _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
+            Task<int> totalRecord = _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
             Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
 
             List<DepartmentsResponseDto> departments = await departmentsTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Кафедры не найдены",
                     Message = $"В системе не найдено ни одной кафедры для факультета с UUID \"{facultyUuid}\"",
                     Field = nameof(facultyUuid)
@@ -233,7 +276,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Кафедры не найдены",
                     Message = $"В системе не найдено ни одной кафедры для указанного факультета и параметров запроса",
                     Field = nameof(facultyUuid)
@@ -359,7 +402,7 @@ namespace MainService
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Кафедра не найдена",
                     Message = $"Кафедра с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)

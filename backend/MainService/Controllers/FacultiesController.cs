@@ -41,6 +41,27 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
             IQueryable<FacultiesResponseDto> query = _context.Faculties
                 .SortByKey(f => string.IsNullOrWhiteSpace(name) || f.Name.Contains(name), sortOrder)
                 .TakeWithOffset(offset, size)
@@ -53,11 +74,11 @@ namespace MainService.Controllers
                 })
                 .AsNoTracking();
 
-            Task<int> totalTask = _context.Faculties.CountAsync();
+            Task<int> totalRecord = _context.Faculties.CountAsync();
             Task<List<FacultiesResponseDto>> listTask = query.ToListAsync();
 
             List<FacultiesResponseDto> faculties = await listTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
@@ -122,7 +143,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)
@@ -234,7 +255,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)
@@ -311,7 +332,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Факультет не найден",
                     Message = "В системе не найден факультет с указанным UUID",
                     Field = nameof(uuid)

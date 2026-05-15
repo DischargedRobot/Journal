@@ -40,6 +40,28 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.1",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+            
             IQueryable<DisciplinesRegistersResponseDto> query = _context.DisciplinesRegisters
                 .Where(r => string.IsNullOrEmpty(name) || r.Name.Contains(name))
                 .SortByKey(r => r.Name, sortOrder)
@@ -52,11 +74,11 @@ namespace MainService.Controllers
                     Version = r.Version
                 });
 
-            Task<int> totalTask = _context.DisciplinesRegisters.CountAsync();
+            Task<int> totalRecord = _context.DisciplinesRegisters.CountAsync();
             Task<List<DisciplinesRegistersResponseDto>> listTask = query.ToListAsync();
 
             List<DisciplinesRegistersResponseDto> registersList = await listTask;
-            int totalCount = await totalTask;
+            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
@@ -130,7 +152,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -216,7 +238,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
@@ -276,7 +298,7 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.2.3",
                     Title = "Запись реестра дисциплин не найдена",
                     Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
                     Field = nameof(uuid)
