@@ -86,10 +86,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.1.3",
                     Title = "Типы оценок не найдены",
                     Message = "В системе не найдено ни одного типа оценки для указанных параметров запроса",
-                    Field = string.Empty
+                    Field = "BODY"
                 });
             }
 

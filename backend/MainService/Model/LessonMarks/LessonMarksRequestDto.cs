@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace MainService
 {
     public class LessonMarksRequestDto
@@ -10,6 +12,7 @@ namespace MainService
         public int Version { get; set; }
         public LessonMarksRequestDto() { }
 
+        [SetsRequiredMembers]
         public LessonMarksRequestDto(LessonMarks lessonMark)
         {
             Uuid = lessonMark.Uuid;

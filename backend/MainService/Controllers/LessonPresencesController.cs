@@ -107,7 +107,7 @@ namespace MainService.Controllers
                 .Include(lp => lp.Lesson)
                 .Include(lp => lp.Student)
                 .Include(lp => lp.PresenceStatus)
-                .Where(lp => ( lp.Student!.Uuid == studentUuid)
+                .Where(lp => (lp.Student!.Uuid == studentUuid)
                              && (presenceStatusUuid == null || lp.PresenceStatus!.Uuid == presenceStatusUuid)
                              && (isPresent == null || lp.IsPresent == isPresent))
                 .AsNoTracking();
@@ -145,10 +145,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.1.3",
                     Title = "Посещения занятий не найдены",
                     Message = "В системе не найдено ни одного посещения занятия для указанных параметров запроса",
-                    Field = string.Empty
+                    Field = "BODY"
                 });
             }
 

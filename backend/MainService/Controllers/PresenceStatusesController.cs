@@ -89,10 +89,10 @@ namespace MainService.Controllers
             {
                 return NotFound(new ApiError
                 {
-                    StatusCode = "1.0.3",
+                    StatusCode = "1.1.3",
                     Title = "Статусы присутствия не найдены",
                     Message = "В системе не найдено ни одного статуса присутствия для указанных параметров запроса",
-                    Field = string.Empty
+                    Field = "BODY"
                 });
             }
 

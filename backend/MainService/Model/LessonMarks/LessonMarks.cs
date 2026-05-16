@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MainService
 {
-    [PrimaryKey(nameof(LessonMarkId), nameof(MarkId), nameof(StudentId))]
+    [Index(nameof(LessonId), nameof(MarkId), nameof(StudentId), IsUnique = true)]
     public class LessonMarks : BaseEntity
     {
         [Key]
