@@ -74,6 +74,8 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
     options.UseNpgsql(connectionString));
 
 
+// Регистрируем контроллеры и OpenAPI
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
@@ -92,6 +94,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Включаем аутентификацию и авторизацию
+app.UseAuthentication();
 app.MapControllers();
 
 app.Run();
