@@ -9,9 +9,10 @@ namespace AuthService.Models
 
         public Guid Uuid { get; set; } = Guid.NewGuid();
 
-        public required string RoleName { get; set; }
+        public string Name { get; set; } = null!;
 
-        public ICollection<UserRoles>? UserRoles { get; set; }
+        public required string RoleName { get; set; }
+        public ICollection<Users>? Users { get; set; }
         public ICollection<RoleRights>? RoleRights { get; set; }
     }
 }

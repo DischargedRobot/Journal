@@ -1,8 +1,12 @@
 using AuthService;
+using AuthService.Redis;
 
 using Microsoft.EntityFrameworkCore;
 
 using StackExchange.Redis;
+using AuthService.Lib.Utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +36,31 @@ string? redisConnectionString = $"{dbRedisHost}:{dbRedisPort},abortConnect={dbRe
 
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-builder.Services.AddScoped<IRefreshTokenStore, RedisRefreshTokenStore>();
+builder.Services.AddScoped<RedisRefreshTokenBlackList>();
+builder.Services.AddScoped<RedisAccessTokenBlackList>();
 
+string? jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("JWT_KEY environment variable is not set.");
+}
+builder.Services.AddSingleton(new TokenService(jwtKey));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = AuthOptions.ISSUER,
+            ValidateAudience = true,
+            ValidAudiences = AuthOptions.AUDIENCE,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(jwtKey),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 string? dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 string? dbPort = Environment.GetEnvironmentVariable("DB_PORT");
@@ -46,9 +73,16 @@ string? connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Usern
 builder.Services.AddDbContext<AuthServiceContext>(options =>
     options.UseNpgsql(connectionString));
 
+
 builder.Services.AddEndpointsApiExplorer();
 
 WebApplication app = builder.Build();
+
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    AuthServiceContext db = scope.ServiceProvider.GetRequiredService<AuthServiceContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

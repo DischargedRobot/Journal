@@ -12,27 +12,21 @@ namespace AuthService
         public DbSet<Users> Users => Set<Users>();
         public DbSet<Roles> Roles => Set<Roles>();
         public DbSet<RoleRights> RoleRights => Set<RoleRights>();
-        public DbSet<RefreshTokens> RefreshTokens => Set<RefreshTokens>();
-        public DbSet<UserRoles> UserRoles => Set<UserRoles>();
+        public DbSet<Sessions> Sessions => Set<Sessions>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<UserRoles>()
-                .HasKey(ur => new { ur.UserId, ur.RoleId });
+            modelBuilder.Entity<Users>()
+            .HasMany(u => u.Roles)
+            .WithMany(r => r.Users)
+            .UsingEntity<Dictionary<string, object>>(
+                "UserRoles",
+                j => j.HasOne<Roles>().WithMany().HasForeignKey("RoleId"),
+                j => j.HasOne<Users>().WithMany().HasForeignKey("UserId")
+            );
 
-            modelBuilder.Entity<UserRoles>()
-                .HasOne(ur => ur.User)
-                .WithMany(u => u.UserRoles)
-                .HasForeignKey(ur => ur.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<UserRoles>()
-                .HasOne(ur => ur.Role)
-                .WithMany(r => r.UserRoles)
-                .HasForeignKey(ur => ur.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Roles>()
                 .HasMany(r => r.RoleRights)

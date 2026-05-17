@@ -13,5 +13,6 @@ namespace AuthService.Models
 
         public int? RoleId { get; set; }
         public Roles? Role { get; set; }
+
     }
 }
