@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-using System.ComponentModel.DataAnnotations;
-
 namespace MainService
 {
 	public class MainServiceContext : DbContext

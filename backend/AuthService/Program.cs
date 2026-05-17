@@ -1,11 +1,18 @@
-var builder = WebApplication.CreateBuilder(args);
+using AuthService;
+
+using Microsoft.EntityFrameworkCore;
+
+using StackExchange.Redis;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen(options =>
     {
         options.EnableAnnotations();
-        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
         {
             Version = "v1",
             Title = "AuthService API",
@@ -13,10 +20,20 @@ if (builder.Environment.IsDevelopment())
         });
     });
 
-    builder.Services.AddSwaggerExamplesFromAssemblyOf<AuthService.Errors.ApiError409ConflictExample>();
+    // builder.Services.AddSwaggerExamplesFromAssemblyOf<AuthService.Errors.ApiError409ConflictExample>();
 }
 
-DotnetEnv.Env.Load();
+DotNetEnv.Env.Load();
+
+string? dbRedisHost = Environment.GetEnvironmentVariable("DB_REDIS_HOST");
+string? dbRedisPort = Environment.GetEnvironmentVariable("DB_REDIS_PORT");
+string? dbRedisAbortConnect = Environment.GetEnvironmentVariable("DB_REDIS_ABORT_CONNECT");
+string? redisConnectionString = $"{dbRedisHost}:{dbRedisPort},abortConnect={dbRedisAbortConnect}";
+
+ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+builder.Services.AddScoped<IRefreshTokenStore, RedisRefreshTokenStore>();
+
 
 string? dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 string? dbPort = Environment.GetEnvironmentVariable("DB_PORT");
@@ -31,7 +48,7 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {

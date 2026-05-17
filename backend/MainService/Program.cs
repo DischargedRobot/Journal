@@ -7,7 +7,6 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Генерация по шаблону для всех контроллеров 
 // на случай когда нету обязательно параметра в теле запроса
 builder.Services.AddControllers()
@@ -36,20 +35,20 @@ builder.Services.AddEndpointsApiExplorer();
 // Регистрируем генератор Swagger только вне продакшена
 if (builder.Environment.IsDevelopment())
 {
-        builder.Services.AddSwaggerGen(options =>
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.EnableAnnotations();
+        options.ExampleFilters();
+        // Регистрируем наш фильтр после ExampleFilters, чтобы он мог перезаписать
+        // или добавить примеры для ответов, если генераторы примеров тоже их установили.
+        options.OperationFilter<ApiErrorExampleOperationFilter>();
+        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
         {
-            options.EnableAnnotations();
-            options.ExampleFilters();
-            // Регистрируем наш фильтр после ExampleFilters, чтобы он мог перезаписать
-            // или добавить примеры для ответов, если генераторы примеров тоже их установили.
-            options.OperationFilter<ApiErrorExampleOperationFilter>();
-            options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-            {
-                Version = "v1",
-                Title = "MainService API",
-                Description = "API для управления журналом успеваемости студентов"
-            });
+            Version = "v1",
+            Title = "MainService API",
+            Description = "API для управления журналом успеваемости студентов"
         });
+    });
     builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
 }
 
