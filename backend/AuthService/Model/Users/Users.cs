@@ -13,7 +13,8 @@ namespace AuthService.Model
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Patronymic { get; set; }
-        public uint TokenVersion { get; set; } = 0;
+        [Range(0, int.MaxValue)]
+        public int TokenVersion { get; set; } = 0;
         public ICollection<Sessions>? Sessions { get; set; }
         public ICollection<Roles>? Roles { get; set; }
     }
