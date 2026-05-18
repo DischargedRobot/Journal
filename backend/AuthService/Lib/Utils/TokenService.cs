@@ -20,6 +20,7 @@ namespace AuthService.Lib.Utils
                 { "aud", AuthOptions.AUDIENCE },
                 { "sub", userUUID.ToString() },
                 { "roles", roles },
+                { "jti", Guid.NewGuid().ToString() },
                 { "exp", DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds() }
             };
             JwtSecurityToken token = new(header, payload);
@@ -35,6 +36,7 @@ namespace AuthService.Lib.Utils
                 { "iss", AuthOptions.ISSUER },
                 { "aud", AuthOptions.AUDIENCE },
                 { "sub", userUUID.ToString() },
+                { "jti", Guid.NewGuid().ToString() },
                 { "exp", DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds() }
             };
             JwtSecurityToken token = new(header, payload);
