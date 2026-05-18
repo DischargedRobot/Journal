@@ -1,4 +1,4 @@
-using AuthService.Models;
+using AuthService.Model;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -41,10 +41,10 @@ namespace AuthService
 
         private void IncrementVersions()
         {
-            foreach (var entry in ChangeTracker.Entries<AuthService.Models.BaseEntity>()
+            foreach (var entry in ChangeTracker.Entries<AuthService.Model.BaseEntity>()
                 .Where(e => e.State == EntityState.Added ||
                     (e.State == EntityState.Modified &&
-                     e.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(AuthService.Models.BaseEntity.Version)))))
+                     e.Properties.Any(p => p.IsModified && p.Metadata.Name != nameof(AuthService.Model.BaseEntity.Version)))))
             {
                 entry.Entity.Version++;
             }

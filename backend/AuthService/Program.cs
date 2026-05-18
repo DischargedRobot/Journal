@@ -7,6 +7,7 @@ using StackExchange.Redis;
 using AuthService.Lib.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Filters;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -14,15 +15,17 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSwaggerGen(options =>
-    {
-        options.EnableAnnotations();
-        options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo
         {
-            Version = "v1",
-            Title = "AuthService API",
-            Description = "API для управления аутентификацией и авторизацией пользователей"
+            options.EnableAnnotations();
+            options.ExampleFilters();
+            options.OperationFilter<AuthService.Errors.ApiErrorExampleOperationFilter>();
+            options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+            {
+                Version = "v1",
+                Title = "AuthService API",
+                Description = "API для управления аутентификацией и авторизацией пользователей"
+            });
         });
-    });
 
     // builder.Services.AddSwaggerExamplesFromAssemblyOf<AuthService.Errors.ApiError409ConflictExample>();
 }

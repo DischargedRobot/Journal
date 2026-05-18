@@ -3,7 +3,7 @@ using Microsoft.OpenApi.Models;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace MainService.Errors
+namespace AuthService.Errors
 {
     public class ApiErrorExampleOperationFilter : IOperationFilter
     {
@@ -37,6 +37,7 @@ namespace MainService.Errors
                 }
 
                 ApiError err = attr.Error;
+
                 OpenApiObject openApiObj = new()
                 {
                     [nameof(err.StatusCode)] = new OpenApiString(err.StatusCode),
