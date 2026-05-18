@@ -8,6 +8,7 @@ using AuthService.Lib.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
+using AuthService.Errors;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ if (builder.Environment.IsDevelopment())
         {
             options.EnableAnnotations();
             options.ExampleFilters();
-            options.OperationFilter<AuthService.Errors.ApiErrorExampleOperationFilter>();
+            options.OperationFilter<ApiErrorExampleOperationFilter>();
             options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
             {
                 Version = "v1",
@@ -27,7 +28,7 @@ if (builder.Environment.IsDevelopment())
             });
         });
 
-    // builder.Services.AddSwaggerExamplesFromAssemblyOf<AuthService.Errors.ApiError409ConflictExample>();
+    builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
 }
 
 DotNetEnv.Env.Load();
