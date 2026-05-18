@@ -112,9 +112,10 @@ namespace AuthService.Controller
 
 			return Ok(result);
 		}
+		
 
 		[HttpPost]
-		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(object))]
+		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(UsersResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: логин занят", typeof(ApiError))]
 		[ApiErrorExample(
@@ -139,7 +140,9 @@ namespace AuthService.Controller
 			"Login"
 		)]
 		[SwaggerOperation(Summary = "Создать нового пользователя")]
-		public async Task<IActionResult> CreateUser([FromBody] UsersCreateDto createDto)
+		public async Task<ActionResult<UsersResponseDto>> CreateUser(
+			[FromBody] UsersCreateDto createDto
+			)
 		{
 			if (createDto == null)
 			{
@@ -223,7 +226,34 @@ namespace AuthService.Controller
 				Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic)
 					? null
 					: createDto.Patronymic.Trim(),
+				TokenVersion = 0,
+				Roles = new List<Roles>()
 			};
+
+			if (createDto.RolesUuid != null)
+			{
+				Guid[] roleUuids = createDto.RolesUuid.Distinct().ToArray();
+				List<Roles> foundRoles = await _context.Roles
+					.Where(r => roleUuids.Contains(r.Uuid))
+					.ToListAsync();
+
+				if (foundRoles.Count != roleUuids.Length)
+				{
+					Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.3",
+							Title = "Неверный запрос",
+							Message = "Одна или несколько ролей не найдены",
+							Field = nameof(createDto.RolesUuid),
+							Details = string.Join(", ", missing),
+						}
+					);
+				}
+
+				user.Roles = foundRoles;
+			}
 
 			_context.Users.Add(user);
 			await _context.SaveChangesAsync();
@@ -231,21 +261,13 @@ namespace AuthService.Controller
 			return CreatedAtAction(
 				nameof(GetUser),
 				new { uuid = user.Uuid },
-				new
-				{
-					user.Uuid,
-					user.Login,
-					user.Email,
-					user.FirstName,
-					user.LastName,
-					user.Patronymic,
-					user.TokenVersion,
-				}
+				new UsersResponseDto(user)
 			);
 		}
 
+
 		[HttpGet("{uuid}")]
-		[SwaggerResponse(StatusCodes.Status200OK, "Пользователь найден", typeof(object))]
+		[SwaggerResponse(StatusCodes.Status200OK, "Пользователь найден", typeof(UsersResponseDto))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Пользователь не найден", typeof(ApiError))]
 		[ApiErrorExample(
 			StatusCodes.Status404NotFound,
@@ -255,21 +277,21 @@ namespace AuthService.Controller
 			nameof(uuid)
 		)]
 		[SwaggerOperation(Summary = "Получить пользователя по UUID")]
-		public async Task<IActionResult> GetUser(Guid uuid)
+		public async Task<ActionResult<UsersResponseDto>> GetUser(Guid uuid)
 		{
-			var user = await _context
-				.Users.Include(u => u.Roles)
+			UsersResponseDto? user = await _context.Users
+				.Include(u => u.Roles)
 				.Where(u => u.Uuid == uuid)
-				.Select(u => new
+				.Select(u => new UsersResponseDto
 				{
-					u.Uuid,
-					u.Login,
-					u.Email,
-					u.FirstName,
-					u.LastName,
-					u.Patronymic,
-					u.TokenVersion,
-					Roles = u.Roles != null ? u.Roles.Select(r => new { r.Uuid, r.Name }) : null,
+					Uuid = u.Uuid,
+					Login = u.Login,
+					Email = u.Email,
+					FirstName = u.FirstName,
+					LastName = u.LastName,
+					Patronymic = u.Patronymic,
+					TokenVersion = u.TokenVersion,
+					RolesUuid = u.Roles != null ? u.Roles.Select(r => r.Uuid).ToArray() : null,
 				})
 				.FirstOrDefaultAsync();
 
@@ -288,6 +310,7 @@ namespace AuthService.Controller
 
 			return Ok(user);
 		}
+
 
 		[HttpDelete("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status204NoContent, "Пользователь удалён")]
@@ -313,6 +336,7 @@ namespace AuthService.Controller
 
 			return NoContent();
 		}
+
 
 		[HttpPatch("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status200OK, "Пользователь обновлён", typeof(object))]
@@ -395,6 +419,32 @@ namespace AuthService.Controller
 				}
 			}
 
+			if (request.FirstName != null && request.FirstName == string.Empty)
+			{
+				return BadRequest(
+					new ApiError
+					{
+						StatusCode = "0.2.0",
+						Title = "Неверный запрос",
+						Message = $"{nameof(UsersUpdateDto.FirstName)} не может быть пустым",
+						Field = nameof(UsersUpdateDto.FirstName),
+					}
+				);
+			}
+
+			if (request.LastName != null && request.LastName == string.Empty)
+			{
+				return BadRequest(
+					new ApiError
+					{
+						StatusCode = "0.2.0",
+						Title = "Неверный запрос",
+						Message = $"{nameof(UsersUpdateDto.LastName)} не может быть пустым",
+						Field = nameof(UsersUpdateDto.LastName),
+					}
+				);
+			}
+
 			if (request.Email != null)
 			{
 				user.Email = request.Email;
@@ -410,6 +460,31 @@ namespace AuthService.Controller
 			if (request.Patronymic != null)
 			{
 				user.Patronymic = request.Patronymic;
+			}
+
+			if (request.RolesUuid != null)
+			{
+				Guid[] roleUuids = request.RolesUuid.Distinct().ToArray();
+				List<Roles> foundRoles = await _context.Roles
+					.Where(r => roleUuids.Contains(r.Uuid))
+					.ToListAsync();
+
+				if (foundRoles.Count != roleUuids.Length)
+				{
+					Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.3",
+							Title = "Неверный запрос",
+							Message = "Одна или несколько ролей не найдены",
+							Field = nameof(request.RolesUuid),
+							Details = string.Join(", ", missing),
+						}
+					);
+				}
+
+				user.Roles = foundRoles;
 			}
 
 			await _context.SaveChangesAsync();

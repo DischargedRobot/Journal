@@ -51,7 +51,7 @@ namespace AuthService.Errors
                     openApiObj[nameof(err.Details)] = new OpenApiString(err.Details);
                 }
 
-                if (attrs.Length > 1)
+                if (attrs.Count(a => a.HttpStatus == attr.HttpStatus) > 1)
                 {
                     mediaType.Examples ??= new Dictionary<string, OpenApiExample>();
                     string exampleKey = $"{attr.StatusCode} - {attr.Field}";

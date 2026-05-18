@@ -22,6 +22,10 @@ namespace AuthService.Controller
 		[HttpGet]
 		[SwaggerResponse(StatusCodes.Status200OK, "Роли найдены", typeof(PagedResult<RolesResponseDto>))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр offset не может быть отрицательным", nameof(offset))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр size не может быть отрицательным", nameof(size))]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.0.3", "Роли не найдены", "В системе не найдено ни одной роли", "")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.1.3", "Роли не найдены", "В системе не найдено ни одной роли для указанных параметров запроса", "BODY")]
 		[SwaggerOperation(Summary = "Получить список ролей")]
 		public async Task<ActionResult<PagedResult<RolesResponseDto>>> GetRoles(
 			[FromQuery, SwaggerParameter("Количество записей")]
@@ -121,6 +125,7 @@ namespace AuthService.Controller
 		[HttpGet("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status200OK, "Роль найдена", typeof(object))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		[SwaggerOperation(Summary = "Получить роль по UUID")]
 		public async Task<IActionResult> GetRole(Guid uuid)
 		{
@@ -155,30 +160,34 @@ namespace AuthService.Controller
 		[HttpPost]
 		[SwaggerResponse(StatusCodes.Status201Created, "Роль создана", typeof(object))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
-		[SwaggerResponse(
-			StatusCodes.Status409Conflict,
-			"Конфликт: роль уже существует",
-			typeof(ApiError)
-		)]
+		[SwaggerResponse(StatusCodes.Status409Conflict,"Роль уже существует",typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name и RoleName обязательны", "Name, RoleName")]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.1.1", "Конфликт", "Роль с таким RoleName уже существует", nameof(RolesCreateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Создать новую роль")]
 		public async Task<IActionResult> CreateRole([FromBody] RolesCreateDto createDto)
 		{
 			if (createDto == null)
+			{
 				return BadRequest(
-					new ApiError("0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")
+					new ApiError(
+					"0.2.1", 
+					"Неверный запрос",
+					"Неверный формат данных", 
+					"BODY")
 				);
-			if (
-				string.IsNullOrWhiteSpace(createDto.Name)
-				|| string.IsNullOrWhiteSpace(createDto.RoleName)
-			)
+			}
+
+			if (string.IsNullOrWhiteSpace(createDto.Name)
+				|| string.IsNullOrWhiteSpace(createDto.RoleName))
 			{
 				return BadRequest(
 					new ApiError(
 						"0.2.0",
 						"Неверный запрос",
 						"Name и RoleName обязательны",
-						"Name, RoleName"
-					)
+						"Name, RoleName")
 				);
 			}
 
@@ -207,15 +216,17 @@ namespace AuthService.Controller
 
 			if (createDto.RightsUuids != null)
 			{
-				// Явный список запрошенных UUID прав
-				List<Guid> requested = createDto.RightsUuids.Distinct().ToList();
+				// Список запрошенных UUID прав
+				List<Guid> requested = createDto.RightsUuids
+					.Distinct()
+					.ToList();
 
 				// Загружаем объекты прав по UUID
-				List<RoleRights> rights = await _context
-					.RoleRights.Where(rr => requested.Contains(rr.Uuid))
+				List<RoleRights> rights = await _context.RoleRights
+					.Where(rr => requested.Contains(rr.Uuid))
 					.ToListAsync();
 
-				// Вычисляем UUID прав, которых не хватило в БД
+				// Вычисляем UUID прав, которых нету в БД
 				List<Guid> missing = requested.Except(rights.Select(r => r.Uuid)).ToList();
 				if (missing.Count > 0)
 				{
@@ -228,19 +239,6 @@ namespace AuthService.Controller
 							Field = nameof(createDto.RightsUuids),
 							Details = string.Join(", ", missing),
 						}
-					);
-				}
-
-				// Проверяем, не привязаны ли права уже к другой роли
-				if (rights.Any(rr => rr.RoleId != null))
-				{
-					return Conflict(
-						new ApiError(
-							"1.2.1",
-							"Конфликт",
-							"Одна или несколько прав уже привязаны к другой роли",
-							nameof(createDto.RightsUuids)
-						)
 					);
 				}
 
@@ -268,17 +266,23 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status200OK, "Роль обновлена", typeof(object))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
-		[SwaggerResponse(
-			StatusCodes.Status409Conflict,
-			"Конфликт: имя роли уже используется",
-			typeof(ApiError)
-		)]
+		[SwaggerResponse(StatusCodes.Status409Conflict, "Имя роли уже используется", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "RoleName уже используется", nameof(RolesUpdateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesUpdateDto.RightsUuids))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Одна или несколько прав уже привязаны к другой роли", nameof(RolesUpdateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Частично обновить роль по UUID")]
 		public async Task<IActionResult> UpdateRole(Guid uuid, [FromBody] RolesUpdateDto? request)
 		{
 			if (request == null)
 				return BadRequest(
-					new ApiError("0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")
+					new ApiError(
+						"0.2.1",
+						"Неверный запрос",
+						"Неверный формат данных",
+						"BODY"
+					)
 				);
 
 			Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Uuid == uuid);
@@ -389,11 +393,13 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status200OK, "Роль заменена", typeof(object))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
-		[SwaggerResponse(
-			StatusCodes.Status409Conflict,
-			"Конфликт: имя роли уже используется",
-			typeof(ApiError)
-		)]
+		[SwaggerResponse(StatusCodes.Status409Conflict,"Конфликт: имя роли уже используется",typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Name и RoleName обязательны", "Name, RoleName")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "RoleName уже используется", nameof(RolesCreateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Одна или несколько прав уже привязаны к другой роли", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Полная замена роли по UUID")]
 		public async Task<IActionResult> ReplaceRole(
 			Guid uuid,
@@ -520,6 +526,7 @@ namespace AuthService.Controller
 		[HttpDelete("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status204NoContent, "Роль удалена")]
 		[SwaggerOperation(Summary = "Удалить роль по UUID")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		public async Task<IActionResult> DeleteRole(Guid uuid)
 		{
 			Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Uuid == uuid);

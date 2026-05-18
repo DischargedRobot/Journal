@@ -12,6 +12,8 @@ namespace AuthService.Model
         public string? Patronymic { get; set; }
         public int TokenVersion { get; set; }
 
+        public Guid[]? RolesUuid { get; set; }
+
         public UsersResponseDto() { }
 
         [SetsRequiredMembers]
@@ -24,6 +26,7 @@ namespace AuthService.Model
             LastName = user.LastName;
             Patronymic = user.Patronymic;
             TokenVersion = (int)user.TokenVersion;
+            RolesUuid = user.Roles?.Select(r => r.Uuid).ToArray();
         }
     }
 }

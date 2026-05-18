@@ -8,6 +8,6 @@ namespace AuthService.Model
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string? Patronymic { get; set; }
-        public string? RoleName { get; set; }
+        public Guid[]? RolesUuid { get; set; }
     }
 }
