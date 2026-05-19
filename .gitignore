@@ -9,7 +9,7 @@
 *.suo
 *.userosscache
 *.sln.docstates
-
+copilot-instructions*
 # IDE folders
 .vs/
 .vscode/

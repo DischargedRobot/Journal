@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 using StackExchange.Redis;
 using AuthService.Lib.Utils;
+using AuthService.Lib;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
@@ -81,6 +82,11 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
 // Регистрируем контроллеры и OpenAPI
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Регистрируем источник активности для OpenTelemetry(пока это всё через логи)
+// TODO: добавить OpenTelemetry и экспортировать трейсинги в Jaeger, Zipkin или другой бэкенд для трейсинга
+string serviceName = Environment.GetEnvironmentVariable("AUTHSERVICE_NAME") ?? "auth-service";
+builder.Services.AddSingleton(Tracing.ActivitySource(serviceName));
 
 WebApplication app = builder.Build();
 

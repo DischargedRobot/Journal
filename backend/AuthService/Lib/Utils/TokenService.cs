@@ -10,7 +10,7 @@ namespace AuthService.Lib.Utils
         private string _secutiryKey;
         public TokenService(string secutiryKey) => _secutiryKey = secutiryKey;
 
-        public string GenerateAccessToken(Guid userUUID, IEnumerable<string> roles)
+        public string GenerateAccessToken(Guid tokenUuid, Guid userUUID, IEnumerable<string> roles)
         {
             SymmetricSecurityKey key = AuthOptions.GetSymmetricSecurityKey(_secutiryKey);
             JwtHeader header = new(new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
@@ -20,7 +20,7 @@ namespace AuthService.Lib.Utils
                 { "aud", AuthOptions.AUDIENCE },
                 { "sub", userUUID.ToString() },
                 { "roles", roles },
-                { "jti", Guid.NewGuid().ToString() },
+                { "jti", tokenUuid.ToString() },
                 { "exp", DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds() }
             };
             JwtSecurityToken token = new(header, payload);
@@ -43,12 +43,48 @@ namespace AuthService.Lib.Utils
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public bool ValidateToken(string token, out Guid tokenUuid, out Guid userUUID, out IEnumerable<string> roles)
+        {
+            userUUID = Guid.Empty;
+            roles = [];
+            tokenUuid = Guid.Empty;
+
+            JwtSecurityTokenHandler tokenHandler = new();
+            try
+            {
+                tokenHandler.ValidateToken(token, 
+                new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = AuthOptions.ISSUER,
+                    ValidateAudience = true,
+                    ValidAudiences = AuthOptions.AUDIENCE, // проверяем все элементы массива
+                    ValidateLifetime = true,
+                    IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(_secutiryKey),
+                    ValidateIssuerSigningKey = true,
+                }, 
+                out SecurityToken validatedToken);
+
+                JwtSecurityToken jwtToken = (JwtSecurityToken)validatedToken;
+                tokenUuid = Guid.Parse(jwtToken.Claims.First(c => c.Type == "jti").Value);
+                userUUID = Guid.Parse(jwtToken.Claims.First(c => c.Type == "sub").Value);
+                // т.к. JwtSecurityToken при создании токена сериализует массив ролей в виде нескольких клеймов с одинаковым типом "roles", 
+                // то для получения всех ролей нужно выбрать все клеймы с типом "roles" и взять их значения
+                roles = jwtToken.Claims.Where(c => c.Type == "roles").Select(c => c.Value);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 
     public static class AuthOptions
     {
-        public static readonly string[] AUDIENCE = ["AuthServer", "MainService"]; // потребитель токена
-        public static readonly string ISSUER = "AuthServer"; // издатель токена
+        public static readonly string[] AUDIENCE = ["auth-service", "main-service"]; // потребитель токена
+        public static readonly string ISSUER = "auth-service"; // издатель токена
         public static SymmetricSecurityKey GetSymmetricSecurityKey(string securityKey)
         {
             return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));

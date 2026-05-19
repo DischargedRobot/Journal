@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using AuthService.Model;
 using System.IdentityModel.Tokens.Jwt;
 using AuthService.Errors;
+using Microsoft.IdentityModel.Tokens;
+using System.Diagnostics;
 
 namespace AuthService.Controller
 {
@@ -17,13 +19,20 @@ namespace AuthService.Controller
         private readonly RedisRefreshTokenBlackList _refreshTokenBlackList;
         private readonly RedisAccessTokenBlackList _accessTokenBlackList;
         private readonly TokenService _tokenService;
+        private readonly ActivitySource _activitySource;
 
-        public AuthController(AuthServiceContext context, RedisRefreshTokenBlackList refreshTokenBlackList, RedisAccessTokenBlackList accessTokenBlackList, TokenService tokenService)
+        public AuthController(
+            AuthServiceContext context,
+            RedisRefreshTokenBlackList refreshTokenBlackList,
+            RedisAccessTokenBlackList accessTokenBlackList,
+            TokenService tokenService,
+            ActivitySource activitySource)
         {
             _context = context;
             _refreshTokenBlackList = refreshTokenBlackList;
             _accessTokenBlackList = accessTokenBlackList;
             _tokenService = tokenService;
+            _activitySource = activitySource;
         }
 
         [HttpPost("log-in")]
@@ -55,7 +64,9 @@ namespace AuthService.Controller
                 });
             }
 
+            Guid tokenUuid = Guid.NewGuid();
             string accessToken = _tokenService.GenerateAccessToken(
+                tokenUuid,
                 user.Uuid,
                 user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
             );
@@ -77,6 +88,8 @@ namespace AuthService.Controller
         [HttpPost("log-out")]
         public async Task<IActionResult> Logout()
         {
+            using Activity? activity = _activitySource?.StartActivity("auth-service.Logout", ActivityKind.Server);
+
             string? authHeader = Request.Headers["Authorization"]
                 .FirstOrDefault();
             if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -143,5 +156,98 @@ namespace AuthService.Controller
 
             return NoContent();
         }
+
+        [HttpPost("check-authtoken")]
+        public async Task<IActionResult> CheckAuthtoken()
+        {
+
+            // Устанавливаем имя сервиса и функции в заголовки сразу после старта activity
+            string serviceName = _activitySource?.Name
+                ?? "auth-service";
+
+            string functionName = ControllerContext.ActionDescriptor.ActionName;
+            using Activity? activity = _activitySource?.StartActivity($"{serviceName}.{functionName}", ActivityKind.Server);
+
+            string? authHeader = Request.Headers.Authorization.FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(authHeader))
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "2.4.0",
+                    Title = "Неверный запрос",
+                    Message = "Заголовок Authorization не может быть пустым",
+                    Field = "Authorization"
+                });
+            }
+            if (!authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "2.4.2",
+                    Title = "Неверный запрос",
+                    Message = "Заголовок Authorization должен быть в формате 'Bearer {token}'",
+                    Field = "Authorization"
+                });
+            }
+
+            string token = authHeader.Substring("Bearer ".Length).Trim();
+            try
+            {
+
+                // Получаем имя операции (operation name)
+                string? operationName = activity?.OperationName ?? activity?.DisplayName ?? Activity.Current?.OperationName;
+
+                _tokenService.ValidateToken(token, out Guid tokenUuid, out Guid userUUID, out IEnumerable<string> roles);
+                if (await _accessTokenBlackList.GetAsync(tokenUuid) != null)
+                {
+                    return Unauthorized(new ApiError
+                    {
+                        StatusCode = "2.2.1",
+                        Title = "Недействительный токен",
+                        Message = "Токен был отозван",
+                        Field = "blacklist"
+                    });
+                }
+
+                if (Request.Headers.TryGetValue("traceparent", out Microsoft.Extensions.Primitives.StringValues tp))
+                {
+                    Response.Headers.TraceParent = tp;
+                }
+                else if (Activity.Current != null)
+                {
+                    Response.Headers.TraceParent = Activity.Current.Id;
+                }
+
+                string traceId = Activity.Current?.TraceId.ToString() ?? string.Empty;
+                if (!string.IsNullOrEmpty(traceId))
+                {
+                    Response.Headers["X-Trace-Id"] = traceId;
+                }
+                return Ok(new { valid = true });
+            }
+            catch (SecurityTokenException ex)
+            {
+                return Unauthorized(new ApiError
+                {
+                    StatusCode = "2.2.2",
+                    Title = "Недействительный токен",
+                    Message = ex.Message,
+                    Field = "exp"
+                });
+            }
+        }
+
+        // [HttpPost("register")]
+        // public async Task<IActionResult> Register()
+        // {
+        //     // Implementation for user registration
+        // }
+
+        // [HttpPost("refresh")]
+        // public async Task<IActionResult> Refresh()
+        // {
+        //     // Implementation for token refresh
+        // }
     }
 }
