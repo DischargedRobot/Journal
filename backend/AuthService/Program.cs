@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
 using AuthService.Errors;
+using Serilog;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
 
 if (builder.Environment.IsDevelopment())
 {
@@ -33,6 +33,20 @@ if (builder.Environment.IsDevelopment())
 }
 
 DotNetEnv.Env.Load();
+
+string env = builder.Environment.EnvironmentName;
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext() // для контектсных свойств
+    .Enrich.WithProperty("Environment", env)
+    .Enrich.With(new SerilogActivityEnricher()) // для добавления TraceId и SpanId из текущей активности в логи
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "Logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 string? dbRedisHost = Environment.GetEnvironmentVariable("DB_REDIS_HOST");
 string? dbRedisPort = Environment.GetEnvironmentVariable("DB_REDIS_PORT");
@@ -108,4 +122,17 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("Starting web host");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
