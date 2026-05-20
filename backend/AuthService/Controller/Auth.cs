@@ -9,6 +9,7 @@ using AuthService.Errors;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using Serilog.Context;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace AuthService.Controller
 {
@@ -41,12 +42,17 @@ namespace AuthService.Controller
         }
 
         [HttpPost("log-in")]
-        public IActionResult Login([FromForm] LoginRequest? request)
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "1.2.3", "Неавторизован", "Пользователь с таким логином не найден или неверный пароль", "Login/Password")]
+        public IActionResult Login([FromBody] LoginRequest? request)
         {
             try
             {
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
+
                 if (request == null || string.IsNullOrWhiteSpace(request.Login) || string.IsNullOrWhiteSpace(request.Password))
                 {
+                    _logger.LogWarning("Вход: неверные данные запроса при попытке входа. Login={Login}", request?.Login);
                     return BadRequest(new ApiError
                     {
                         StatusCode = "0.2.0",
@@ -62,6 +68,7 @@ namespace AuthService.Controller
 
                 if (user == null || !HashingPassword.VerifyPassword(request.Password, user.PasswordHash))
                 {
+                    _logger.LogWarning("Вход: неудачная попытка входа для логина {Login}", request.Login);
                     return Unauthorized(new ApiError
                     {
                         StatusCode = "1.2.3",
@@ -93,7 +100,7 @@ namespace AuthService.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Login: unexpected error");
+                _logger.LogError(ex, "Вход: непредвиденная ошибка");
                 return StatusCode(500, new ApiError
                 {
                     StatusCode = "1.0.0",
@@ -108,7 +115,7 @@ namespace AuthService.Controller
         {
             try
             {
-                using Activity? activity = _activitySource?.StartActivity("auth-service.Logout", ActivityKind.Server);
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
 
                 string? authHeader = Request.Headers["Authorization"]
                     .FirstOrDefault();
@@ -136,7 +143,7 @@ namespace AuthService.Controller
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Logout: error processing access token");
+                        _logger.LogError(ex, "Выход: ошибка обработки access-токена");
                     }
                 }
 
@@ -163,7 +170,7 @@ namespace AuthService.Controller
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Logout: error processing refresh token");
+                        _logger.LogError(ex, "Выход: ошибка обработки refresh-токена");
                     }
 
                     Response.Cookies.Append("refreshToken", string.Empty, new CookieOptions
@@ -180,7 +187,7 @@ namespace AuthService.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Logout: unexpected error");
+                _logger.LogError(ex, "Выход: непредвиденная ошибка");
                 return StatusCode(500, new ApiError
                 {
                     StatusCode = "1.0.0",
@@ -191,22 +198,20 @@ namespace AuthService.Controller
         }
 
         [HttpPost("check-authtoken")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "2.4.0", "Неверный запрос", "Заголовок Authorization не может быть пустым", "Authorization")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "2.4.2", "Неверный запрос", "Заголовок Authorization должен быть в формате 'Bearer {token}'", "Authorization")]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.2", "Недействительный токен", "Токен не прошёл проверку", "exp")]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.1", "Недействительный токен", "Токен был отозван", "blacklist")]
         public async Task<IActionResult> CheckAuthtoken()
         {
             try
             {
-
-                // Устанавливаем имя сервиса и функции в заголовки сразу после старта activity
-                string serviceName = _activitySource?.Name
-                    ?? "auth-service";
-
-                string functionName = ControllerContext.ActionDescriptor.ActionName;
-                using Activity? activity = _activitySource?.StartActivity($"{serviceName}.{functionName}", ActivityKind.Server);
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
 
                 string? authHeader = Request.Headers.Authorization.FirstOrDefault();
-
                 if (string.IsNullOrWhiteSpace(authHeader))
                 {
+                    _logger.LogWarning("Проверка токена: пустой заголовок Authorization");
                     return BadRequest(new ApiError
                     {
                         StatusCode = "2.4.0",
@@ -217,6 +222,7 @@ namespace AuthService.Controller
                 }
                 if (!authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
+                    _logger.LogWarning("Проверка токена: неверный формат заголовка Authorization");
                     return BadRequest(new ApiError
                     {
                         StatusCode = "2.4.2",
@@ -249,11 +255,6 @@ namespace AuthService.Controller
 
                     //  traceparent в контекст логирования, 
                     // чтобы Enrich.FromLogContext() включил их в {Properties}
-                    _logger.LogInformation(
-                        "CheckAuthtoken start {Operation} {Path}",
-                        functionName,
-                        Request.Path);
-
                     _tokenService.ValidateToken(token, out Guid tokenUuid, out Guid userUUID, out IEnumerable<string> roles);
                     if (await _accessTokenBlackList.GetAsync(tokenUuid) != null)
                     {
@@ -279,7 +280,7 @@ namespace AuthService.Controller
                 }
                 catch (SecurityTokenException ex)
                 {
-                    _logger.LogWarning(ex, "CheckAuthtoken: token validation failed");
+                    _logger.LogWarning(ex, "Проверка токена: ошибка валидации токена");
                     return Unauthorized(new ApiError
                     {
                         StatusCode = "2.2.2",
@@ -291,7 +292,212 @@ namespace AuthService.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "CheckAuthtoken: unexpected error");
+                _logger.LogError(ex, "Проверка токена: непредвиденная ошибка");
+                return StatusCode(500, new ApiError
+                {
+                    StatusCode = "1.0.0",
+                    Title = "Внутренняя ошибка сервера",
+                    Message = "Произошла ошибка на сервере"
+                });
+            }
+        }
+
+        [HttpPost("register")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: логин занят", typeof(ApiError))]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
+        [ApiErrorExample(StatusCodes.Status409Conflict, "1.1.1", "Конфликт", "Пользователь с таким логином уже существует", "Login")]
+        [SwaggerOperation(Summary = "Регистрация нового пользователя")]
+        public async Task<IActionResult> Register([FromBody] UsersCreateDto? request)
+        {
+            try
+            {
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
+
+                _logger.LogInformation("Регистрация: попытка для логина {Login}", request?.Login);
+                if (request == null)
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = "Неверный формат данных",
+                        Field = "BODY"
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Login) || string.IsNullOrWhiteSpace(request.Password))
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.0",
+                        Title = "Неверный запрос",
+                        Message = "Логин или пароль не могут быть пустыми",
+                        Field = "Login/Password"
+                    });
+                }
+                if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
+                {
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = "FirstName и LastName обязательны",
+                        Field = "FirstName, LastName"
+                    });
+                }
+                bool exists = await _context.Users.AnyAsync(u => u.Login == request.Login);
+                if (exists)
+                {
+                    _logger.LogWarning("Регистрация: логин уже существует {Login}", request.Login);
+                    return Conflict(new ApiError
+                    {
+                        StatusCode = "1.1.1",
+                        Title = "Конфликт",
+                        Message = "Пользователь с таким логином уже существует",
+                        Field = "Login"
+                    });
+                }
+
+                Users user = new()
+                {
+                    Uuid = Guid.NewGuid(),
+                    Login = request.Login.Trim(),
+                    PasswordHash = HashingPassword.ComputeHash(request.Password, string.Empty),
+                    Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
+                    FirstName = request.FirstName.Trim(),
+                    LastName = request.LastName.Trim(),
+                    Patronymic = string.IsNullOrWhiteSpace(request.Patronymic) ? null : request.Patronymic.Trim(),
+                    TokenVersion = 0,
+                    Roles = new List<Roles>()
+                };
+
+                if (request.RolesUuid != null)
+                {
+                    Guid[] roleUuids = request.RolesUuid.Distinct().ToArray();
+                    List<Roles> foundRoles = await _context.Roles.Where(r => roleUuids.Contains(r.Uuid)).ToListAsync();
+                    if (foundRoles.Count != roleUuids.Length)
+                    {
+                        Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
+                        _logger.LogWarning(
+                            "Регистрация: указаны несуществующие роли {Missing}",
+                            string.Join(",", missing)
+                        );
+                        return BadRequest(new ApiError
+                        {
+                            StatusCode = "0.2.3",
+                            Title = "Неверный запрос",
+                            Message = "Одна или несколько ролей не найдены",
+                            Field = nameof(request.RolesUuid),
+                            Details = string.Join(", ", missing)
+                        });
+                    }
+                    user.Roles = foundRoles;
+                }
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                // Выдаём токены сразу после регистрации
+                Guid tokenUuid = Guid.NewGuid();
+                string accessToken = _tokenService.GenerateAccessToken(tokenUuid, user.Uuid, user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>());
+                string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
+                Response.Headers.Append("Authorization", $"Bearer {accessToken}");
+                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Path = "/api/auth-service/v1/auth/refresh" });
+
+                _logger.LogInformation("Регистрация: пользователь создан {UserUuid}", user.Uuid);
+                return Created(string.Empty, new { accessToken });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Регистрация: непредвиденная ошибка");
+                return StatusCode(500, new ApiError
+                {
+                    StatusCode = "1.0.0",
+                    Title = "Внутренняя ошибка сервера",
+                    Message = "Произошла ошибка на сервере"
+                });
+            }
+        }
+
+        [HttpPost("refresh")]
+        [SwaggerOperation(Summary = "Обновить access token по refresh token")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Новый access token выдан")]
+        [SwaggerResponse(StatusCodes.Status401Unauthorized, "Недействительный refresh token", typeof(ApiError))]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "2.4.0", "Недействительный запрос", "Refresh token не предоставлен", "refreshToken")]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.2", "Недействительный токен", "Refresh token не прошёл проверку", "refreshToken")]
+        [ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.1", "Недействительный токен", "Refresh token был отозван", "blacklist")]
+        public async Task<IActionResult> Refresh()
+        {
+            try
+            {
+                // Устанавливаем имя сервиса и функции в заголовки сразу после старта activity
+                string serviceName = _activitySource?.Name ?? "auth-service";
+                string functionName = ControllerContext.ActionDescriptor.ActionName;
+                using Activity? activity = _activitySource?.StartActivity($"{serviceName}.{functionName}", ActivityKind.Server);
+                _logger.LogInformation("Начало операции {Operation} {Path}", functionName, Request.Path);
+
+                _logger.LogInformation("Обновление токена: попытка; токен в cookie присутствует={HasCookie} ", Request.Cookies.ContainsKey("refreshToken"));
+                string? refreshToken = null;
+                // берём из cookie
+                if (Request.Cookies.TryGetValue("refreshToken", out string? cookieValue) && !string.IsNullOrWhiteSpace(cookieValue))
+                {
+                    refreshToken = cookieValue;
+                }
+
+                if (string.IsNullOrWhiteSpace(refreshToken))
+                {
+                    _logger.LogWarning("Обновление токена: refresh-токен не предоставлен");
+                    return Unauthorized(new ApiError
+                    {
+                        StatusCode = "2.4.0",
+                        Title = "Недействительный запрос",
+                        Message = "Refresh token не предоставлен",
+                        Field = "refreshToken"
+                    });
+                }
+
+                bool valid = _tokenService.ValidateToken(refreshToken, out Guid tokenUuid, out Guid userUuid, out IEnumerable<string> roles);
+                if (!valid)
+                {
+                    _logger.LogWarning("Обновление токена: проверка токена не пройдена");
+                    return Unauthorized(new ApiError
+                    {
+                        StatusCode = "2.2.2",
+                        Title = "Недействительный токен",
+                        Message = "Refresh token не прошёл проверку",
+                        Field = "refreshToken"
+                    });
+                }
+
+                if (await _refreshTokenBlackList.GetAsync(tokenUuid) != null)
+                {
+                    _logger.LogWarning("Обновление токена: токен в чёрном списке {TokenUuid}", tokenUuid);
+                    return Unauthorized(new ApiError
+                    {
+                        StatusCode = "2.2.1",
+                        Title = "Недействительный токен",
+                        Message = "Refresh token был отозван",
+                        Field = "blacklist"
+                    });
+                }
+
+                // Генерируем новый access token и новый refresh token (ротация)
+                Guid newAccessUuid = Guid.NewGuid();
+                string newAccessToken = _tokenService.GenerateAccessToken(newAccessUuid, userUuid, roles);
+                string newRefreshToken = _tokenService.GenerateRefreshToken(userUuid);
+
+                Response.Headers.Append("Authorization", $"Bearer {newAccessToken}");
+                Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Path = "/api/auth-service/v1/auth/refresh" });
+
+                _logger.LogInformation("Обновление токена: выдан новый access-токен для пользователя {UserUuid}", userUuid);
+                return Ok(new { accessToken = newAccessToken });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Refresh: unexpected error");
                 return StatusCode(500, new ApiError
                 {
                     StatusCode = "1.0.0",

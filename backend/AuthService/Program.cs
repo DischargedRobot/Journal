@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
 using AuthService.Errors;
 using Serilog;
+using Serilog.Context;
+using System.Diagnostics;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -36,9 +38,8 @@ DotNetEnv.Env.Load();
 
 string env = builder.Environment.EnvironmentName;
 Log.Logger = new LoggerConfiguration()
-    .Enrich.FromLogContext() // для контектсных свойств
+    .Enrich.FromLogContext() // для контекстных свойств
     .Enrich.WithProperty("Environment", env)
-    .Enrich.With(new SerilogActivityEnricher()) // для добавления TraceId и SpanId из текущей активности в логи
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
     .WriteTo.File(
         path: "Logs/log-.txt",
@@ -118,18 +119,34 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Middleware: если пришёл заголовок traceparent — положим его в LogContext как IncomingTraceParent
+app.Use(async (context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("traceparent", out var tp) && !string.IsNullOrWhiteSpace(tp))
+    {
+        using (LogContext.PushProperty("TraceParent", tp.ToString()))
+        {
+            await next();
+        }
+    }
+    else
+    {
+        await next();
+    }
+});
+
 // Включаем аутентификацию и авторизацию
 app.UseAuthentication();
 app.MapControllers();
 
 try
 {
-    Log.Information("Starting web host");
+    Log.Information("Запуск веб‑хоста");
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "Host terminated unexpectedly");
+    Log.Fatal(ex, "Хост завершился с ошибкой");
     throw;
 }
 finally
