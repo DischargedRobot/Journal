@@ -3,6 +3,8 @@
 **/obj/
 
 .env
+.config
+AGENTS.md
 
 # User-specific files
 *.user

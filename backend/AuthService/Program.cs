@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Filters;
 using AuthService.Errors;
+using AuthService.ResponseExample;
 using Serilog;
 using Serilog.Context;
-using System.Diagnostics;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +23,8 @@ if (builder.Environment.IsDevelopment())
             options.EnableAnnotations();
             options.ExampleFilters();
             options.OperationFilter<ApiErrorExampleOperationFilter>();
+            options.OperationFilter<ResponseExampleOperationFilter>();
+
             options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
             {
                 Version = "v1",

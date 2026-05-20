@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace AuthService.Model
 {
-    public class UsersResponseDto
+    public class UsersResponseDto : IExampleProvider<UsersResponseDto>
     {
         public required Guid Uuid { get; set; }
         public required string Login { get; set; }
@@ -25,8 +25,20 @@ namespace AuthService.Model
             FirstName = user.FirstName;
             LastName = user.LastName;
             Patronymic = user.Patronymic;
-            TokenVersion = (int)user.TokenVersion;
+            TokenVersion = user.TokenVersion;
             RolesUuid = user.Roles?.Select(r => r.Uuid).ToArray();
         }
+
+        public static UsersResponseDto Example => new()
+        {
+            Uuid = Guid.NewGuid(),
+            Login = "johndoe",
+            Email = "johndoe@example.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Patronymic = "Middle",
+            TokenVersion = 0,
+            RolesUuid = Array.Empty<Guid>()
+        };
     }
 }

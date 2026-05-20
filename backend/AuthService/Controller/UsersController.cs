@@ -2,8 +2,11 @@ using AuthService.Enums;
 using AuthService.Errors;
 using AuthService.Lib.Utils;
 using AuthService.Model;
+using AuthService.ResponseExample;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace AuthService.Controller
@@ -112,7 +115,7 @@ namespace AuthService.Controller
 
 			return Ok(result);
 		}
-		
+
 
 		[HttpPost]
 		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(UsersResponseDto))]
@@ -268,6 +271,7 @@ namespace AuthService.Controller
 
 		[HttpGet("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status200OK, "Пользователь найден", typeof(UsersResponseDto))]
+		[ResponseExample(StatusCodes.Status200OK, typeof(UsersResponseDto))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Пользователь не найден", typeof(ApiError))]
 		[ApiErrorExample(
 			StatusCodes.Status404NotFound,
