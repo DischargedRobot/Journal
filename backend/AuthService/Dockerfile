@@ -13,6 +13,8 @@ RUN dotnet publish "AuthService.csproj" -c Release -o /app --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 # настраиваем переменную окружения для прослушивания на порту 8000
-COPY --from=build /app .а
+COPY ./publish .
+
+EXPOSE 80
 # запускаем приложение
 ENTRYPOINT ["dotnet", "AuthService.dll"]

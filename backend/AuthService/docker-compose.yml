@@ -1,6 +1,30 @@
-service:
+version: "3.8"
+services:
   auth-service:
     image: journal/authservice:latest
-    env_file: .env
+    env_file:
+      - .env
     ports:
       - "9000:80"
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    # записываеданные в журнал чтобы при перезапуске сверять с вольюмом
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  redis-data:
