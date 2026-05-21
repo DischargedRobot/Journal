@@ -25,8 +25,8 @@ namespace AuthService.Model
 		public static RolesResponseDto Example => new()
 		{
 			Uuid = Guid.NewGuid(),
-			Name = "student",
-			RoleName = "STUDENT_ROLE",
+			Name = "Admin",
+			RoleName = "ADMIN_ROLE",
 			Rights = [RoleRightsResponseDto.Example]
 		};
 	}
