@@ -159,7 +159,29 @@ namespace AuthService.Controller
                     .FirstOrDefault();
                 if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
-                    string accessToken = authHeader.Substring("Bearer ".Length).Trim();
+                    string opaqueToken = authHeader.Substring("Bearer ".Length).Trim();
+                    _logger.LogInformation("{Function}: проверка opaque-токена {OpaqueToken}", functionName, opaqueToken);
+                    TokenService.TokenOpaqueValidationResult opaqueResult = await _tokenService.ValidateOpaqueTokenAsync(
+                        opaqueToken,
+                        _accessTokenList
+                    );
+
+                    if (opaqueResult.IsValid)
+                    {
+                        _logger.LogInformation("{Function}: проверка opaque-токена пройдена {OpaqueToken}", functionName, opaqueToken);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("{Function}: проверка opaque-токена не пройдена {OpaqueToken}", functionName, opaqueToken);
+                        return Unauthorized(new ApiError
+                        {
+                            StatusCode = "2.3.1",
+                            Title = "Недействительный токен",
+                            Message = "Access token не прошёл проверку",
+                            Field = "Authorization"
+                        });
+                    }
+                    string accessToken = opaqueResult.Token;
                     TokenService.TokenValidationResult resultCheckingAccessToken = await _tokenService.ValidateAccessTokenAsync(accessToken, _accessTokenBlackList);
 
                     if (resultCheckingAccessToken.IsValid)
@@ -191,6 +213,7 @@ namespace AuthService.Controller
 
                     if (Request.Cookies.TryGetValue("refreshToken", out string? refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
                     {
+                        _logger.LogInformation("{Function}: проверка refresh-токена {RefreshToken}", functionName, refreshToken);
                         TokenService.TokenValidationResult resultCheckingRefreshToken = await _tokenService.ValidateRefreshTokenAsync(
                             refreshToken,
                             _refreshTokenBlackList
@@ -318,11 +341,10 @@ namespace AuthService.Controller
                     }
                     string traceId = Activity.Current?.TraceId.ToString() ?? string.Empty;
 
-                    // проверка пришешего непрозрачного токена от клиента
+                    // проверка пришедшего непрозрачного токена от клиента
                     TokenService.TokenOpaqueValidationResult opaqueResult = await _tokenService.ValidateOpaqueTokenAsync(
                         token,
-                        _accessTokenList,
-                        _accessTokenBlackList
+                        _accessTokenList
                     );
                     if (!opaqueResult.IsValid)
                     {
@@ -581,8 +603,7 @@ namespace AuthService.Controller
             try
             {
                 // Устанавливаем имя сервиса и функции в заголовки сразу после старта activity
-                string serviceName = _activitySource?.Name ?? "auth-service";
-                using Activity? activity = _activitySource?.StartActivity($"{serviceName}.{functionName}", ActivityKind.Server);
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
 
                 _logger.LogInformation("{Function}: начало проверки рефреш токена из cookie", functionName);
                 string? refreshToken = null;

@@ -11,11 +11,9 @@ namespace AuthService.Lib.Utils
     {
 
         private string _secutiryKey;
-        private byte[] _opaqueKey;
-        public TokenService(string secutiryKey, byte[] opaqueKey)
+        public TokenService(string secutiryKey)
         {
             _secutiryKey = secutiryKey;
-            _opaqueKey = opaqueKey;
         }
         // TODO: Реализовать шифрование/дешифрование токена с помощью _opaqueKey
         public string GenerateOpaqueToken(Guid tokenUuid) => tokenUuid.ToString();
@@ -53,15 +51,10 @@ namespace AuthService.Lib.Utils
         // TODO: переделать при жобавлении шифрования/дешифрования токена
         public async Task<TokenOpaqueValidationResult> ValidateOpaqueTokenAsync(
             string token,
-            ITokenStore accesTokenStore,
-            ITokenBlackListStore blacklist
+            ITokenStore accesTokenStore
         )
         {
             Guid tokenUuid = DecryptOpaqueToken(token, out Guid uuid) ? uuid : Guid.Empty;
-            if (await blacklist.GetAsync(tokenUuid) != null)
-            {
-                return new TokenOpaqueValidationResult { IsValid = false };
-            }
             string? accessToken = await accesTokenStore.GetAsync(tokenUuid);
             if (accessToken == null)
             {
@@ -241,14 +234,14 @@ namespace AuthService.Lib.Utils
         }
 
 
-        public static class AuthOptions
+    }
+    public static class AuthOptions
+    {
+        public static readonly string[] AUDIENCE = ["auth-service", "main-service"]; // потребитель токена
+        public static readonly string ISSUER = "auth-service"; // издатель токена
+        public static SymmetricSecurityKey GetSymmetricSecurityKey(string securityKey)
         {
-            public static readonly string[] AUDIENCE = ["auth-service", "main-service"]; // потребитель токена
-            public static readonly string ISSUER = "auth-service"; // издатель токена
-            public static SymmetricSecurityKey GetSymmetricSecurityKey(string securityKey)
-            {
-                return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
-            }
+            return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
         }
     }
 }

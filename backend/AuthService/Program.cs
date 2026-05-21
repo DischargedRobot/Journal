@@ -68,13 +68,7 @@ if (string.IsNullOrEmpty(jwtKey))
 {
     throw new InvalidOperationException("JWT_KEY environment variable is not set.");
 }
-string? opaqueSecret = Environment.GetEnvironmentVariable("OPAQUE_KEY"); // длинная случайная строка или base64
-if (string.IsNullOrEmpty(opaqueSecret))
-{
-    throw new InvalidOperationException("JWT_OPAQUE_KEY environment variable is not set.");
-}
-byte[] jwtOpaqueKey = SHA256.HashData(Encoding.UTF8.GetBytes(opaqueSecret));
-builder.Services.AddSingleton(new TokenService(jwtKey, jwtOpaqueKey));
+builder.Services.AddSingleton(new TokenService(jwtKey));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
