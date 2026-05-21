@@ -1,0 +1,6 @@
+service:
+  auth-service:
+    image: journal/authservice:latest
+    env_file: .env
+    ports:
+      - "9000:80"

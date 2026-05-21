@@ -5,11 +5,11 @@ using StackExchange.Redis;
 
 namespace AuthService.Redis
 {
-    public class RedisAccessTokenkList : ITokenStore
+    public class RedisAccessTokenList : ITokenStore
     {
         private readonly IDatabase _redis;
 
-        public RedisAccessTokenkList(IConnectionMultiplexer redis)
+        public RedisAccessTokenList(IConnectionMultiplexer redis)
         {
             _redis = redis.GetDatabase();
         }

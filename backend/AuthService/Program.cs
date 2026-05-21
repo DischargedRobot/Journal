@@ -54,6 +54,12 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+// слушаем только локальный интерфейс
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(80);
+});
+
 // Редис
 string? dbRedisHost = Environment.GetEnvironmentVariable("DB_REDIS_HOST");
 string? dbRedisPort = Environment.GetEnvironmentVariable("DB_REDIS_PORT");
@@ -64,6 +70,7 @@ ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionStrin
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddScoped<RedisRefreshTokenBlackList>();
 builder.Services.AddScoped<RedisAccessTokenBlackList>();
+builder.Services.AddScoped<RedisAccessTokenList>();
 
 string? jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 if (string.IsNullOrEmpty(jwtKey))

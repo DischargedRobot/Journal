@@ -19,7 +19,7 @@ namespace AuthService.Controller
         private readonly ILogger<AuthController> _logger;
         private readonly AuthServiceContext _context;
         private readonly RedisRefreshTokenBlackList _refreshTokenBlackList;
-        private readonly RedisAccessTokenkList _accessTokenList;
+        private readonly RedisAccessTokenList _accessTokenList;
         private readonly RedisAccessTokenBlackList _accessTokenBlackList;
         private readonly TokenService _tokenService;
         private readonly ActivitySource _activitySource;
@@ -28,7 +28,7 @@ namespace AuthService.Controller
             ILogger<AuthController> logger,
             AuthServiceContext context,
             RedisRefreshTokenBlackList refreshTokenBlackList,
-            RedisAccessTokenkList accessTokenList,
+            RedisAccessTokenList accessTokenList,
             RedisAccessTokenBlackList accessTokenBlackList,
             TokenService tokenService,
             ActivitySource activitySource)
