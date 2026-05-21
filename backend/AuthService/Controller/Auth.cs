@@ -4,12 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using AuthService.Lib.Utils;
 using Microsoft.EntityFrameworkCore;
 using AuthService.Model;
-using System.IdentityModel.Tokens.Jwt;
 using AuthService.Errors;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Text.Json;
 
 namespace AuthService.Controller
 {
@@ -295,7 +293,6 @@ namespace AuthService.Controller
             try
             {
                 using Activity? activity = _activitySource.StartAndLog(_logger, this);
-                _logger.LogInformation("{Function}: начало операции {Path}", functionName, Request.Path);
 
                 string? authHeader = Request.Headers.Authorization.FirstOrDefault();
                 if (string.IsNullOrWhiteSpace(authHeader))

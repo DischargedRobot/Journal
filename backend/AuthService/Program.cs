@@ -13,8 +13,6 @@ using AuthService.Errors;
 using AuthService.ResponseExample;
 using Serilog;
 using Serilog.Context;
-using System.Security.Cryptography;
-using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +38,7 @@ if (builder.Environment.IsDevelopment())
 
 DotNetEnv.Env.Load();
 
+// Логгирирование
 string env = builder.Environment.EnvironmentName;
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext() // для контекстных свойств
@@ -53,6 +52,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+// Редис
 string? dbRedisHost = Environment.GetEnvironmentVariable("DB_REDIS_HOST");
 string? dbRedisPort = Environment.GetEnvironmentVariable("DB_REDIS_PORT");
 string? dbRedisAbortConnect = Environment.GetEnvironmentVariable("DB_REDIS_ABORT_CONNECT");
@@ -86,6 +86,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// БД Auth
 string? dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 string? dbPort = Environment.GetEnvironmentVariable("DB_PORT");
 string? dbName = Environment.GetEnvironmentVariable("DB_NAME");

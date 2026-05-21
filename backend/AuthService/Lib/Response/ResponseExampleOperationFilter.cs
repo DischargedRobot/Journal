@@ -16,7 +16,6 @@ namespace AuthService.ResponseExample
 
             if (attrs.Length == 0) return;
 
-            Console.WriteLine($"Found {attrs.Length} response example attributes for method {context.MethodInfo.Name}");
             foreach (ResponseExampleAttribute attr in attrs)
             {
                 string statusKey = attr.HttpStatus.ToString();
@@ -38,7 +37,7 @@ namespace AuthService.ResponseExample
                 if (attrs.Count(a => a.HttpStatus == attr.HttpStatus) > 1)
                 {
                     mediaType.Examples ??= new Dictionary<string, OpenApiExample>();
-                    string exampleKey = $"Example for HTTP {statusKey}";
+                    string exampleKey = $"Пример для HTTP {statusKey}";
                     mediaType.Examples[exampleKey] = new OpenApiExample
                     {
                         Value = OpenApiAnyFactory.CreateFromJson(System.Text.Json.JsonSerializer.Serialize(attr.ExampleType.GetProperty("Example")?.GetValue(null)))

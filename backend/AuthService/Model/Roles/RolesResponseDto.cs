@@ -21,5 +21,13 @@ namespace AuthService.Model
 				Name = rr.Name,
 			});
 		}
+
+		public static RolesResponseDto Example => new()
+		{
+			Uuid = Guid.NewGuid(),
+			Name = "student",
+			RoleName = "STUDENT_ROLE",
+			Rights = [RoleRightsResponseDto.Example]
+		};
 	}
 }

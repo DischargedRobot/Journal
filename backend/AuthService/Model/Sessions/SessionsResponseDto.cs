@@ -12,5 +12,19 @@ namespace AuthService.Model
         public string? BrowserName { get; set; }
         public string? BrowserVersion { get; set; }
         public string? OsName { get; set; }
+
+        public static SessionsResponseDto Example => new()
+        {
+            SessionId = 1,
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddHours(1),
+            RefreshTokenUuid = Guid.NewGuid(),
+            UserId = 1,
+            UserUuid = Guid.NewGuid(),
+            UserAgent = "Mozilla/5.0",
+            BrowserName = "Firefox",
+            BrowserVersion = "112.0",
+            OsName = "Windows"
+        };
     }
 }
