@@ -4,9 +4,9 @@ namespace AuthService.Lib.Utils
 {
     public static class HashingPassword
     {
-        public static string ComputeHash(string password, string secret)
+        public static string ComputeHash(string password)
         {
-            int iterations = 100000; // Количество итераций для PBKDF2
+            int iterations = 1000; // Количество итераций для PBKDF2
             byte[] salt = RandomNumberGenerator.GetBytes(16);
             using Rfc2898DeriveBytes pbkdf2 = new(password, salt, iterations, HashAlgorithmName.SHA256);
             byte[] hash = pbkdf2.GetBytes(32);

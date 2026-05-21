@@ -9,6 +9,7 @@ using AuthService.Errors;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 
 namespace AuthService.Controller
 {
@@ -20,6 +21,7 @@ namespace AuthService.Controller
         private readonly ILogger<AuthController> _logger;
         private readonly AuthServiceContext _context;
         private readonly RedisRefreshTokenBlackList _refreshTokenBlackList;
+        private readonly RedisAccessTokenkList _accessTokenList;
         private readonly RedisAccessTokenBlackList _accessTokenBlackList;
         private readonly TokenService _tokenService;
         private readonly ActivitySource _activitySource;
@@ -28,6 +30,7 @@ namespace AuthService.Controller
             ILogger<AuthController> logger,
             AuthServiceContext context,
             RedisRefreshTokenBlackList refreshTokenBlackList,
+            RedisAccessTokenkList accessTokenList,
             RedisAccessTokenBlackList accessTokenBlackList,
             TokenService tokenService,
             ActivitySource activitySource)
@@ -35,6 +38,7 @@ namespace AuthService.Controller
             _logger = logger;
             _context = context;
             _refreshTokenBlackList = refreshTokenBlackList;
+            _accessTokenList = accessTokenList;
             _accessTokenBlackList = accessTokenBlackList;
             _tokenService = tokenService;
             _activitySource = activitySource;
@@ -100,17 +104,21 @@ namespace AuthService.Controller
                     });
                 }
 
-                _logger.LogInformation("{Function}: создание токенов для пользователя {UserUuid}", functionName, user.Uuid);
+
+                // Генерируем и отправляй opaque токен, в редисе сохраняем access токен с ключём, который отправили в opaque
+                _logger.LogInformation("{Function}: создание access токена для пользователя {UserUuid}", functionName, user.Uuid);
                 Guid tokenUuid = Guid.NewGuid();
                 string accessToken = _tokenService.GenerateAccessToken(
                     tokenUuid,
                     user.Uuid,
                     user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
                 );
-                Response.Headers.Append("Authorization", $"Bearer {accessToken}");
+                string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
+                _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
+                Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
 
+                _logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, user.Uuid);
                 string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
-
                 Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,
@@ -120,7 +128,7 @@ namespace AuthService.Controller
                 });
 
                 _logger.LogInformation("{Function}: успешная авторизация для пользователя {UserUuid}", functionName, user.Uuid);
-                return Ok(new { accessToken });
+                return Ok(new { accessToken = opaqueToken });
             }
             catch (Exception ex)
             {
@@ -152,7 +160,7 @@ namespace AuthService.Controller
                 if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
                     string accessToken = authHeader.Substring("Bearer ".Length).Trim();
-                    TokenService.TokenValidationResult resultCheckingAccessToken = await _tokenService.ValidateTokenAsync(accessToken, _accessTokenBlackList);
+                    TokenService.TokenValidationResult resultCheckingAccessToken = await _tokenService.ValidateAccessTokenAsync(accessToken, _accessTokenBlackList);
 
                     if (resultCheckingAccessToken.IsValid)
                     {
@@ -183,7 +191,10 @@ namespace AuthService.Controller
 
                     if (Request.Cookies.TryGetValue("refreshToken", out string? refreshToken) && !string.IsNullOrWhiteSpace(refreshToken))
                     {
-                        TokenService.TokenValidationResult resultCheckingRefreshToken = await _tokenService.ValidateTokenAsync(refreshToken, _refreshTokenBlackList);
+                        TokenService.TokenValidationResult resultCheckingRefreshToken = await _tokenService.ValidateRefreshTokenAsync(
+                            refreshToken,
+                            _refreshTokenBlackList
+                        );
                         if (resultCheckingRefreshToken.IsValid)
                         {
                             Guid tokenUuid = resultCheckingRefreshToken.Payload.TokenUuid;
@@ -305,12 +316,28 @@ namespace AuthService.Controller
                             Response.Headers.TraceParent = traceParentValue;
                         }
                     }
-
                     string traceId = Activity.Current?.TraceId.ToString() ?? string.Empty;
 
-                    //  traceparent в контекст логирования, 
-                    // чтобы Enrich.FromLogContext() включил их в {Properties}
-                    TokenService.TokenValidationResult result = await _tokenService.ValidateTokenAsync(token, _accessTokenBlackList);
+                    // проверка пришешего непрозрачного токена от клиента
+                    TokenService.TokenOpaqueValidationResult opaqueResult = await _tokenService.ValidateOpaqueTokenAsync(
+                        token,
+                        _accessTokenList,
+                        _accessTokenBlackList
+                    );
+                    if (!opaqueResult.IsValid)
+                    {
+                        _logger.LogWarning("{Function}: проверка opaque-токена не пройдена", functionName);
+                        return Unauthorized(new ApiError
+                        {
+                            StatusCode = "2.2.2",
+                            Title = "Недействительный токен",
+                            Message = "Токен не прошёл проверку",
+                            Field = "exp"
+                        });
+                    }
+
+                    // проверка аccess токена который соответствует этому непрозрачному токену
+                    TokenService.TokenValidationResult result = await _tokenService.ValidateAccessTokenAsync(opaqueResult.Token, _accessTokenBlackList);
                     if (!result.IsValid)
                     {
                         _logger.LogWarning("{Function}: проверка токена не пройдена", functionName);
@@ -462,7 +489,7 @@ namespace AuthService.Controller
                 {
                     Uuid = Guid.NewGuid(),
                     Login = request.Login.Trim(),
-                    PasswordHash = HashingPassword.ComputeHash(request.Password, string.Empty),
+                    PasswordHash = HashingPassword.ComputeHash(request.Password),
                     Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
                     FirstName = request.FirstName.Trim(),
                     LastName = request.LastName.Trim(),
@@ -501,11 +528,28 @@ namespace AuthService.Controller
                 await _context.SaveChangesAsync();
 
                 // Выдаём токены сразу после регистрации
+                // Генерируем и отправляй opaque токен, 
+                // в редисе сохраняем access токен с ключём, который отправили в opaque
+                _logger.LogInformation("{Function}: создание access токена для пользователя {UserUuid}", functionName, user.Uuid);
                 Guid tokenUuid = Guid.NewGuid();
-                string accessToken = _tokenService.GenerateAccessToken(tokenUuid, user.Uuid, user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>());
+                string accessToken = _tokenService.GenerateAccessToken(
+                    tokenUuid,
+                    user.Uuid,
+                    user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
+                );
+                string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
+                _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
+                Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
+
+                _logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, user.Uuid);
                 string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
-                Response.Headers.Append("Authorization", $"Bearer {accessToken}");
-                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.Strict, Path = "/api/auth-service/v1/auth/refresh" });
+                Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Path = "/api/auth-service/v1/auth/refresh"
+                });
 
                 _logger.LogInformation("{Function}: пользователь создан {UserUuid}", functionName, user.Uuid);
                 return Created(string.Empty, new UsersResponseDto(user));
@@ -561,7 +605,10 @@ namespace AuthService.Controller
                     });
                 }
 
-                TokenService.TokenValidationResult result = await _tokenService.ValidateTokenAsync(refreshToken, _refreshTokenBlackList);
+                TokenService.TokenValidationResult result = await _tokenService.ValidateRefreshTokenAsync(
+                    refreshToken,
+                    _refreshTokenBlackList
+                );
                 if (!result.IsValid)
                 {
                     _logger.LogWarning("{Function}: проверка токена не пройдена", functionName);
@@ -589,24 +636,27 @@ namespace AuthService.Controller
                 Guid userUuid = result.Payload.UserUuid;
                 IEnumerable<string> roles = result.Payload.Roles;
                 // Генерируем новый access token и новый refresh token (ротация)
-                Guid newAccessUuid = Guid.NewGuid();
-                string newAccessToken = _tokenService.GenerateAccessToken(newAccessUuid, userUuid, roles);
+                Guid tokenUuid = Guid.NewGuid();
+                string accessToken = _tokenService.GenerateAccessToken(
+                    tokenUuid,
+                    userUuid,
+                    roles
+                );
+                string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
+                _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
+                Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
+
+                _logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, userUuid);
                 string newRefreshToken = _tokenService.GenerateRefreshToken(userUuid);
-
-                Response.Headers.Append("Authorization", $"Bearer {newAccessToken}");
-                Response.Cookies.Append(
-                    "refreshToken",
-                    newRefreshToken,
-                    new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.Strict,
-                        Path = "/api/auth-service/v1/auth/refresh"
-                    });
-
+                Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Path = "/api/auth-service/v1/auth/refresh"
+                });
                 _logger.LogInformation("{Function}: выдан новый access-токен для пользователя {UserUuid}", functionName, userUuid);
-                return Ok();
+                return Ok(new { accessToken = opaqueToken });
             }
             catch (Exception ex)
             {

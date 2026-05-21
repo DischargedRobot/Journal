@@ -1,8 +1,15 @@
 namespace AuthService.Redis
 {
-    public interface ITokenStore
+    public interface ITokenBlackListStore
     {
         Task SaveAsync(Guid tokenUUID, Guid userUuid, TimeSpan ttl);
+        Task<string?> GetAsync(Guid tokenUUID);
+        Task DeleteAsync(Guid tokenUUID);
+    }
+
+    public interface ITokenStore
+    {
+        Task SaveAsync(Guid tokenUUID, string data, TimeSpan ttl);
         Task<string?> GetAsync(Guid tokenUUID);
         Task DeleteAsync(Guid tokenUUID);
     }

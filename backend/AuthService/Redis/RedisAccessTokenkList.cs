@@ -1,25 +1,25 @@
+
 using System.Text.Json;
 
 using StackExchange.Redis;
 
 namespace AuthService.Redis
 {
-    public class RedisRefreshTokenBlackList : ITokenBlackListStore
+    public class RedisAccessTokenkList : ITokenStore
     {
         private readonly IDatabase _redis;
 
-        public RedisRefreshTokenBlackList(IConnectionMultiplexer redis)
+        public RedisAccessTokenkList(IConnectionMultiplexer redis)
         {
             _redis = redis.GetDatabase();
         }
 
-        private static string GetKey(Guid tokenUuid) => $"refresh:blacklist:{tokenUuid}";
+        private static string GetKey(Guid tokenUuid) => $"opaqueaccess:{tokenUuid}";
 
-        public async Task SaveAsync(Guid tokenUuid, Guid userUuid, TimeSpan ttl)
+        public async Task SaveAsync(Guid tokenUuid, string token, TimeSpan ttl)
         {
-            string value = JsonSerializer.Serialize(new { UserUuid = userUuid, RevokedAt = DateTime.UtcNow });
             string key = GetKey(tokenUuid);
-            await _redis.StringSetAsync(key, value, ttl);
+            await _redis.StringSetAsync(key, token, ttl);
         }
 
         public async Task<string?> GetAsync(Guid tokenUuid)

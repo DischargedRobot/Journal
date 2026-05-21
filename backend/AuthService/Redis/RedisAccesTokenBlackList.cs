@@ -5,7 +5,7 @@ using StackExchange.Redis;
 
 namespace AuthService.Redis
 {
-    public class RedisAccessTokenBlackList : ITokenStore
+    public class RedisAccessTokenBlackList : ITokenBlackListStore
     {
         private readonly IDatabase _redis;
 

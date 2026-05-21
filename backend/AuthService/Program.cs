@@ -13,6 +13,8 @@ using AuthService.Errors;
 using AuthService.ResponseExample;
 using Serilog;
 using Serilog.Context;
+using System.Security.Cryptography;
+using System.Text;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +46,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProperty("Environment", env)
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
     .WriteTo.File(
-        path: "Logs/log-.txt",
+        path: "Logs/log-.log",
         rollingInterval: RollingInterval.Day,
         outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
     .CreateLogger();
@@ -66,7 +68,13 @@ if (string.IsNullOrEmpty(jwtKey))
 {
     throw new InvalidOperationException("JWT_KEY environment variable is not set.");
 }
-builder.Services.AddSingleton(new TokenService(jwtKey));
+string? opaqueSecret = Environment.GetEnvironmentVariable("OPAQUE_KEY"); // длинная случайная строка или base64
+if (string.IsNullOrEmpty(opaqueSecret))
+{
+    throw new InvalidOperationException("JWT_OPAQUE_KEY environment variable is not set.");
+}
+byte[] jwtOpaqueKey = SHA256.HashData(Encoding.UTF8.GetBytes(opaqueSecret));
+builder.Services.AddSingleton(new TokenService(jwtKey, jwtOpaqueKey));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -94,6 +102,7 @@ string? connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Usern
 
 builder.Services.AddDbContext<AuthServiceContext>(options =>
     options.UseNpgsql(connectionString));
+
 
 
 // Регистрируем контроллеры и OpenAPI

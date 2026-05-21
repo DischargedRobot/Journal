@@ -218,7 +218,7 @@ namespace AuthService.Controller
 			{
 				Uuid = Guid.NewGuid(),
 				Login = createDto.Login.Trim(),
-				PasswordHash = HashingPassword.ComputeHash(createDto.Password, string.Empty),
+				PasswordHash = HashingPassword.ComputeHash(createDto.Password),
 				Email = string.IsNullOrWhiteSpace(createDto.Email) ? null : createDto.Email.Trim(),
 				FirstName = string.IsNullOrWhiteSpace(createDto.FirstName)
 					? null
@@ -418,7 +418,7 @@ namespace AuthService.Controller
 				bool same = HashingPassword.VerifyPassword(request.Password, user.PasswordHash);
 				if (!same)
 				{
-					user.PasswordHash = HashingPassword.ComputeHash(request.Password, string.Empty);
+					user.PasswordHash = HashingPassword.ComputeHash(request.Password);
 					user.TokenVersion++;
 				}
 			}
