@@ -1,0 +1,42 @@
+# Visual Studio / Rider / VSCode
+.vs/
+.vscode/
+.idea/
+
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Publish output (если собираете локально и копируете ./publish)
+publish/
+
+# Git
+.git/
+.gitignore
+
+# Logs and temp
+*.log
+logs/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Secrets / env
+.env
+
+# Dockerfiles local artifacts
+docker-compose.override.yml
+
+# NuGet package caches (не обязательно, но можно)
+.nuget/
+
+# Если есть локальные инструменты/артефакты
+node_modules/
+coverage/

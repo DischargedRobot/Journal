@@ -11,7 +11,7 @@ RUN addgroup -g ${PGID} -S authgroup \
 WORKDIR /app
 
 # Копируем конфигурацию nginx
-COPY auth.conf /etc/nginx/conf.d/default.conf
+COPY gateway.conf /etc/nginx/conf.d/default.conf
 
 # Выставляем владельца и базовые права — чтобы сервис писал только в ожидаемые места
 RUN mkdir -p /var/www && \

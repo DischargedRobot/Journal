@@ -55,9 +55,10 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // слушаем только локальный интерфейс
+// TODO: В релизе переделать на локал хост (сейчас так чтобы видеть свагер)
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenLocalhost(80);
+    options.ListenAnyIP(9000);
 });
 
 // Редис
@@ -107,8 +108,6 @@ string? connectionString = $"Host={dbHost};Port={dbPort};Database={dbName};Usern
 builder.Services.AddDbContext<AuthServiceContext>(options =>
     options.UseNpgsql(connectionString));
 
-
-
 // Регистрируем контроллеры и OpenAPI
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = context =>
@@ -156,11 +155,41 @@ builder.Services.AddSingleton(Tracing.ActivitySource(serviceName));
 
 WebApplication app = builder.Build();
 
-using (IServiceScope scope = app.Services.CreateScope())
-{
-    AuthServiceContext db = scope.ServiceProvider.GetRequiredService<AuthServiceContext>();
-    db.Database.Migrate();
-}
+// // Применение миграции подключение к бд
+// int retry = 0;
+// int maxRetry = 10;
+// while (true)
+// {
+//     try
+//     {
+//         using (IServiceScope scope = app.Services.CreateScope())
+//         {
+//             AuthServiceContext db = scope.ServiceProvider.GetRequiredService<AuthServiceContext>();
+//             var pending = db.Database.GetPendingMigrations();
+//             if (pending != null && pending.Any())
+//             {
+//                 Log.Information("Найдены ожидающие миграции: {Count}", pending.Count());
+//                 db.Database.Migrate();
+//             }
+//             else
+//             {
+//                 Log.Information("Миграций не обнаружено, пропускаем ApplyMigrations");
+//             }
+//         }
+//         break; // если миграция прошла успешно, выходим из цикла
+//     }
+//     catch (Exception ex)
+//     {
+//         retry++;
+//         Log.Error(ex, "Ошибка при миграции базы данных. Попытка {Retry}/{MaxRetry}", retry, maxRetry);
+//         if (retry >= maxRetry)
+//         {
+//             Log.Fatal("Превышено максимальное количество попыток миграции базы данных. Завершение работы.");
+//             throw;
+//         }
+//         Thread.Sleep(5000); // ждем 5 секунд перед следующей попыткой
+//     }
+// }
 
 if (app.Environment.IsDevelopment())
 {
