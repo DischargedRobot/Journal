@@ -120,8 +120,9 @@ namespace AuthService.Controller
                 Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7),
                     Path = "/api/auth-service/v1/auth/refresh"
                 });
 
@@ -565,8 +566,9 @@ namespace AuthService.Controller
                 Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7),
                     Path = "/api/auth-service/v1/auth/refresh"
                 });
 
@@ -669,8 +671,9 @@ namespace AuthService.Controller
                 Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddDays(7),
                     Path = "/api/auth-service/v1/auth/refresh"
                 });
                 _logger.LogInformation("{Function}: выдан новый access-токен для пользователя {UserUuid}", functionName, userUuid);

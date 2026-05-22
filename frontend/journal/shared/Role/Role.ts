@@ -1,0 +1,40 @@
+const TPerm = {
+	CU: "CREATE_USER",
+	RU: "READ_USER",
+	UU: "UPDATE_USER",
+	DU: "DELETE_USER",
+	CR: "CREATE_ROLE",
+	RR: "READ_ROLE",
+	UR: "UPDATE_ROLE",
+	DR: "DELETE_ROLE",
+	CL: "CREATE_LESSON",
+	RL: "READ_LESSON",
+	UL: "UPDATE_LESSON",
+	DL: "DELETE_LESSON",
+	CB: "CREATE_BRIGADE",
+	RB: "READ_BRIGADE",
+	UB: "UPDATE_BRIGADE",
+	DB: "DELETE_BRIGADE",
+	CDEP: "CREATE_DEPARTMENT",
+	RDEP: "READ_DEPARTMENT",
+	UDEP: "UPDATE_DEPARTMENT",
+	DDEP: "DELETE_DEPARTMENT",
+	CF: "CREATE_FACULTY",
+	RF: "READ_FACULTY",
+	UF: "UPDATE_FACULTY",
+	DF: "DELETE_FACULTY",
+	CDIS: "CREATE_DISCIPLINE",
+	RDIS: "READ_DISCIPLINE",
+	UDIS: "UPDATE_DISCIPLINE",
+	DDIS: "DELETE_DISCIPLINE",
+} as const
+
+export type TPerm = (typeof TPerm)[keyof typeof TPerm]
+
+export type TPermKey = keyof typeof TPerm
+
+export interface IRole {
+	uuid: string
+	name: string
+	permissions: TPerm[]
+}

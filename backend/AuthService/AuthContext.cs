@@ -30,9 +30,13 @@ namespace AuthService
 
             modelBuilder.Entity<Roles>()
                 .HasMany(r => r.RoleRights)
-                .WithOne(rr => rr.Role)
-                .HasForeignKey(rr => rr.RoleId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(rr => rr.Roles)
+                .UsingEntity<Dictionary<string, object>>(
+                "RoleRoleRights",
+                j => j.HasOne<RoleRights>().WithMany().HasForeignKey("RoleRightId"),
+                j => j.HasOne<Roles>().WithMany().HasForeignKey("RoleId")
+            );
+            ;
 
             modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
             modelBuilder.Entity<Roles>().HasAlternateKey(e => e.Uuid);

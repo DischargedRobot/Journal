@@ -86,13 +86,12 @@ namespace AuthService.Controller
 				Task<int> totalRecord = baseQuery.CountAsync();
 
 				List<RolesResponseDto> items = await baseQuery
-					.SortByKey(r => r.RoleName, sortOrder)
+					.SortByKey(r => r.Name, sortOrder)
 					.TakeWithOffset(offset, size)
 					.Select(r => new RolesResponseDto
 					{
 						Uuid = r.Uuid,
 						Name = r.Name,
-						RoleName = r.RoleName,
 						Rights =
 							r.RoleRights != null
 								? r.RoleRights.Select(rr => new RoleRightsResponseDto
@@ -175,13 +174,16 @@ namespace AuthService.Controller
 
 				var role = await _context
 						.Roles.Where(r => r.Uuid == uuid)
-						.Select(r => new
+						.Select(r => new RolesResponseDto
 						{
-							r.Uuid,
-							r.Name,
-							r.RoleName,
+							Uuid = r.Uuid,
+							Name = r.Name,
 							Rights = r.RoleRights != null
-								? r.RoleRights.Select(rr => new { rr.Uuid, rr.Name })
+								? r.RoleRights.Select(rr => new RoleRightsResponseDto
+								{
+									Uuid = rr.Uuid,
+									Name = rr.Name,
+								})
 								: null,
 						})
 						.FirstOrDefaultAsync();
@@ -220,8 +222,8 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Роль уже существует", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name и RoleName обязательны", "Name, RoleName")]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Роль с таким RoleName уже существует", nameof(RolesCreateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name обязательна", "Name")]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Роль с таким Name уже существует", nameof(RolesCreateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.3", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Создать новую роль")]
 		public async Task<IActionResult> CreateRole(
@@ -258,28 +260,16 @@ namespace AuthService.Controller
 					);
 				}
 
-				if (string.IsNullOrWhiteSpace(createDto.RoleName))
-				{
-					_logger.LogWarning("{Function}: RoleName отсутствует", functionName);
-					return BadRequest(
-						new ApiError(
-							"0.2.0",
-							"Неверный запрос",
-							"RoleName обязательна",
-							nameof(createDto.RoleName))
-					);
-				}
-
-				bool exists = await _context.Roles.AnyAsync(r => r.RoleName == createDto.RoleName);
+				bool exists = await _context.Roles.AnyAsync(r => r.Name == createDto.Name);
 				if (exists)
 				{
-					_logger.LogWarning("{Function}: роль с RoleName={RoleName} уже существует", functionName, createDto.RoleName);
+					_logger.LogWarning("{Function}: роль с Name={Name} уже существует", functionName, createDto.Name);
 					return Conflict(
 						new ApiError(
 							"1.2.1",
 							"Конфликт",
-							"Роль с таким RoleName уже существует",
-							nameof(RolesCreateDto.RoleName)
+							"Роль с таким Name уже существует",
+							nameof(RolesCreateDto.Name)
 						)
 					);
 				}
@@ -289,7 +279,6 @@ namespace AuthService.Controller
 				{
 					Uuid = Guid.NewGuid(),
 					Name = createDto.Name.Trim(),
-					RoleName = createDto.RoleName.Trim(),
 				};
 
 				// Операция должна быть атомарной: либо роль и привязки прав создаются вместе, либо ничего не сохраняется.
@@ -298,7 +287,7 @@ namespace AuthService.Controller
 				{
 					List<Guid> requested = createDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
 
-					List<RoleRights> rights = [];
+					List<RoleRights> rights = new List<RoleRights>();
 					if (requested.Count > 0)
 					{
 						rights = await _context.RoleRights
@@ -329,9 +318,11 @@ namespace AuthService.Controller
 
 					if (rights.Count > 0)
 					{
+						role.RoleRights ??= [];
 						foreach (RoleRights rr in rights)
 						{
-							rr.Role = role;
+							if (!role.RoleRights.Any(r => r.Uuid == rr.Uuid))
+								role.RoleRights.Add(rr);
 						}
 
 					}
@@ -358,7 +349,6 @@ namespace AuthService.Controller
 					{
 						Uuid = role.Uuid,
 						Name = role.Name,
-						RoleName = role.RoleName,
 					}
 				);
 			}
@@ -382,9 +372,8 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Имя роли уже используется", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "RoleName уже используется", nameof(RolesUpdateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesUpdateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesUpdateDto.RightsUuids))]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Одна или несколько прав уже привязаны к другой роли", nameof(RolesUpdateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Частично обновить роль по UUID")]
 		public async Task<IActionResult> UpdateRole(
 			[SwaggerParameter("UUID роли")]
@@ -411,7 +400,7 @@ namespace AuthService.Controller
 					);
 				}
 
-				Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Uuid == uuid);
+				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
 				if (role == null)
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);
@@ -425,24 +414,24 @@ namespace AuthService.Controller
 					);
 				}
 
-				if (!string.IsNullOrWhiteSpace(request.RoleName) && request.RoleName != role.RoleName)
+				if (!string.IsNullOrWhiteSpace(request.Name) && request.Name != role.Name)
 				{
 					bool exists = await _context.Roles.AnyAsync(r =>
-						r.RoleName == request.RoleName && r.Uuid != uuid
+						r.Name == request.Name && r.Uuid != uuid
 					);
 					if (exists)
 					{
-						_logger.LogWarning("{Function}: попытка установить RoleName={RoleName}, уже занято", functionName, request.RoleName);
+						_logger.LogWarning("{Function}: попытка установить Name={Name}, уже занято", functionName, request.Name);
 						return Conflict(
 							new ApiError(
 								"1.2.1",
 								"Конфликт",
-								"RoleName уже используется",
-								nameof(RolesUpdateDto.RoleName)
+								"Name уже используется",
+								nameof(RolesUpdateDto.Name)
 							)
 						);
 					}
-					role.RoleName = request.RoleName.Trim();
+					role.Name = request.Name.Trim();
 				}
 
 				if (request.Name != null)
@@ -454,13 +443,13 @@ namespace AuthService.Controller
 
 				if (request.RightsUuids != null)
 				{
-					List<Guid> requested = request.RightsUuids.Distinct().ToList();
+					List<Guid> requestedRights = request.RightsUuids.Distinct().ToList();
 
-					List<RoleRights> rights = await _context
-						.RoleRights.Where(rr => requested.Contains(rr.Uuid))
+					List<RoleRights> rights = await _context.RoleRights
+						.Where(rr => requestedRights.Contains(rr.Uuid))
 						.ToListAsync();
 
-					List<Guid> missing = requested.Except(rights.Select(r => r.Uuid)).ToList();
+					List<Guid> missing = requestedRights.Except(rights.Select(r => r.Uuid)).ToList();
 					if (missing.Count > 0)
 					{
 						_logger.LogWarning("{Function}: некоторые права не найдены: {Missing}", functionName, string.Join(", ", missing));
@@ -475,39 +464,25 @@ namespace AuthService.Controller
 							}
 						);
 					}
-					// Убираем привязку прав, которые не были запрошены, но сейчас привязаны к роли
-					List<RoleRights> current = await _context
-						.RoleRights.Where(rr => rr.RoleId == role.RoleId)
-						.ToListAsync();
+
+					_logger.LogInformation("{Function}: изменяем права роли uuid={Uuid}", functionName, uuid);
+					// Убираем привязку прав у роли (удаляем из коллекции role.RoleRights)
+					role.RoleRights ??= [];
+					List<RoleRights> current = role.RoleRights.ToList();
 
 					List<RoleRights> toRemove = current
-						.Where(cr => !requested.Contains(cr.Uuid))
+						.Where(cr => !requestedRights.Contains(cr.Uuid))
 						.ToList();
 					foreach (RoleRights r in toRemove)
 					{
-						r.RoleId = null;
-
+						role.RoleRights.Remove(r);
 					}
 
-					if (rights.Any(rr => rr.RoleId != null && rr.RoleId != role.RoleId))
+					// Привязываем запрошенные права к роли (добавляем в коллекцию)
+					foreach (RoleRights rr in rights)
 					{
-						_logger.LogWarning("{Function}: попытка привязать права, принадлежащие другим ролям", functionName);
-						return Conflict(
-							new ApiError(
-								"1.2.1",
-								"Конфликт",
-								"Одна или несколько прав уже привязаны к другой роли",
-								nameof(request.RightsUuids)
-							)
-						);
-					}
-
-					List<RoleRights> toAdd = rights
-						.Where(rr => rr.RoleId == null || rr.RoleId == role.RoleId)
-						.ToList();
-					foreach (RoleRights r in toAdd)
-					{
-						r.RoleId = role.RoleId;
+						if (!role.RoleRights.Any(x => x.Uuid == rr.Uuid))
+							role.RoleRights.Add(rr);
 					}
 				}
 
@@ -535,9 +510,9 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: имя роли уже используется", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Name и RoleName обязательны", "Name, RoleName")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Name обязательна", "Name")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "RoleName уже используется", nameof(RolesCreateDto.RoleName))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesCreateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Одна или несколько прав уже привязаны к другой роли", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Полная замена роли по UUID")]
@@ -577,20 +552,7 @@ namespace AuthService.Controller
 					);
 				}
 
-				if (string.IsNullOrWhiteSpace(replaceDto.RoleName))
-				{
-					_logger.LogWarning("{Function}: RoleName отсутствует", functionName);
-					return BadRequest(
-						new ApiError(
-							"0.2.0",
-							"Неверный запрос",
-							"RoleName обязательна",
-							nameof(replaceDto.RoleName)
-						)
-					);
-				}
-
-				Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Uuid == uuid);
+				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
 				if (role == null)
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);
@@ -605,30 +567,29 @@ namespace AuthService.Controller
 				}
 
 				bool exists = await _context.Roles.AnyAsync(r =>
-					r.RoleName == replaceDto.RoleName && r.Uuid != uuid
+					r.Name == replaceDto.Name && r.Uuid != uuid
 				);
 				if (exists)
 				{
-					_logger.LogWarning("{Function}: попытка установить RoleName={RoleName}, уже занято", functionName, replaceDto.RoleName);
+					_logger.LogWarning("{Function}: попытка установить Name={Name}, уже занято", functionName, replaceDto.Name);
 					return Conflict(
 						new ApiError(
 							"1.2.1",
 							"Конфликт",
-							"RoleName уже используется",
-							nameof(RolesCreateDto.RoleName)
+							"Name уже используется",
+							nameof(RolesCreateDto.Name)
 						)
 					);
 				}
 
 				role.Name = replaceDto.Name.Trim();
-				role.RoleName = replaceDto.RoleName.Trim();
 
 				List<Guid> requested = replaceDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
 
 				if (requested.Count > 0)
 				{
-					List<RoleRights> rights = await _context
-						.RoleRights.Where(rr => requested.Contains(rr.Uuid))
+					List<RoleRights> rights = await _context.RoleRights
+						.Where(rr => requested.Contains(rr.Uuid))
 						.ToListAsync();
 
 					List<Guid> missing = requested.Except(rights.Select(r => r.Uuid)).ToList();
@@ -651,30 +612,26 @@ namespace AuthService.Controller
 						);
 					}
 
-					// Убираем привязку прав, которые не были запрошены, но сейчас привязаны к роли
-					List<RoleRights> current = await _context.RoleRights
-						.Where(rr => rr.RoleId == role.RoleId)
-						.ToListAsync();
-					foreach (RoleRights r in current.Where(cr => !requested.Contains(cr.Uuid)))
+					// Убираем привязку прав у роли (удаляем из коллекции role.RoleRights)
+					List<RoleRights> currentRoleRights = role.RoleRights?.ToList() ?? new List<RoleRights>();
+					foreach (RoleRights r in currentRoleRights)
 					{
-						r.RoleId = null;
+						role.RoleRights?.Remove(r);
 					}
 
-					// Привязываем запрошенные права к роли
+					// Привязываем запрошенные права к роли (добавляем в коллекцию)
 					foreach (RoleRights r in rights)
 					{
-						r.RoleId = role.RoleId;
+						if (role.RoleRights?.Any(x => x.Uuid == r.Uuid) == false)
+						{
+							role.RoleRights?.Add(r);
+						}
 					}
 				}
 				else
 				{
-					List<RoleRights> currentAll = await _context
-						.RoleRights.Where(rr => rr.RoleId == role.RoleId)
-						.ToListAsync();
-					foreach (RoleRights r in currentAll)
-					{
-						r.RoleId = null;
-					}
+					role.RoleRights ??= [];
+					role.RoleRights.Clear();
 				}
 				await _context.SaveChangesAsync();
 
@@ -684,7 +641,6 @@ namespace AuthService.Controller
 					{
 						Uuid = role.Uuid,
 						Name = role.Name,
-						RoleName = role.RoleName,
 						Rights = role.RoleRights?.Select(rr => new RoleRightsResponseDto
 						{
 							Uuid = rr.Uuid,
@@ -720,7 +676,7 @@ namespace AuthService.Controller
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
-				Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Uuid == uuid);
+				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
 				if (role == null)
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);

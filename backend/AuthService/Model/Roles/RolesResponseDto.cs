@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace AuthService.Model
 {
@@ -6,7 +7,6 @@ namespace AuthService.Model
 	{
 		public required Guid Uuid { get; set; }
 		public required string Name { get; set; }
-		public required string RoleName { get; set; }
 		public IEnumerable<RoleRightsResponseDto>? Rights { get; set; }
 		public RolesResponseDto() { }
 		[SetsRequiredMembers]
@@ -14,7 +14,6 @@ namespace AuthService.Model
 		{
 			Uuid = role.Uuid;
 			Name = role.Name;
-			RoleName = role.RoleName;
 			Rights = role.RoleRights?.Select(rr => new RoleRightsResponseDto
 			{
 				Uuid = rr.Uuid,
@@ -26,7 +25,6 @@ namespace AuthService.Model
 		{
 			Uuid = Guid.NewGuid(),
 			Name = "Admin",
-			RoleName = "ADMIN_ROLE",
 			Rights = [RoleRightsResponseDto.Example]
 		};
 	}

@@ -152,44 +152,53 @@ builder.Services.AddEndpointsApiExplorer();
 // TODO: добавить OpenTelemetry и экспортировать трейсинги в Jaeger, Zipkin или другой бэкенд для трейсинга
 string serviceName = Environment.GetEnvironmentVariable("AUTHSERVICE_NAME") ?? "auth-service";
 builder.Services.AddSingleton(Tracing.ActivitySource(serviceName));
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:9000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 WebApplication app = builder.Build();
-
-// // Применение миграции подключение к бд
-// int retry = 0;
-// int maxRetry = 10;
-// while (true)
-// {
-//     try
-//     {
-//         using (IServiceScope scope = app.Services.CreateScope())
-//         {
-//             AuthServiceContext db = scope.ServiceProvider.GetRequiredService<AuthServiceContext>();
-//             var pending = db.Database.GetPendingMigrations();
-//             if (pending != null && pending.Any())
-//             {
-//                 Log.Information("Найдены ожидающие миграции: {Count}", pending.Count());
-//                 db.Database.Migrate();
-//             }
-//             else
-//             {
-//                 Log.Information("Миграций не обнаружено, пропускаем ApplyMigrations");
-//             }
-//         }
-//         break; // если миграция прошла успешно, выходим из цикла
-//     }
-//     catch (Exception ex)
-//     {
-//         retry++;
-//         Log.Error(ex, "Ошибка при миграции базы данных. Попытка {Retry}/{MaxRetry}", retry, maxRetry);
-//         if (retry >= maxRetry)
-//         {
-//             Log.Fatal("Превышено максимальное количество попыток миграции базы данных. Завершение работы.");
-//             throw;
-//         }
-//         Thread.Sleep(5000); // ждем 5 секунд перед следующей попыткой
-//     }
-// }
+app.UseCors("AllowSpecificOrigin");
+// Применение миграции подключение к бд
+int retry = 0;
+int maxRetry = 10;
+while (true)
+{
+    try
+    {
+        using (IServiceScope scope = app.Services.CreateScope())
+        {
+            AuthServiceContext db = scope.ServiceProvider.GetRequiredService<AuthServiceContext>();
+            var pending = db.Database.GetPendingMigrations();
+            if (pending != null && pending.Any())
+            {
+                Log.Information("Найдены ожидающие миграции: {Count}", pending.Count());
+                db.Database.Migrate();
+            }
+            else
+            {
+                Log.Information("Миграций не обнаружено, пропускаем ApplyMigrations");
+            }
+        }
+        break; // если миграция прошла успешно, выходим из цикла
+    }
+    catch (Exception ex)
+    {
+        retry++;
+        Log.Error(ex, "Ошибка при миграции базы данных. Попытка {Retry}/{MaxRetry}", retry, maxRetry);
+        if (retry >= maxRetry)
+        {
+            Log.Fatal("Превышено максимальное количество попыток миграции базы данных. Завершение работы.");
+            throw;
+        }
+        Thread.Sleep(5000); // ждем 5 секунд перед следующей попыткой
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
