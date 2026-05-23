@@ -133,8 +133,7 @@ namespace MainService.Controllers
             Task<int> totalRecord = baseQuery.CountAsync();
 
             List<LessonMarksResponseDto> items = await baseQuery
-                .Skip(offset)
-                .Take(size)
+                .TakeWithOffset(offset, size)
                 .Select(lm => new LessonMarksResponseDto(lm))
                 .ToListAsync();
 

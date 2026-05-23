@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
+using MainService.Lib.Utils;
+using System.Diagnostics;
 
 namespace MainService.Controllers
 {
@@ -14,11 +16,15 @@ namespace MainService.Controllers
     [Produces("application/json")]
     public class AttestationMarksController : ControllerBase
     {
+        private readonly ILogger<AttestationMarksController> _logger;
         private readonly MainServiceContext _context;
+        private readonly ActivitySource _activitySource;
 
-        public AttestationMarksController(MainServiceContext context)
+        public AttestationMarksController(MainServiceContext context, ILogger<AttestationMarksController> logger, System.Diagnostics.ActivitySource activitySource)
         {
             _context = context;
+            _logger = logger;
+            _activitySource = activitySource;
         }
 
 
@@ -41,71 +47,96 @@ namespace MainService.Controllers
             SortOrder sortOrder = SortOrder.Ascending
         )
         {
-            if (offset < 0)
+            string functionName = ControllerContext.ActionDescriptor.ActionName;
+            try
             {
-                return BadRequest(new ApiError
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
+                _logger.LogInformation("{Function} вызвано: size={Size}, offset={Offset}, filterMark={FilterMark}, sortOrder={SortOrder}", functionName, size, offset, filterMark, sortOrder);
+
+                if (offset < 0)
                 {
-                    StatusCode = "0.2.1",
-                    Title = "Неверный запрос",
-                    Message = "Параметр offset не может быть отрицательным",
-                    Field = nameof(offset)
+                    _logger.LogWarning("{Function}: неверный offset {Offset}", functionName, offset);
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = "Параметр offset не может быть отрицательным",
+                        Field = nameof(offset)
+                    });
+                }
+
+                if (size < 0)
+                {
+                    _logger.LogWarning("{Function}: неверный size {Size}", functionName, size);
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = "Параметр size не может быть отрицательным",
+                        Field = nameof(size)
+                    });
+                }
+
+                IQueryable<AttestationMarks> baseQuery = _context.AttestationMarks
+                    .Where(am => filterMark == null || am.Mark.Contains(filterMark))
+                    .Include(am => am.AttestationType)
+                    .AsNoTracking();
+
+                Task<int> totalRecord = baseQuery.CountAsync();
+
+                List<AttestationMarksResponseDto> items = await baseQuery
+                    .SortByKey(am => am.Mark, sortOrder)
+                    .TakeWithOffset(offset, size)
+                    .Select(am => new AttestationMarksResponseDto(am))
+                    .ToListAsync();
+
+                int total = await totalRecord;
+
+                _logger.LogInformation("{Function}: найдено записей = {Total}", functionName, total);
+
+                if (total == 0)
+                {
+                    _logger.LogInformation("{Function}: не найдено записей (total=0)", functionName);
+                    return NotFound(new ApiError
+                    {
+                        StatusCode = "1.0.3",
+                        Title = "Оценки аттестаций не найдены",
+                        Message = "В системе не найдено ни одной оценки аттестации",
+                        Field = string.Empty
+                    });
+                }
+
+                if (items.Count == 0)
+                {
+                    _logger.LogInformation("{Function}: нет записей по фильтру (total={Total}, offset={Offset})", functionName, total, offset);
+                    return NotFound(new ApiError
+                    {
+                        StatusCode = "1.1.3",
+                        Title = "Оценки аттестаций не найдены",
+                        Message = "В системе не найдено ни одной оценки аттестации для указанных параметров запроса",
+                        Field = "BODY"
+                    });
+                }
+
+                _logger.LogInformation("{Function}: возвращает {Count} элементов (offset={Offset}, total={Total})", functionName, items.Count, offset, total);
+
+                return Ok(new PagedResult<AttestationMarksResponseDto>(
+                    Total: total,
+                    Offset: offset,
+                    Size: items.Count,
+                    Items: items
+                ));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Function}: неожиданная ошибка при обработке запроса", functionName);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+                {
+                    StatusCode = "1.0.0",
+                    Title = "Внутренняя ошибка сервера",
+                    Message = "Произошла ошибка на сервере",
                 });
             }
-
-            if (size < 0)
-            {
-                return BadRequest(new ApiError
-                {
-                    StatusCode = "0.2.1",
-                    Title = "Неверный запрос",
-                    Message = "Параметр size не может быть отрицательным",
-                    Field = nameof(size)
-                });
-            }
-
-            IQueryable<AttestationMarks> baseQuery = _context.AttestationMarks
-                .Where(am => filterMark == null || am.Mark.Contains(filterMark))
-                .Include(am => am.AttestationType)
-                .AsNoTracking();
-
-            Task<int> totalRecord = baseQuery.CountAsync();
-
-            List<AttestationMarksResponseDto> items = await baseQuery
-                .SortByKey(am => am.Mark, sortOrder)
-                .TakeWithOffset(offset, size)
-                .Select(am => new AttestationMarksResponseDto(am))
-                .ToListAsync();
-
-            int total = await totalRecord;
-
-            if (total == 0)
-            {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.0.3",
-                    Title = "Оценки аттестаций не найдены",
-                    Message = "В системе не найдено ни одной оценки аттестации",
-                    Field = string.Empty
-                });
-            }
-
-            if (items.Count == 0)
-            {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.1.3",
-                    Title = "Оценки аттестаций не найдены",
-                    Message = "В системе не найдено ни одной оценки аттестации для указанных параметров запроса",
-                    Field = "BODY"
-                });
-            }
-
-            return Ok(new PagedResult<AttestationMarksResponseDto>(
-                Total: total,
-                Offset: offset,
-                Size: items.Count,
-                Items: items
-            ));
         }
 
 
@@ -133,34 +164,54 @@ namespace MainService.Controllers
             Guid uuid
         )
         {
-            if (uuid == Guid.Empty)
+            string functionName = ControllerContext.ActionDescriptor.ActionName;
+            try
             {
-                return BadRequest(new ApiError
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
+                _logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
+
+                if (uuid == Guid.Empty)
                 {
-                    StatusCode = "0.2.0",
-                    Title = "Неверный запрос",
-                    Message = "UUID оценки аттестации не может быть пустым",
-                    Field = nameof(uuid)
+                    _logger.LogWarning("{Function}: пустой uuid", functionName);
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.0",
+                        Title = "Неверный запрос",
+                        Message = "UUID оценки аттестации не может быть пустым",
+                        Field = nameof(uuid)
+                    });
+                }
+
+                AttestationMarks? attestationMark = await _context.AttestationMarks
+                    .Include(am => am.AttestationType)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(am => am.Uuid == uuid);
+
+                if (attestationMark == null)
+                {
+                    _logger.LogInformation("{Function}: запись с uuid={Uuid} не найдена", functionName, uuid);
+                    return NotFound(new ApiError
+                    {
+                        StatusCode = "1.2.3",
+                        Title = "Оценка аттестации не найдена",
+                        Message = $"Оценка аттестации с UUID \"{uuid}\" не найдена",
+                        Field = nameof(uuid)
+                    });
+                }
+
+                _logger.LogInformation("{Function}: возвращена запись uuid={Uuid}", functionName, uuid);
+                return Ok(new AttestationMarksResponseDto(attestationMark));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Function}: неожиданная ошибка при получении оценки", functionName);
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+                {
+                    StatusCode = "1.0.0",
+                    Title = "Внутренняя ошибка сервера",
+                    Message = "Произошла ошибка на сервере",
                 });
             }
-
-            AttestationMarks? attestationMark = await _context.AttestationMarks
-                .Include(am => am.AttestationType)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(am => am.Uuid == uuid);
-
-            if (attestationMark == null)
-            {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Оценка аттестации не найдена",
-                    Message = $"Оценка аттестации с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
-            }
-
-            return Ok(new AttestationMarksResponseDto(attestationMark));
         }
     }
 }

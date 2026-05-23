@@ -5,7 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 using Swashbuckle.AspNetCore.Filters;
 
-var builder = WebApplication.CreateBuilder(args);
+using Serilog;
+using MainService.Lib;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+string env = builder.Environment.EnvironmentName;
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext() // для контекстных свойств
+    .Enrich.WithProperty("Environment", env)
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "Logs/log-.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties}{NewLine}{Exception}")
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 // Генерация по шаблону для всех контроллеров 
 // на случай когда нету обязательно параметра в теле запроса
@@ -14,7 +29,7 @@ builder.Services.AddControllers()
     {
         options.InvalidModelStateResponseFactory = context =>
         {
-            var errors = context.ModelState
+            Dictionary<string, string[]> errors = context.ModelState
                 .Where(e => e.Value?.Errors.Count > 0)
                 .ToDictionary(
                     e => e.Key,
@@ -32,6 +47,9 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
+// Регистрируем источник активности для трейсинга
+string serviceName = Environment.GetEnvironmentVariable("MAINSERVICE_NAME") ?? "main-service";
+builder.Services.AddSingleton(Tracing.ActivitySource(serviceName));
 // Регистрируем генератор Swagger только вне продакшена
 if (builder.Environment.IsDevelopment())
 {
@@ -51,6 +69,8 @@ if (builder.Environment.IsDevelopment())
     });
     builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
 }
+
+
 
 DotNetEnv.Env.Load();
 
