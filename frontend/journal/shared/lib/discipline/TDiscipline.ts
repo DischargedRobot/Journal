@@ -1,7 +1,9 @@
+import { Uuid } from "../utility-types/uuid"
+
 export type TDiscipline = {
-	uuid: string
+	uuid: Uuid
 	name: string
 	isArchived: boolean
-	professorUuid: string
-	groupUuid: string
+	professorUuid: Uuid
+	groupUuid: Uuid
 }
