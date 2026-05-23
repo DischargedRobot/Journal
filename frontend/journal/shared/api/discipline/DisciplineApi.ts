@@ -1,6 +1,5 @@
 import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
 import { TPagedRequestOptions, TPagedResponse } from "@/shared/api/TPaged"
-import { TSortOrder } from "@/shared/api/TSortOrder"
 
 const DISCIPLINE_URL =
 	process.env.NEXT_PUBLIC_API_DISCIPLINE_URL_V1 ??
@@ -92,9 +91,12 @@ export const DisciplineApi = {
 		},
 	): Promise<TPagedResponse<TDisciplinesResponseDto>> => {
 		const q = buildQuery(options ?? {})
-		return ApiJsonRequest(`${DISCIPLINE_URL}/group/${groupUuid}${q}`, {
-			method: "GET",
-		})
+		return ApiJsonRequest(
+			`${DISCIPLINE_URL}/group/${groupUuid}/disciplines${q}`,
+			{
+				method: "GET",
+			},
+		)
 	},
 
 	getDisciplinesByProfessor: async (
@@ -106,7 +108,7 @@ export const DisciplineApi = {
 	): Promise<TPagedResponse<TDisciplinesResponseDto>> => {
 		const q = buildQuery(options ?? {})
 		return ApiJsonRequest(
-			`${DISCIPLINE_URL}/professor/${professorUuid}${q}`,
+			`${DISCIPLINE_URL}/professor/${professorUuid}/disciplines${q}`,
 			{
 				method: "GET",
 			},

@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace MainService.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/")]
     public class DisciplinesController : ControllerBase
     {
         private readonly MainServiceContext _context;
@@ -21,7 +21,7 @@ namespace MainService.Controllers
             _context = context;
         }
 
-        [HttpGet]
+        [HttpGet("[controller]")]
         [SwaggerResponse(StatusCodes.Status200OK, "Дисциплины найдены", typeof(PagedResult<DisciplinesResponseDto>))]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Дисциплины не найдены", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
@@ -118,7 +118,7 @@ namespace MainService.Controllers
             ));
         }
 
-        [HttpGet("{uuid}")]
+        [HttpGet("[controller]/{uuid}")]
         [SwaggerResponse(StatusCodes.Status200OK, "Дисциплина найдена", typeof(DisciplinesResponseDto))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
@@ -176,7 +176,7 @@ namespace MainService.Controllers
         }
 
 
-        [HttpGet("{uuid}/lessons")]
+        [HttpGet("[controller]/{uuid}/lessons")]
         [SwaggerResponse(StatusCodes.Status200OK, "Занятия найдены", typeof(PagedResult<LessonsResponseDto>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
@@ -295,7 +295,7 @@ namespace MainService.Controllers
             ));
         }
 
-        [HttpGet("group/{uuid}")]
+        [HttpGet("group/{uuid}/disciplines")]
         [SwaggerResponse(StatusCodes.Status200OK, "Дисциплины найдены", typeof(PagedResult<DisciplinesResponseDto>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
@@ -410,7 +410,7 @@ namespace MainService.Controllers
             ));
         }
 
-        [HttpGet("professor/{uuid}")]
+        [HttpGet("professor/{uuid}/disciplines")]
         [SwaggerResponse(StatusCodes.Status200OK, "Дисциплины найдены", typeof(PagedResult<DisciplinesResponseDto>))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
