@@ -1,7 +1,12 @@
-import Image from "next/image";
+import { Button, HStack } from "@chakra-ui/react"
 
-export default function Home() {
+const Demo = () => {
   return (
-    <div></div>
-  );
+    <HStack>
+      <Button>Click me</Button>
+      <Button>Click me</Button>
+    </HStack>
+  )
 }
+
+export default Demo
