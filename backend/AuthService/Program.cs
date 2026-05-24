@@ -110,41 +110,46 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
 
 // Регистрируем контроллеры и OpenAPI
 builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options => options.InvalidModelStateResponseFactory = context =>
-{
-    // пустое тело
-    if (context.ModelState.TryGetValue(string.Empty, out var bodyEntry) && bodyEntry.Errors.Count > 0)
+    .ConfigureApiBehaviorOptions(options =>
     {
-        return new BadRequestObjectResult(new ApiError
+        options.SuppressModelStateInvalidFilter = true; // отключаем автоматическую 400 ошибку от ASP.NET Core при невалидной модели, чтобы возвращать кастомную структуру ошибки
+        options.InvalidModelStateResponseFactory = context =>
         {
-            StatusCode = "0.1.1",
-            Title = "Неверный запрос",
-            Message = bodyEntry.Errors.First().ErrorMessage,
-            Field = "BODY"
-        });
-    }
 
-    // поля с ошибками
-    List<string> fields = [];
-    foreach (KeyValuePair<string, ModelStateEntry?> kvp in context.ModelState.Where(k => k.Value?.Errors.Count > 0))
-    {
-        string key = kvp.Key;
-        if (!fields.Contains(key))
-        {
-            fields.Add(key);
-        }
-    }
+            // пустое тело
+            if (context.ModelState.TryGetValue(string.Empty, out var bodyEntry) && bodyEntry.Errors.Count > 0)
+            {
+                return new BadRequestObjectResult(new ApiError
+                {
+                    StatusCode = "0.1.0",
+                    Title = "Неверный запрос",
+                    Message = "Тело запроса не может быть пустым",
+                    Field = "BODY"
+                });
+            }
 
-    ApiError apiError = new()
-    {
-        StatusCode = "0.2.1",
-        Title = "Неверный запрос",
-        Message = $"Полe(я) {string.Join(", ", fields)} не могут быть пустыми",
-        Field = string.Join(",", fields),
-    };
-    return new BadRequestObjectResult(apiError);
 
-});
+            // поля с ошибками
+            List<string> fields = [];
+            foreach (KeyValuePair<string, ModelStateEntry?> kvp in context.ModelState.Where(k => k.Value?.Errors.Count > 0))
+            {
+                string key = kvp.Key;
+                if (!fields.Contains(key))
+                {
+                    fields.Add(key);
+                }
+            }
+
+            ApiError apiError = new()
+            {
+                StatusCode = "0.2.1",
+                Title = "Неверный запрос",
+                Message = $"Полe(я) {string.Join(", ", fields)} не могут быть пустыми",
+                Field = string.Join(",", fields),
+            };
+            return new BadRequestObjectResult(apiError);
+        };
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 

@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  postgres-main-service:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres-main-service-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  main-service:
+    build: .
+    env_file:
+      - .env
+    image: journal/main-service:latest
+    ports:
+      - "9000:9010"
+    restart: unless-stopped
+    depends_on:
+      - postgres-main-service
+
+volumes:
+  postgres-main-service-data:

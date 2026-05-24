@@ -22,6 +22,11 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Host.UseSerilog();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(9010);
+});
+
 // Генерация по шаблону для всех контроллеров 
 // на случай когда нету обязательно параметра в теле запроса
 builder.Services.AddControllers()
@@ -51,26 +56,24 @@ builder.Services.AddEndpointsApiExplorer();
 string serviceName = Environment.GetEnvironmentVariable("MAINSERVICE_NAME") ?? "main-service";
 builder.Services.AddSingleton(Tracing.ActivitySource(serviceName));
 // Регистрируем генератор Swagger только вне продакшена
-if (builder.Environment.IsDevelopment())
+// if (builder.Environment.IsDevelopment())
+// {
+builder.Services.AddSwaggerGen(options =>
 {
-    builder.Services.AddSwaggerGen(options =>
+    options.EnableAnnotations();
+    options.ExampleFilters();
+    // Регистрируем наш фильтр после ExampleFilters, чтобы он мог перезаписать
+    // или добавить примеры для ответов, если генераторы примеров тоже их установили.
+    options.OperationFilter<ApiErrorExampleOperationFilter>();
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
-        options.EnableAnnotations();
-        options.ExampleFilters();
-        // Регистрируем наш фильтр после ExampleFilters, чтобы он мог перезаписать
-        // или добавить примеры для ответов, если генераторы примеров тоже их установили.
-        options.OperationFilter<ApiErrorExampleOperationFilter>();
-        options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-        {
-            Version = "v1",
-            Title = "MainService API",
-            Description = "API для управления журналом успеваемости студентов"
-        });
+        Version = "v1",
+        Title = "MainService API",
+        Description = "API для управления журналом успеваемости студентов"
     });
-    builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
-}
-
-
+});
+builder.Services.AddSwaggerExamplesFromAssemblyOf<ApiError>();
+// }
 
 DotNetEnv.Env.Load();
 
@@ -88,18 +91,50 @@ WebApplication app = builder.Build();
 
 // если база данных не существует, она будет создана, 
 // а если существует, то будут применены все миграции
-using (IServiceScope scope = app.Services.CreateScope())
+// Применение миграции подключение к бд
+int retry = 0;
+int maxRetry = 10;
+while (true)
 {
-    MainServiceContext db = scope.ServiceProvider.GetRequiredService<MainServiceContext>();
-    db.Database.Migrate();
+    try
+    {
+        using (IServiceScope scope = app.Services.CreateScope())
+        {
+            MainServiceContext db = scope.ServiceProvider.GetRequiredService<MainServiceContext>();
+            // сверяем наличие миграций и применяем их, если они есть
+            IEnumerable<string> pending = db.Database.GetPendingMigrations();
+            if (pending != null && pending.Any())
+            {
+                Log.Information("Найдены ожидающие миграции: {Count}", pending.Count());
+                db.Database.Migrate();
+            }
+            else
+            {
+                Log.Information("Не применённых миграций не обнаружено, пропускаем ApplyMigrations");
+            }
+        }
+        break; // если миграция прошла успешно, выходим из цикла
+    }
+    catch (Exception ex)
+    {
+        retry++;
+        Log.Error(ex, "Ошибка при миграции базы данных. Попытка {Retry}/{MaxRetry}", retry, maxRetry);
+        if (retry >= maxRetry)
+        {
+            Log.Fatal("Превышено максимальное количество попыток миграции базы данных. Завершение работы.");
+            throw;
+        }
+        Thread.Sleep(5000); // ждем 5 секунд перед следующей попыткой
+    }
 }
 
+
 // только при разработке включаем Swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI();
+// }
 
 // перенаправляем с http на https
 app.UseHttpsRedirection();

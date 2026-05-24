@@ -138,7 +138,6 @@ namespace AuthService.Controller
                     StatusCode = "1.0.0",
                     Title = "Внутренняя ошибка сервера",
                     Message = "Произошла ошибка на сервере",
-                    Field = "server"
                 });
             }
         }
@@ -204,7 +203,6 @@ namespace AuthService.Controller
                     StatusCode = "1.0.0",
                     Title = "Внутренняя ошибка сервера",
                     Message = "Произошла ошибка на сервере",
-                    Field = "server"
                 });
             }
         }
@@ -213,7 +211,7 @@ namespace AuthService.Controller
         [SwaggerResponse(StatusCodes.Status201Created, "Сессия создана", typeof(SessionsResponseDto))]
         [ResponseExample(StatusCodes.Status201Created, typeof(SessionsResponseDto))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
-        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "UserUuid обязателен", nameof(SessionsCreateDto.UserUuid))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "RefreshTokenUuid обязателен", nameof(SessionsCreateDto.RefreshTokenUuid))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Пользователь не найден", nameof(SessionsCreateDto.UserUuid))]
@@ -231,9 +229,9 @@ namespace AuthService.Controller
                 {
                     _logger.LogWarning("{Function}: пустой createDto", functionName);
                     return BadRequest(new ApiError(
-                        "0.1.1",
+                        "0.1.0",
                         "Неверный запрос",
-                        "Неверный формат данных",
+                        "Тело запроса не может быть пустым",
                         "BODY"));
                 }
 
@@ -317,7 +315,7 @@ namespace AuthService.Controller
         [ResponseExample(StatusCodes.Status200OK, typeof(SessionsResponseDto))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "UUID не может быть пустым", nameof(refreshTokenUuid))]
-        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
         [SwaggerResponse(StatusCodes.Status404NotFound, "Сессия не найдена", typeof(ApiError))]
         [ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Сессия не найдена", "Сессия с указанным UUID refresh-токена не найдена", nameof(refreshTokenUuid))]
         [SwaggerOperation(Summary = "Частично обновить сессию по UUID refresh-токена")]
@@ -343,9 +341,9 @@ namespace AuthService.Controller
                 {
                     _logger.LogWarning("{Function}: пустой request", functionName);
                     return BadRequest(new ApiError(
-                        "0.2.0",
+                        "0.1.0",
                         "Неверный запрос",
-                        "Неверный формат данных",
+                        "Тело запроса не может быть пустым",
                         "BODY"
                     ));
                 }
@@ -400,7 +398,6 @@ namespace AuthService.Controller
                     StatusCode = "1.0.0",
                     Title = "Внутренняя ошибка сервера",
                     Message = "Произошла ошибка на сервере",
-                    Field = "server"
                 });
             }
         }

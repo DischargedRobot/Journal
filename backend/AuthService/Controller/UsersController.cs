@@ -24,19 +24,18 @@ namespace AuthService.Controller
 		}
 
 		[HttpGet]
-		[SwaggerResponse(
-			StatusCodes.Status200OK,
-			"Пользователи найдены",
-			typeof(PagedResult<UsersResponseDto>)
-		)]
+		[SwaggerResponse(StatusCodes.Status200OK, "Пользователи найдены", typeof(PagedResult<UsersResponseDto>))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerOperation(Summary = "Получить список пользователей")]
 		public async Task<ActionResult<PagedResult<UsersResponseDto>>> GetUsers(
-			[FromQuery, SwaggerParameter("Количество записей")] int size = 100,
-			[FromQuery, SwaggerParameter("Смещение от начала списка")] int offset = 0,
-			[FromQuery, SwaggerParameter("Фильтр по логину")] string? filterLogin = null,
+			[FromQuery, SwaggerParameter("Количество записей")]
+			int size = 100,
+			[FromQuery, SwaggerParameter("Смещение от начала списка")]
+			int offset = 0,
+			[FromQuery, SwaggerParameter("Фильтр по логину")]
+			string? filterLogin = null,
 			[FromQuery, SwaggerParameter("Порядок сортировки по логину")]
-				SortOrder sortOrder = SortOrder.Ascending
+			SortOrder sortOrder = SortOrder.Ascending
 		)
 		{
 			if (offset < 0)
@@ -121,6 +120,7 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(UsersResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: логин занят", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Пустой запрос", "Тело запроса не может быть пустым", "BODY")]
 		[ApiErrorExample(
 			StatusCodes.Status400BadRequest,
 			"0.2.0",
@@ -152,9 +152,9 @@ namespace AuthService.Controller
 				return BadRequest(
 					new ApiError
 					{
-						StatusCode = "0.2.1",
+						StatusCode = "0.1.0",
 						Title = "Неверный запрос",
-						Message = "Неверный формат данных",
+						Message = "Тело запроса не может быть пустым",
 						Field = "BODY",
 					}
 				);
@@ -372,9 +372,9 @@ namespace AuthService.Controller
 				return BadRequest(
 					new ApiError
 					{
-						StatusCode = "0.2.1",
+						StatusCode = "0.1.0",
 						Title = "Неверный запрос",
-						Message = "Неверный формат данных",
+						Message = "Тело запроса не может быть пустым",
 						Field = "BODY",
 					}
 				);

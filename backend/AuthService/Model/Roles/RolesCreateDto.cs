@@ -1,8 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+using Swashbuckle.AspNetCore.Annotations;
+
 namespace AuthService.Model
 {
     public class RolesCreateDto
     {
-        public string Name { get; set; } = null!;
+        [SwaggerSchema("Название роли"), Required, ValidateNever]
+        public string? Name { get; set; }
+        [SwaggerSchema("UUID прав роли"), Required, ValidateNever]
         public IEnumerable<Guid>? RightsUuids { get; set; }
     }
 }

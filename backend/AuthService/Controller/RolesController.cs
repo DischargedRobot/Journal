@@ -221,14 +221,14 @@ namespace AuthService.Controller
 		[ResponseExample(StatusCodes.Status201Created, typeof(RolesResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Роль уже существует", typeof(ApiError))]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name обязательна", "Name")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Поле Name обязательно для создания роли", "Name")]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Роль с таким Name уже существует", nameof(RolesCreateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.3", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Создать новую роль")]
 		public async Task<IActionResult> CreateRole(
 			[FromBody, SwaggerParameter("Тело запроса: данные для создания роли")]
-			RolesCreateDto createDto)
+			RolesCreateDto? createDto)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
 			try
@@ -241,7 +241,7 @@ namespace AuthService.Controller
 					_logger.LogWarning("{Function}: пустой createDto", functionName);
 					return BadRequest(
 						new ApiError(
-							"0.2.1",
+							"0.1.0",
 							"Неверный запрос",
 							"Неверный формат данных",
 							"BODY")
@@ -255,8 +255,20 @@ namespace AuthService.Controller
 						new ApiError(
 							"0.2.0",
 							"Неверный запрос",
-							"Name обязательна",
+							"Поле Name обязательно для создания роли",
 							nameof(createDto.Name))
+					);
+				}
+
+				if (createDto.RightsUuids == null)
+				{
+					_logger.LogWarning("{Function}: RightsUuids отсутствует", functionName);
+					return BadRequest(
+						new ApiError(
+							"0.2.0",
+							"Неверный запрос",
+							"Поле RightsUuids обязательно для создания роли (может быть пустым массивом)",
+							nameof(createDto.RightsUuids))
 					);
 				}
 
@@ -370,7 +382,7 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Имя роли уже используется", typeof(ApiError))]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesUpdateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesUpdateDto.RightsUuids))]
@@ -392,9 +404,9 @@ namespace AuthService.Controller
 					_logger.LogWarning("{Function}: пустой request", functionName);
 					return BadRequest(
 						new ApiError(
-							"0.2.1",
+							"0.1.0",
 							"Неверный запрос",
-							"Неверный формат данных",
+							"Тело запроса не может быть пустым",
 							"BODY"
 						)
 					);
@@ -509,8 +521,8 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status404NotFound, "Роль не найдена", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: имя роли уже используется", typeof(ApiError))]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Name обязательна", "Name")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Неверный формат данных", "BODY")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name обязательна", "Name")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesCreateDto.Name))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
@@ -533,9 +545,9 @@ namespace AuthService.Controller
 				{
 					_logger.LogWarning("{Function}: пустой replaceDto", functionName);
 					return BadRequest(new ApiError(
-						"0.2.0",
+						"0.1.0",
 						"Неверный запрос",
-						"Неверный формат данных",
+						"Тело запроса не может быть пустым",
 						"BODY"
 						));
 				}
@@ -657,7 +669,6 @@ namespace AuthService.Controller
 					StatusCode = "1.0.0",
 					Title = "Внутренняя ошибка сервера",
 					Message = "Произошла ошибка на сервере",
-					Field = "server"
 				});
 			}
 		}
@@ -704,7 +715,6 @@ namespace AuthService.Controller
 					StatusCode = "1.0.0",
 					Title = "Внутренняя ошибка сервера",
 					Message = "Произошла ошибка на сервере",
-					Field = "server"
 				});
 			}
 		}

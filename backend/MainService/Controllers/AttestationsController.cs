@@ -284,7 +284,7 @@ namespace MainService.Controllers
         public async Task<ActionResult<AttestationsResponseDto>> GetAttestation(
             [SwaggerParameter("UUID аттестации")]
             Guid uuid
-            )
+        )
         {
             string functionName = ControllerContext.ActionDescriptor.ActionName;
             try
@@ -304,15 +304,22 @@ namespace MainService.Controllers
                     });
                 }
 
-                Attestations? a = await _context.Attestations
-                    .Include(x => x.AttestationType)
-                    .Include(x => x.AttestationMark)
-                    .Include(x => x.Student)
-                    .Include(x => x.Discipline)
+                AttestationsResponseDto? attestation = await _context.Attestations
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Uuid == uuid);
+                    .Where(x => x.Uuid == uuid)
+                    .Select(att => new AttestationsResponseDto
+                    {
+                        Uuid = att.Uuid,
+                        Date = att.Date,
+                        AttestationTypeUuid = att.AttestationType!.Uuid,
+                        AttestationMarkUuid = att.AttestationMark != null ? att.AttestationMark.Uuid : null,
+                        StudentUuid = att.Student!.Uuid,
+                        DisciplineUuid = att.Discipline!.Uuid,
+                        Version = att.Version
+                    })
+                    .FirstOrDefaultAsync();
 
-                if (a == null)
+                if (attestation == null)
                 {
                     _logger.LogInformation("{Function}: запись с uuid={Uuid} не найдена", functionName, uuid);
                     return NotFound(new ApiError
@@ -325,7 +332,7 @@ namespace MainService.Controllers
                 }
 
                 _logger.LogInformation("{Function}: возвращена запись uuid={Uuid}", functionName, uuid);
-                return Ok(new AttestationsResponseDto(a));
+                return Ok(attestation);
             }
             catch (Exception ex)
             {
@@ -353,6 +360,18 @@ namespace MainService.Controllers
             {
                 using Activity? activity = _activitySource.StartAndLog(_logger, this);
                 _logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, createDto?.Uuid);
+
+                if (createDto == null)
+                {
+                    _logger.LogWarning("{Function}: пустой createDto", functionName);
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.0",
+                        Title = "Неверный запрос",
+                        Message = "Тело запроса не может быть пустым",
+                        Field = "BODY"
+                    });
+                }
 
                 if (createDto.Uuid == Guid.Empty)
                 {

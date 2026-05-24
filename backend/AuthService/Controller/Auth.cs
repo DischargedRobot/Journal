@@ -427,7 +427,7 @@ namespace AuthService.Controller
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: логин занят", typeof(ApiError))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
-        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Неверный формат данных", "BODY")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
         [ApiErrorExample(StatusCodes.Status409Conflict, "1.1.1", "Конфликт", "Пользователь с таким логином уже существует", "Login")]
         [ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
@@ -442,12 +442,12 @@ namespace AuthService.Controller
                 _logger.LogInformation("{Function}: попытка для логина {Login}", functionName, request?.Login);
                 if (request == null)
                 {
-                    _logger.LogWarning("{Function}: неверный формат тела запроса при регистрации", functionName);
+                    _logger.LogWarning("{Function}: тело запроса не может быть пустым при регистрации", functionName);
                     return BadRequest(new ApiError
                     {
-                        StatusCode = "0.2.1",
+                        StatusCode = "0.1.0",
                         Title = "Неверный запрос",
-                        Message = "Неверный формат данных",
+                        Message = "Тело запроса не может быть пустым",
                         Field = "BODY"
                     });
                 }
