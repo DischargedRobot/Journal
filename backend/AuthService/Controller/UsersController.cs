@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using AuthService.Enums;
 using AuthService.Errors;
 using AuthService.Lib.Utils;
@@ -17,16 +19,25 @@ namespace AuthService.Controller
 	public class UsersController : ControllerBase
 	{
 		private readonly AuthServiceContext _context;
+		private readonly ILogger<UsersController> _logger;
+		private readonly ActivitySource _activitySource;
 
-		public UsersController(AuthServiceContext context)
+		public UsersController(AuthServiceContext context, ILogger<UsersController> logger, ActivitySource activitySource)
 		{
 			_context = context;
+			_logger = logger;
+			_activitySource = activitySource;
 		}
 
 		[HttpGet]
 		[SwaggerResponse(StatusCodes.Status200OK, "Пользователи найдены", typeof(PagedResult<UsersResponseDto>))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр offset не может быть отрицательным", nameof(offset))]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр size не может быть отрицательным", nameof(size))]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.0.3", "Пользователи не найдены", "В системе не найдено ни одного пользователя", "")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.1.3", "Пользователи не найдены", "В системе не найдено ни одного пользователя для указанных параметров запроса", "BODY")]
 		[SwaggerOperation(Summary = "Получить список пользователей")]
+		[ResponseExample(StatusCodes.Status200OK, typeof(PagedResult<UsersResponseDto>))]
 		public async Task<ActionResult<PagedResult<UsersResponseDto>>> GetUsers(
 			[FromQuery, SwaggerParameter("Количество записей")]
 			int size = 100,
@@ -38,81 +49,103 @@ namespace AuthService.Controller
 			SortOrder sortOrder = SortOrder.Ascending
 		)
 		{
-			if (offset < 0)
+			string functionName = ControllerContext.ActionDescriptor.ActionName;
+			try
 			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.2.1",
-						Title = "Неверный запрос",
-						Message = "Параметр offset не может быть отрицательным",
-						Field = nameof(offset),
-					}
-				);
-			}
+				using Activity? activity = _activitySource.StartAndLog(_logger, this);
+				_logger.LogInformation("{Function} вызвано: size={Size}, offset={Offset}, filterLogin={FilterLogin}, sortOrder={SortOrder}", functionName, size, offset, filterLogin, sortOrder);
 
-			if (size < 0)
+				if (offset < 0)
+				{
+					_logger.LogWarning("{Function}: неверный offset {Offset}", functionName, offset);
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.1",
+							Title = "Неверный запрос",
+							Message = "Параметр offset не может быть отрицательным",
+							Field = nameof(offset),
+						}
+					);
+				}
+
+				if (size < 0)
+				{
+					_logger.LogWarning("{Function}: неверный size {Size}", functionName, size);
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.1",
+							Title = "Неверный запрос",
+							Message = "Параметр size не может быть отрицательным",
+							Field = nameof(size),
+						}
+					);
+				}
+
+				IQueryable<Users> baseQuery = _context
+					.Users.Where(u => filterLogin == null || u.Login.Contains(filterLogin))
+					.AsNoTracking();
+
+				Task<int> totalRecord = baseQuery.CountAsync();
+
+				List<UsersResponseDto> items = await baseQuery
+					.SortByKey(u => u.Login, sortOrder)
+					.TakeWithOffset(offset, size)
+					.Select(u => new UsersResponseDto(u))
+					.ToListAsync();
+
+				int total = await totalRecord;
+
+				if (total == 0)
+				{
+					_logger.LogInformation("{Function}: пользователей не найдено (total=0)", functionName);
+					return NotFound(
+						new ApiError
+						{
+							StatusCode = "1.0.3",
+							Title = "Пользователи не найдены",
+							Message = "В системе не найдено ни одного пользователя",
+							Field = string.Empty,
+						}
+					);
+				}
+
+				if (items.Count == 0)
+				{
+					_logger.LogInformation("{Function}: нет пользователей по фильтру (total={Total}, offset={Offset})", functionName, total, offset);
+					return NotFound(
+						new ApiError
+						{
+							StatusCode = "1.1.3",
+							Title = "Пользователи не найдены",
+							Message = "В системе не найдено ни одного пользователя для указанных параметров запроса",
+							Field = "BODY",
+						}
+					);
+				}
+
+				PagedResult<UsersResponseDto> result = new(
+					Total: total,
+					Offset: offset,
+					Size: items.Count,
+					Items: items
+				);
+
+				_logger.LogInformation("{Function}: возвращает {Count} элементов (offset={Offset}, total={Total})", functionName, items.Count, offset, total);
+
+				return Ok(result);
+			}
+			catch (Exception ex)
 			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.2.1",
-						Title = "Неверный запрос",
-						Message = "Параметр size не может быть отрицательным",
-						Field = nameof(size),
-					}
-				);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при получении пользователей", functionName);
+				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+				{
+					StatusCode = "1.0.0",
+					Title = "Внутренняя ошибка сервера",
+					Message = "Произошла ошибка на сервере",
+				});
 			}
-
-			IQueryable<Users> baseQuery = _context
-				.Users.Where(u => filterLogin == null || u.Login.Contains(filterLogin))
-				.AsNoTracking();
-
-			Task<int> totalRecord = baseQuery.CountAsync();
-
-			List<UsersResponseDto> items = await baseQuery
-				.SortByKey(u => u.Login, sortOrder)
-				.TakeWithOffset(offset, size)
-				.Select(u => new UsersResponseDto(u))
-				.ToListAsync();
-
-			int total = await totalRecord;
-
-			if (total == 0)
-			{
-				return NotFound(
-					new ApiError
-					{
-						StatusCode = "1.0.3",
-						Title = "Пользователи не найдены",
-						Message = "В системе не найдено ни одного пользователя",
-						Field = string.Empty,
-					}
-				);
-			}
-
-			if (items.Count == 0)
-			{
-				return NotFound(
-					new ApiError
-					{
-						StatusCode = "1.1.3",
-						Title = "Пользователи не найдены",
-						Message =
-							"В системе не найдено ни одного пользователя для указанных параметров запроса",
-						Field = "BODY",
-					}
-				);
-			}
-
-			PagedResult<UsersResponseDto> result = new(
-				Total: total,
-				Offset: offset,
-				Size: items.Count,
-				Items: items
-			);
-
-			return Ok(result);
 		}
 
 
@@ -147,125 +180,149 @@ namespace AuthService.Controller
 			[FromBody] UsersCreateDto createDto
 			)
 		{
-			if (createDto == null)
+			string functionName = ControllerContext.ActionDescriptor.ActionName;
+			try
 			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.1.0",
-						Title = "Неверный запрос",
-						Message = "Тело запроса не может быть пустым",
-						Field = "BODY",
-					}
-				);
-			}
+				using Activity? activity = _activitySource.StartAndLog(_logger, this);
+				_logger.LogInformation("{Function}: вызвано CreateUser", functionName);
 
-			if (
-				string.IsNullOrWhiteSpace(createDto.Login)
-				|| string.IsNullOrWhiteSpace(createDto.Password)
-			)
-			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.2.1",
-						Title = "Неверный запрос",
-						Message = "Логин или пароль не могут быть пустыми",
-						Field = $"{nameof(createDto.Login)}, {nameof(createDto.Password)}",
-					}
-				);
-			}
-
-			if (string.IsNullOrWhiteSpace(createDto.FirstName))
-			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.2.1",
-						Title = "Неверный запрос",
-						Message = $"{nameof(createDto.FirstName)} обязательно",
-						Field = nameof(createDto.FirstName),
-					}
-				);
-			}
-
-			if (string.IsNullOrWhiteSpace(createDto.LastName))
-			{
-				return BadRequest(
-					new ApiError
-					{
-						StatusCode = "0.2.1",
-						Title = "Неверный запрос",
-						Message = $"{nameof(createDto.LastName)} обязательно",
-						Field = nameof(createDto.LastName),
-					}
-				);
-			}
-
-			bool exists = await _context.Users.AnyAsync(u => u.Login == createDto.Login);
-			if (exists)
-				return Conflict(
-					new ApiError
-					{
-						StatusCode = "1.1.1",
-						Title = "Конфликт",
-						Message = $"Пользователь с таким {nameof(createDto.Login)} уже существует",
-						Field = nameof(createDto.Login),
-					}
-				);
-
-			Users user = new()
-			{
-				Uuid = Guid.NewGuid(),
-				Login = createDto.Login.Trim(),
-				PasswordHash = HashingPassword.ComputeHash(createDto.Password),
-				Email = string.IsNullOrWhiteSpace(createDto.Email) ? null : createDto.Email.Trim(),
-				FirstName = string.IsNullOrWhiteSpace(createDto.FirstName)
-					? null
-					: createDto.FirstName.Trim(),
-				LastName = string.IsNullOrWhiteSpace(createDto.LastName)
-					? null
-					: createDto.LastName.Trim(),
-				Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic)
-					? null
-					: createDto.Patronymic.Trim(),
-				TokenVersion = 0,
-				Roles = new List<Roles>()
-			};
-
-			if (createDto.RolesUuid != null)
-			{
-				Guid[] roleUuids = createDto.RolesUuid.Distinct().ToArray();
-				List<Roles> foundRoles = await _context.Roles
-					.Where(r => roleUuids.Contains(r.Uuid))
-					.ToListAsync();
-
-				if (foundRoles.Count != roleUuids.Length)
+				if (createDto == null)
 				{
-					Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
+					_logger.LogWarning("{Function}: пустой createDto", functionName);
 					return BadRequest(
 						new ApiError
 						{
-							StatusCode = "0.2.3",
+							StatusCode = "0.1.0",
 							Title = "Неверный запрос",
-							Message = "Одна или несколько ролей не найдены",
-							Field = nameof(createDto.RolesUuid),
-							Details = string.Join(", ", missing),
+							Message = "Тело запроса не может быть пустым",
+							Field = "BODY",
 						}
 					);
 				}
 
-				user.Roles = foundRoles;
+				if (
+					string.IsNullOrWhiteSpace(createDto.Login)
+					|| string.IsNullOrWhiteSpace(createDto.Password)
+				)
+				{
+					_logger.LogWarning("{Function}: пустой Login или Password", functionName);
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.1",
+							Title = "Неверный запрос",
+							Message = "Логин или пароль не могут быть пустыми",
+							Field = $"{nameof(createDto.Login)}, {nameof(createDto.Password)}",
+						}
+					);
+				}
+
+				if (string.IsNullOrWhiteSpace(createDto.FirstName))
+				{
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.1",
+							Title = "Неверный запрос",
+							Message = $"{nameof(createDto.FirstName)} обязательно",
+							Field = nameof(createDto.FirstName),
+						}
+					);
+				}
+
+				if (string.IsNullOrWhiteSpace(createDto.LastName))
+				{
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.1",
+							Title = "Неверный запрос",
+							Message = $"{nameof(createDto.LastName)} обязательно",
+							Field = nameof(createDto.LastName),
+						}
+					);
+				}
+
+				bool exists = await _context.Users.AnyAsync(u => u.Login == createDto.Login);
+				if (exists)
+				{
+					_logger.LogWarning("{Function}: пользователь с логином уже существует: {Login}", functionName, createDto.Login);
+					return Conflict(
+						new ApiError
+						{
+							StatusCode = "1.1.1",
+							Title = "Конфликт",
+							Message = $"Пользователь с таким {nameof(createDto.Login)} уже существует",
+							Field = nameof(createDto.Login),
+						}
+					);
+				}
+
+				Users user = new()
+				{
+					Uuid = Guid.NewGuid(),
+					Login = createDto.Login.Trim(),
+					PasswordHash = HashingPassword.ComputeHash(createDto.Password),
+					Email = string.IsNullOrWhiteSpace(createDto.Email) ? null : createDto.Email.Trim(),
+					FirstName = string.IsNullOrWhiteSpace(createDto.FirstName)
+						? null
+						: createDto.FirstName.Trim(),
+					LastName = string.IsNullOrWhiteSpace(createDto.LastName)
+						? null
+						: createDto.LastName.Trim(),
+					Patronymic = string.IsNullOrWhiteSpace(createDto.Patronymic)
+						? null
+						: createDto.Patronymic.Trim(),
+					TokenVersion = 0,
+					Roles = new List<Roles>()
+				};
+
+				if (createDto.RolesUuid != null)
+				{
+					Guid[] roleUuids = createDto.RolesUuid.Distinct().ToArray();
+					List<Roles> foundRoles = await _context.Roles
+						.Where(r => roleUuids.Contains(r.Uuid))
+						.ToListAsync();
+
+					if (foundRoles.Count != roleUuids.Length)
+					{
+						Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
+						_logger.LogWarning("{Function}: некоторые роли не найдены: {Missing}", functionName, string.Join(", ", missing));
+						return BadRequest(
+							new ApiError
+							{
+								StatusCode = "0.2.3",
+								Title = "Неверный запрос",
+								Message = "Одна или несколько ролей не найдены",
+								Field = nameof(createDto.RolesUuid),
+								Details = string.Join(", ", missing),
+							}
+						);
+					}
+
+					user.Roles = foundRoles;
+				}
+
+				_context.Users.Add(user);
+				await _context.SaveChangesAsync();
+
+				_logger.LogInformation("{Function}: создан пользователь uuid={Uuid}", functionName, user.Uuid);
+				return CreatedAtAction(
+					nameof(GetUser),
+					new { uuid = user.Uuid },
+					new UsersResponseDto(user)
+				);
 			}
-
-			_context.Users.Add(user);
-			await _context.SaveChangesAsync();
-
-			return CreatedAtAction(
-				nameof(GetUser),
-				new { uuid = user.Uuid },
-				new UsersResponseDto(user)
-			);
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при создании пользователя", functionName);
+				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+				{
+					StatusCode = "1.0.0",
+					Title = "Внутренняя ошибка сервера",
+					Message = "Произошла ошибка на сервере",
+				});
+			}
 		}
 
 
@@ -283,36 +340,54 @@ namespace AuthService.Controller
 		[SwaggerOperation(Summary = "Получить пользователя по UUID")]
 		public async Task<ActionResult<UsersResponseDto>> GetUser(Guid uuid)
 		{
-			UsersResponseDto? user = await _context.Users
-				.Include(u => u.Roles)
-				.Where(u => u.Uuid == uuid)
-				.Select(u => new UsersResponseDto
-				{
-					Uuid = u.Uuid,
-					Login = u.Login,
-					Email = u.Email,
-					FirstName = u.FirstName,
-					LastName = u.LastName,
-					Patronymic = u.Patronymic,
-					TokenVersion = u.TokenVersion,
-					RolesUuid = u.Roles != null ? u.Roles.Select(r => r.Uuid).ToArray() : null,
-				})
-				.FirstOrDefaultAsync();
-
-			if (user == null)
+			string functionName = ControllerContext.ActionDescriptor.ActionName;
+			try
 			{
-				return NotFound(
-					new ApiError
-					{
-						StatusCode = "1.2.3",
-						Title = "Пользователь не найден",
-						Message = "Пользователь с указанным UUID не найден",
-						Field = nameof(uuid),
-					}
-				);
-			}
+				using Activity? activity = _activitySource.StartAndLog(_logger, this);
+				_logger.LogInformation("{Function}: GetUser uuid={Uuid}", functionName, uuid);
 
-			return Ok(user);
+				UsersResponseDto? user = await _context.Users
+					.Include(u => u.Roles)
+					.Where(u => u.Uuid == uuid)
+					.Select(u => new UsersResponseDto
+					{
+						Uuid = u.Uuid,
+						Login = u.Login,
+						Email = u.Email,
+						FirstName = u.FirstName,
+						LastName = u.LastName,
+						Patronymic = u.Patronymic,
+						TokenVersion = u.TokenVersion,
+						RolesUuid = u.Roles != null ? u.Roles.Select(r => r.Uuid).ToArray() : null,
+					})
+					.FirstOrDefaultAsync();
+
+				if (user == null)
+				{
+					_logger.LogInformation("{Function}: пользователь не найден uuid={Uuid}", functionName, uuid);
+					return NotFound(
+						new ApiError
+						{
+							StatusCode = "1.2.3",
+							Title = "Пользователь не найден",
+							Message = "Пользователь с указанным UUID не найден",
+							Field = nameof(uuid),
+						}
+						);
+				}
+
+				return Ok(user);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при получении пользователя uuid={Uuid}", functionName, uuid);
+				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+				{
+					StatusCode = "1.0.0",
+					Title = "Внутренняя ошибка сервера",
+					Message = "Произошла ошибка на сервере",
+				});
+			}
 		}
 
 
