@@ -219,6 +219,7 @@ namespace AuthService.Controller
 
 				if (string.IsNullOrWhiteSpace(createDto.FirstName))
 				{
+					_logger.LogWarning("{Function}: пустой FirstName", functionName);
 					return BadRequest(
 						new ApiError
 						{
@@ -232,6 +233,7 @@ namespace AuthService.Controller
 
 				if (string.IsNullOrWhiteSpace(createDto.LastName))
 				{
+					_logger.LogWarning("{Function}: пустой LastName", functionName);
 					return BadRequest(
 						new ApiError
 						{
