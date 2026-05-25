@@ -1,56 +1,53 @@
-'use client'
-import { Registration } from "@/_page/auth";
-import { Login } from "@/_page/auth";
-import { Container } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useState } from "react";
+"use client"
+import { Registration } from "@/_page/auth"
+import { Login } from "@/_page/auth"
+import { Container } from "@mui/material"
+import { createTheme, ThemeProvider } from "@mui/material/styles"
+import { useState } from "react"
 
 const base = createTheme()
 
-declare module '@mui/material/styles' {
-    interface PaletteColor {
-        black?: PaletteOptions['primary'];
-    }
+declare module "@mui/material/styles" {
+	interface PaletteColor {
+		black?: PaletteOptions["primary"]
+	}
 
-    interface PaletteOptions {
-        black?: PaletteOptions['primary'];
-    }
+	interface PaletteOptions {
+		black?: PaletteOptions["primary"]
+	}
 }
 
 const theme = createTheme({
-    palette: {
-        black: base.palette.augmentColor({
-            color: { main: base.palette.grey[900] },
-            name: "black",
-        }),
-        primary: { main: "#5b69e3" },
-        secondary: {
-            main: "#F3F3F3",
-            light: "#FCFCFC",
-            dark: "#EFEFEF"
-        },
-        mode: "light",
-    },
+	palette: {
+		black: base.palette.augmentColor({
+			color: { main: base.palette.grey[900] },
+			name: "black",
+		}),
+		primary: { main: "#5b69e3" },
+		secondary: {
+			main: "#F3F3F3",
+			light: "#FCFCFC",
+			dark: "#EFEFEF",
+		},
+		mode: "light",
+	},
 })
 const AuthPage = () => {
-
-    const [registrationOpen, setRegistrationOpen] = useState(false);
-    return (
-        <ThemeProvider theme={theme}>
-            <Container
-                className="relative flex items-stretch justify-between p-0! w-full max-w-5xl rounded-3xl overflow-clip"
-            >
-                <Registration
-                    focused={registrationOpen}
-                    onToRegistration={() => setRegistrationOpen(true)}
-                />
-                <Login
-                    focused={!registrationOpen}
-                    onToLogin={() => setRegistrationOpen(false)}
-                />
-            </Container>
-        </ThemeProvider>
-    );
+	const [registrationOpen, setRegistrationOpen] = useState(false)
+	return (
+		<ThemeProvider theme={theme}>
+			<Container className="relative flex items-stretch justify-between p-0! w-full max-w-5xl rounded-3xl overflow-clip">
+				<Registration
+					focused={registrationOpen}
+					onToRegistration={() => setRegistrationOpen(true)}
+				/>
+				<Login
+					focused={!registrationOpen}
+					onToLogin={() => setRegistrationOpen(false)}
+				/>
+			</Container>
+		</ThemeProvider>
+	)
 }
 
-export default AuthPage;
+export default AuthPage

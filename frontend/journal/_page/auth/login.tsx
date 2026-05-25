@@ -1,32 +1,28 @@
-import { Stack, TextField, Typography, Button, Box } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { Stack, TextField, Typography, Button, Box } from "@mui/material"
+import { useForm } from "react-hook-form"
 
 interface FormValues {
-    login: string;
-    password: string;
+    login: string
+    password: string
 }
 
 interface Props {
-    onToLogin: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    focused: boolean;
+    onToLogin: (event: React.MouseEvent<HTMLButtonElement>) => void
+    focused: boolean
 }
 
 const Login = (props: Props) => {
-
-    const {
-        focused,
-        onToLogin,
-    } = props;
+    const { focused, onToLogin } = props
 
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<FormValues>();
+    } = useForm<FormValues>()
 
     const onSubmit = handleSubmit((data) => {
-        console.log('login', data);
-    });
+        console.log("login", data)
+    })
 
     return (
         // right-1 - чтобы не было видно границы между блоками при анимации
@@ -34,11 +30,11 @@ const Login = (props: Props) => {
             <Stack
                 className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
                 sx={{
-                    transition: 'clip-path 1s ease',
+                    transition: "clip-path 1s ease",
                     clipPath: !focused
-                        ? 'circle(150% at center left)'
-                        : 'circle(0% at center left)',
-                    backgroundColor: 'primary.main',
+                        ? "circle(150% at center left)"
+                        : "circle(0% at center left)",
+                    backgroundColor: "primary.main",
                     // display: focused ? 'flex' : 'none',
                 }}
                 spacing={4}
@@ -57,10 +53,10 @@ const Login = (props: Props) => {
             <Stack
                 className="flex-1 py-10 px-5"
                 sx={{
-                    transitionProperty: focused ? 'none' : 'visibility',
-                    transitionDelay: '1s',
-                    visibility: focused ? 'visible' : 'hidden',
-                    bgcolor: 'secondary.main',
+                    transitionProperty: focused ? "none" : "visibility",
+                    transitionDelay: "1s",
+                    visibility: focused ? "visible" : "hidden",
+                    bgcolor: "secondary.main",
                 }}
                 spacing={4}
             >
@@ -69,7 +65,6 @@ const Login = (props: Props) => {
                     <TextField
                         variant="outlined"
                         label="Логин"
-
                         {...register("login", {
                             required: {
                                 value: true,
@@ -95,7 +90,7 @@ const Login = (props: Props) => {
                 </form>
             </Stack>
         </Box>
-    );
-};
+    )
+}
 
-export default Login;
+export default Login
