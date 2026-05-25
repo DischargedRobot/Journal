@@ -5,6 +5,9 @@
 	--foreground: #171717;
 	--color-primary: #5b69e3;
 	--color-black: #282827;
+
+	--font-roboto-mono: "Roboto Mono", monospace;
+	--font-afacad: "Afacad", serif;
 }
 
 @theme inline {
@@ -13,6 +16,8 @@
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-geist-sans);
 	--font-mono: var(--font-geist-mono);
+	--font-roboto-mono: var(--font-roboto-mono);
+	--font-afacad: var(--font-afacad);
 }
 
 /* @media (prefers-color-scheme: dark) {
