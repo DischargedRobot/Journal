@@ -3,17 +3,20 @@ import { memo, useCallback, useMemo } from "react"
 interface Props {
 	password: string
 }
-const messages = ["Cлабый", "Средний", "Сильный", "Очень сильный"]
+const messages = ["Никакущий", "Слабый", "Средний", "Сильный", "Очень сильный"]
 const calculateStrength = (password: string) => {
 	let strength = 0
-	if (password.length >= 8) {
-		strength += 1
-	}
+
 	if (/\d/.test(password)) {
 		strength += 1
 	}
 	if (/\W/.test(password)) {
 		strength += 1
+	}
+	if (password.length >= 8) {
+		strength += Math.trunc(password.length / 8)
+	} else {
+		strength = 0
 	}
 
 	return Math.min(strength, messages.length - 1)
@@ -28,7 +31,9 @@ const selectColorStrength = (strength: number) => {
 		case 2:
 			return "bg-yellow-500"
 		case 3:
-			return "bg-green-500"
+			return "bg-green-400"
+		case 4:
+			return "bg-green-600"
 		default:
 			return "bg-gray-300"
 	}
@@ -42,18 +47,17 @@ const PasswordStregth = ({ password }: Props) => {
 	)
 
 	return (
-		<div className="flex justify-between gap-6 w-full ">
-			<div
-				className={`w-full h-2 rounded-full bg-gray-300 ${colorStrength}`}
-			></div>
-			<div
-				className={`w-full h-2 rounded-full bg-gray-300 ${strength > 1 ? colorStrength : ""}`}
-			></div>
-			<div
-				className={`w-full h-2 rounded-full bg-gray-300 ${strength > 2 ? colorStrength : ""}`}
-			></div>
-			<span>{messages[strength]}</span>
-		</div>
+		<span className="block w-full">
+			<span className="flex items-center gap-4 w-full ">
+				<span className="flex gap-2 w-full">
+					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${colorStrength}`} />
+					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 1 ? colorStrength : ""}`} />
+					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 2 ? colorStrength : ""}`} />
+					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 3 ? colorStrength : ""}`} />
+				</span>
+				<span className="w-full">{messages[strength]}</span>
+			</span>
+		</span>
 	)
 }
 

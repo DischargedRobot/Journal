@@ -26,7 +26,7 @@ const Login = (props: Props) => {
 
     return (
         // right-1 - чтобы не было видно границы между блоками при анимации
-        <Box className="relative right-1 flex-1 flex overflow-hidden">
+        <Box className="relative right-1 flex-1 flex overflow-hidden p-5">
             <Stack
                 className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
                 sx={{
