@@ -1,4 +1,4 @@
-import { Stack, TextField, Typography, Button } from "@mui/material";
+import { Stack, TextField, Typography, Button, Box } from "@mui/material";
 import { useForm } from "react-hook-form";
 
 interface FormValues {
@@ -6,7 +6,18 @@ interface FormValues {
     password: string;
 }
 
-const Login = () => {
+interface Props {
+    onToLogin: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    focused: boolean;
+}
+
+const Login = (props: Props) => {
+
+    const {
+        focused,
+        onToLogin,
+    } = props;
+
     const {
         register,
         handleSubmit,
@@ -18,24 +29,37 @@ const Login = () => {
     });
 
     return (
-        <>
+        // right-1 - чтобы не было видно границы между блоками при анимации
+        <Box className="relative right-1 flex-1 flex overflow-hidden">
             <Stack
-                className="flex-1 flex items-center justify-center p-8 text-white self-stretch"
+                className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
                 sx={{
+                    transition: 'clip-path 1s ease',
+                    clipPath: !focused
+                        ? 'circle(150% at center left)'
+                        : 'circle(0% at center left)',
                     backgroundColor: 'primary.main',
+                    // display: focused ? 'flex' : 'none',
                 }}
                 spacing={4}
             >
-                <Typography variant="h4">Регистрация</Typography>
-                <Typography variant="h6">У вас ещё нет аккаунта?</Typography>
-                <Button variant="outlined" sx={{ backgroundColor: 'white' }}>
-                    Вы в первый раз?
+                <Typography variant="h4">С возвращением!</Typography>
+                <Typography variant="h6">У вас уже есть аккаунт?</Typography>
+                <Button
+                    variant="outlined"
+                    onClick={onToLogin}
+                    sx={{ backgroundColor: "white" }}
+                >
+                    Войти
                 </Button>
             </Stack>
 
             <Stack
                 className="flex-1 py-10 px-5"
                 sx={{
+                    transitionProperty: focused ? 'none' : 'visibility',
+                    transitionDelay: '1s',
+                    visibility: focused ? 'visible' : 'hidden',
                     bgcolor: 'secondary.main',
                 }}
                 spacing={4}
@@ -70,7 +94,7 @@ const Login = () => {
                     </Button>
                 </form>
             </Stack>
-        </>
+        </Box>
     );
 };
 

@@ -5,7 +5,17 @@ interface FormValues {
     password: string
 }
 
-const Registration = () => {
+interface Props {
+    onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    focused: boolean;
+}
+
+const Registration = (props: Props) => {
+
+    const {
+        focused,
+        onToRegistration,
+    } = props;
 
     const {
         register,
@@ -17,12 +27,40 @@ const Registration = () => {
         console.log(data);
     });
     return (
-        <Box className="flex rounded-3xl overflow-clip"
-            sx={{
-                bgcolor: 'secondary.main',
-            }}
-        >
-            <Stack spacing={4} className="flex-1 py-10 px-5">
+        // left-1 - чтобы не было видно границы между блоками при анимации
+        <Box className="relative left-1 flex-1 flex overflow-hidden">
+            <Stack
+                className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
+                sx={{
+                    transition: 'clip-path 1s ease',
+                    clipPath: !focused
+                        ? 'circle(150% at center right)'
+                        : 'circle(0% at center right)',
+                    backgroundColor: 'primary.main',
+                    // display: focused ? 'flex' : 'none',
+                }}
+                spacing={4}
+            >
+                <Typography variant="h4">Вы в первый раз?</Typography>
+                <Typography variant="h6">У вас ещё нет аккаунта?</Typography>
+                <Button
+                    onClick={onToRegistration}
+                    variant="outlined"
+                    sx={{ backgroundColor: 'white' }}
+                >
+                    зарегистрироваться
+                </Button>
+            </Stack>
+            <Stack
+                className="flex-1 py-10 px-5"
+                sx={{
+                    transitionProperty: focused ? 'none' : 'visibility',
+                    transitionDelay: '1s',
+                    visibility: focused ? 'visible' : 'hidden',
+                    bgcolor: 'secondary.main',
+                }}
+                spacing={4}
+            >
                 <Typography variant="h4">Регистрация</Typography>
                 <form onSubmit={onSubmit} className="flex flex-col gap-4 ">
                     <TextField
@@ -53,19 +91,8 @@ const Registration = () => {
                     </Button>
                 </form>
             </Stack>
-            <Stack
-                className="flex-1 flex items-center justify-center p-8 bg-primary text-white self-stretch"
-                spacing={4}
-            >
-                <Typography variant="h4">С возвращением!</Typography>
-                <Typography variant="h6">У вас уже есть аккаунт?</Typography>
-                <Button variant="outlined" className="" sx={{
-                    backgroundColor: "white"
-                }}>
-                    Войти
-                </Button>
-            </Stack>
-        </Box>
+
+        </Box >
     );
 }
 

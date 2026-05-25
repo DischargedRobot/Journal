@@ -34,15 +34,20 @@ const theme = createTheme({
 })
 const AuthPage = () => {
 
-    const [focused, isFocused] = useState(false);
-
+    const [registrationOpen, setRegistrationOpen] = useState(false);
     return (
         <ThemeProvider theme={theme}>
             <Container
-                className="flex items-stretch justify-between gap-6 p-0! w-full max-w-5xl bg-gray-100 rounded-3xl overflow-clip"
+                className="relative flex items-stretch justify-between p-0! w-full max-w-5xl rounded-3xl overflow-clip"
             >
-                <Registration />
-                <Login />
+                <Registration
+                    focused={registrationOpen}
+                    onToRegistration={() => setRegistrationOpen(true)}
+                />
+                <Login
+                    focused={!registrationOpen}
+                    onToLogin={() => setRegistrationOpen(false)}
+                />
             </Container>
         </ThemeProvider>
     );

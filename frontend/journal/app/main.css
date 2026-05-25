@@ -1,5 +1,5 @@
 @import "./reset.css";
 @import "./globals.css";
 
-@import "../fonts/Afacad/stylesheet.css";
-@import "../fonts/RobotoMono/stylesheet.css";
+@import "../public/fonts/Afacad/stylesheet.css";
+@import "../public/fonts/RobotoMono/stylesheet.css";
