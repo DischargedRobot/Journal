@@ -5,10 +5,12 @@ import { createTheme, ThemeProvider } from "@mui/material/styles"
 declare module "@mui/material/styles" {
 	interface PaletteColor {
 		black?: PaletteOptions["primary"]
+		default?: PaletteOptions["primary"]
 	}
 
 	interface PaletteOptions {
 		black?: PaletteOptions["primary"]
+		default?: PaletteOptions["primary"]
 	}
 }
 
@@ -25,6 +27,9 @@ const theme = createTheme({
 			main: "#F3F3F3",
 			light: "#FCFCFC",
 			dark: "#EFEFEF",
+		},
+		default: {
+			main: "#8E8D8D",
 		},
 		mode: "light",
 	},
