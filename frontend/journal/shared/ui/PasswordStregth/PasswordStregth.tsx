@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react"
+import { memo, useMemo } from "react"
 
 interface Props {
 	password: string
@@ -50,10 +50,18 @@ const PasswordStregth = ({ password }: Props) => {
 		<span className="block w-full">
 			<span className="flex items-center gap-4 w-full ">
 				<span className="flex gap-2 w-full">
-					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${colorStrength}`} />
-					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 1 ? colorStrength : ""}`} />
-					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 2 ? colorStrength : ""}`} />
-					<span className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 3 ? colorStrength : ""}`} />
+					<span
+						className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${colorStrength}`}
+					/>
+					<span
+						className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 1 ? colorStrength : ""}`}
+					/>
+					<span
+						className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 2 ? colorStrength : ""}`}
+					/>
+					<span
+						className={`max-w-20 w-full h-1 rounded-full bg-gray-300 ${strength > 3 ? colorStrength : ""}`}
+					/>
 				</span>
 				<span className="w-full">{messages[strength]}</span>
 			</span>

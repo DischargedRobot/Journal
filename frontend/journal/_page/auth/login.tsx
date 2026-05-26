@@ -49,19 +49,19 @@ const Login = (props: Props) => {
 			className="relative right-1 flex overflow-hidden py-5 px-7"
 			sx={(theme) => ({
 				flex: 1,
-				left: 1,
+				right: 1,
+				borderRadius: "0 32px 32px 0",
 				[theme.breakpoints.down("md")]: {
-					left: 0,
+					right: 0,
 					flex: focused ? "auto" : "none",
 					height: focused ? "730px" : "250px",
+					borderRadius: "0",
 				},
 			})}
 		>
 			<Stack
 				className="absolute z-10 inset-0 flex items-center justify-center p-8  text-white self-stretch"
 				sx={(theme) => ({
-					borderRadius: "0 32px 32px 0",
-
 					transition: "clip-path 1s ease",
 					clipPath: !focused
 						? "circle(150% at center left)"

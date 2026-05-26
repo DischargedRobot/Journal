@@ -13,11 +13,14 @@ import {
 	Radio,
 	FormHelperText,
 	SvgIcon,
+	OutlinedInput,
+	InputAdornment,
 } from "@mui/material"
 import { useForm, useWatch, Controller } from "react-hook-form"
 interface FormValues {
 	login: string
 	password: string
+	passwordConfirm?: string
 	firstName: string
 	lastName: string
 	patronymic?: string | null
@@ -63,7 +66,7 @@ const Registration = (props: Props) => {
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
 		<Box
-			className="relative flex overflow-hidden py-5 px-7"
+			className="relative flex overflow-hidden "
 			sx={(theme) => ({
 				flex: 1,
 				left: 1,
@@ -78,7 +81,6 @@ const Registration = (props: Props) => {
 			<Stack
 				className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
 				sx={(theme) => ({
-					borderRadius: "32px 0 0 32px ",
 					transition: "clip-path 1s ease",
 					clipPath: !focused
 						? "circle(150% at center right)"
@@ -101,13 +103,13 @@ const Registration = (props: Props) => {
 				<Button
 					onClick={onToRegistration}
 					variant="outlined"
-					sx={{ backgroundColor: "white" }}
+					sx={{ backgroundColor: "white", fontSize: "16px" }}
 				>
 					зарегистрироваться
 				</Button>
 			</Stack>
 			<Stack
-				className="flex-1"
+				className="flex-1 py-5 px-7"
 				sx={(theme) => ({
 					visibility: focused ? "visible" : "hidden",
 					bgcolor: "secondary.main",
@@ -135,6 +137,7 @@ const Registration = (props: Props) => {
 					<TextField
 						variant="outlined"
 						label="Имя"
+						size="small"
 						{...register("firstName", {
 							required: {
 								value: true,
@@ -148,6 +151,7 @@ const Registration = (props: Props) => {
 					<TextField
 						variant="outlined"
 						label="Фамилия"
+						size="small"
 						{...register("lastName", {
 							required: {
 								value: true,
@@ -161,6 +165,7 @@ const Registration = (props: Props) => {
 					<TextField
 						variant="outlined"
 						label="Отчество"
+						size="small"
 						{...register("patronymic")}
 						helperText={" "}
 					/>
@@ -168,6 +173,7 @@ const Registration = (props: Props) => {
 					<TextField
 						variant="outlined"
 						label="Email"
+						size="small"
 						type="email"
 						{...register("email", {
 							pattern: {
@@ -212,6 +218,7 @@ const Registration = (props: Props) => {
 						<TextField
 							variant="outlined"
 							label="Группа"
+							size="small"
 							{...register("group", {
 								required:
 									role === "STUDENT"
@@ -227,6 +234,7 @@ const Registration = (props: Props) => {
 						<TextField
 							variant="outlined"
 							label="Кафедра"
+							size="small"
 							{...register("department", {
 								required:
 									role === "TEACHER"
@@ -241,6 +249,7 @@ const Registration = (props: Props) => {
 					<TextField
 						variant="outlined"
 						label="Логин"
+						size="small"
 						{...register("login", {
 							required: {
 								value: true,
@@ -251,25 +260,54 @@ const Registration = (props: Props) => {
 						helperText={errors.login?.message ?? " "}
 					/>
 
-					<TextField
-						variant="outlined"
-						label="Пароль"
-						type="password"
-						{...register("password", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
-						error={!!errors.password}
-						helperText={
-							errors.password ? (
+					<FormControl error={!!errors.password}>
+						<FormLabel>Пароль</FormLabel>
+						<OutlinedInput
+							size="small"
+							type="password"
+							{...register("password", {
+								required: {
+									value: true,
+									message: "Поле обязательно для заполнения",
+								},
+							})}
+							endAdornment={
+								<InputAdornment position="end"></InputAdornment>
+							}
+						/>
+						<FormHelperText className=" mt-1 mb-4">
+							{errors.password ? (
 								errors.password.message
 							) : (
 								<PasswordStregth password={password} />
-							)
-						}
-					/>
+							)}
+						</FormHelperText>
+					</FormControl>
+
+					<FormControl error={!!errors.passwordConfirm}>
+						<FormLabel>Повторите пароль</FormLabel>
+						<OutlinedInput
+							size="small"
+							type="password"
+							{...register("passwordConfirm", {
+								required: {
+									value: true,
+									message: "Поле обязательно для заполнения",
+								},
+								validate: (value) =>
+									value === password || "Пароли не совпадают",
+							})}
+							endAdornment={
+								<InputAdornment position="end"></InputAdornment>
+							}
+						/>
+						<FormHelperText className=" mt-1 mb-4">
+							{errors.passwordConfirm
+								? errors.passwordConfirm.message
+								: " "}
+						</FormHelperText>
+					</FormControl>
+
 					<Button variant="contained" color="primary" type="submit">
 						Зарегистрироваться
 					</Button>

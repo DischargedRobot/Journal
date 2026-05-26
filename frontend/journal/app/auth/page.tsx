@@ -38,11 +38,16 @@ const AuthPage = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<Container
-				className="relative flex items-stretch  justify-between p-0! min-h-screen w-full max-w-5xl overflow-clip"
-				sx={{
+				className="relative flex items-stretch justify-between p-0!  w-full overflow-clip"
+				sx={(theme) => ({
 					backgroundColor: "secondary.main",
 					flexDirection: { xs: "column", md: "row" },
-				}}
+					borderRadius: "32px ",
+					[theme.breakpoints.down("md")]: {
+						height: "100vh",
+						borderRadius: "0",
+					},
+				})}
 			>
 				<Registration
 					focused={registrationOpen}
