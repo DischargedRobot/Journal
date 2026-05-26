@@ -1,4 +1,4 @@
-namespace AuthService.Controller.Dto
+namespace AuthService.Model.Auth.Dto
 {
     public class LoginRequest
     {

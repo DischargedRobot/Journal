@@ -1,5 +1,4 @@
 using AuthService.Redis;
-using AuthService.Controller.Dto;
 using Microsoft.AspNetCore.Mvc;
 using AuthService.Lib.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +7,8 @@ using AuthService.Errors;
 using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using Swashbuckle.AspNetCore.Annotations;
+using AuthService.ResponseExample;
+using AuthService.Model.Auth.Dto;
 
 namespace AuthService.Controller
 {
@@ -45,13 +46,14 @@ namespace AuthService.Controller
         [HttpPost("log-in")]
         [SwaggerOperation(Summary = "Вход в систему")]
         [SwaggerResponse(StatusCodes.Status200OK, "Успешная авторизация, возвращает access token")]
+        [ResponseExample(StatusCodes.Status200OK, typeof(LoginResponse))]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Неавторизован", typeof(ApiError))]
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
         [ApiErrorExample(StatusCodes.Status401Unauthorized, "1.2.3", "Неавторизован", "Пользователь с таким логином не найден или неверный пароль", "Login/Password")]
         [ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
-        public IActionResult Login(
+        public async Task<ActionResult<LoginResponse>> Login(
             [FromBody]
             LoginRequest? request
         )
@@ -83,9 +85,9 @@ namespace AuthService.Controller
                     });
                 }
 
-                Users? user = _context.Users
+                Users? user = await _context.Users
                     .Include(u => u.Roles)
-                    .FirstOrDefault(u => u.Login == request.Login);
+                    .FirstOrDefaultAsync(u => u.Login == request.Login);
 
                 if (user == null || !HashingPassword.VerifyPassword(request.Password, user.PasswordHash))
                 {
@@ -125,9 +127,17 @@ namespace AuthService.Controller
                     Expires = DateTime.UtcNow.AddDays(7),
                     Path = "/api/auth-service/v1/auth/refresh"
                 });
+                Response.Cookies.Append("accessToken", opaqueToken, new CookieOptions
+                {
+                    HttpOnly = false,
+                    Secure = false,
+                    SameSite = SameSiteMode.Lax,
+                    Expires = DateTime.UtcNow.AddMinutes(30),
+                    Path = "/api/"
+                });
 
                 _logger.LogInformation("{Function}: успешная авторизация для пользователя {UserUuid}", functionName, user.Uuid);
-                return Ok(new { accessToken = opaqueToken });
+                return Ok(new LoginResponse { AccessToken = opaqueToken });
             }
             catch (Exception ex)
             {
