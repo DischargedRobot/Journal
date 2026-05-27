@@ -33,6 +33,10 @@ namespace MainService
         [ForeignKey("AcademicYearId")]
         public AcademicYears? AcademicYear { get; set; }
 
+        public required int DisciplineTypeId { get; set; }
+        [ForeignKey("DisciplineTypeId")]
+        public DisciplinesTypes? DisciplinesTypes { get; set; }
+
         public ICollection<Brigades>? Brigades { get; set; } = [];
 
         [Required, MinLength(1)]
@@ -44,8 +48,10 @@ namespace MainService
 
         public ICollection<Lessons>? Lessons { get; set; } = [];
 
-        public ICollection<SelectedMarkTypes>? SelectedMarkTypes { get; set; } = [];
+        [Required, MinLength(1)]
+        public ICollection<SelectedMarkTypes> SelectedMarkTypes { get; set; } = [];
 
         public ICollection<Attestations>? Attestations { get; set; } = [];
+
     }
 }

@@ -34,6 +34,8 @@ namespace MainService
 		public DbSet<MarkTypes> MarkTypes => Set<MarkTypes>();
 		public DbSet<UniversityEmployers> UniversityEmployers => Set<UniversityEmployers>();
 		public DbSet<Users> Users => Set<Users>();
+		public DbSet<DisciplinesTypes> DisciplinesTypes => Set<DisciplinesTypes>();
+		public DbSet<SelectedMarkTypes> SelectedMarkTypes => Set<SelectedMarkTypes>();
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -108,6 +110,14 @@ namespace MainService
 			modelBuilder.Entity<TrainingDirections>().HasAlternateKey(e => e.Uuid);
 			modelBuilder.Entity<UniversityEmployers>().HasAlternateKey(e => e.Uuid);
 			modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
+
+			modelBuilder.Entity<SelectedMarkTypes>()
+				.Property(e => e.LessonTypeId)
+				.HasDefaultValue(0);
+
+			modelBuilder.Entity<SelectedMarkTypes>()
+				.Property(e => e.MarkTypeId)
+				.HasDefaultValue(0);
 		}
 
 		private void IncrementVersions()

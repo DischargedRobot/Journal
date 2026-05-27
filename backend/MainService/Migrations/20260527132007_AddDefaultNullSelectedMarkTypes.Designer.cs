@@ -3,6 +3,7 @@ using System;
 using MainService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MainService.Migrations
 {
     [DbContext(typeof(MainServiceContext))]
-    partial class MainServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20260527132007_AddDefaultNullSelectedMarkTypes")]
+    partial class AddDefaultNullSelectedMarkTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -825,25 +828,26 @@ namespace MainService.Migrations
             modelBuilder.Entity("MainService.SelectedMarkTypes", b =>
                 {
                     b.Property<int>("LessonTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
-                    b.Property<int>("MarkTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                    b.Property<int?>("MarkTypeId")
+                        .HasColumnType("integer");
 
-                    b.Property<int>("DisciplineId")
+                    b.Property<int?>("DisciplineTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DisciplineId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
                         .IsConcurrencyToken()
                         .HasColumnType("integer");
 
-                    b.HasKey("LessonTypeId", "MarkTypeId", "DisciplineId");
+                    b.HasKey("LessonTypeId", "MarkTypeId", "DisciplineTypeId");
 
                     b.HasIndex("DisciplineId");
+
+                    b.HasIndex("DisciplineTypeId");
 
                     b.HasIndex("MarkTypeId");
 
@@ -1392,7 +1396,11 @@ namespace MainService.Migrations
                 {
                     b.HasOne("MainService.Disciplines", "Disciplines")
                         .WithMany("SelectedMarkTypes")
-                        .HasForeignKey("DisciplineId")
+                        .HasForeignKey("DisciplineId");
+
+                    b.HasOne("MainService.DisciplinesTypes", "DisciplinesType")
+                        .WithMany("SelectedMarkTypes")
+                        .HasForeignKey("DisciplineTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1403,12 +1411,14 @@ namespace MainService.Migrations
                         .IsRequired();
 
                     b.HasOne("MainService.MarkTypes", "MarkType")
-                        .WithMany("SelectedMarkTypes")
+                        .WithMany()
                         .HasForeignKey("MarkTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Disciplines");
+
+                    b.Navigation("DisciplinesType");
 
                     b.Navigation("LessonType");
 
@@ -1497,6 +1507,8 @@ namespace MainService.Migrations
             modelBuilder.Entity("MainService.DisciplinesTypes", b =>
                 {
                     b.Navigation("Disciplines");
+
+                    b.Navigation("SelectedMarkTypes");
                 });
 
             modelBuilder.Entity("MainService.EmployeePosts", b =>
@@ -1535,8 +1547,6 @@ namespace MainService.Migrations
             modelBuilder.Entity("MainService.MarkTypes", b =>
                 {
                     b.Navigation("Marks");
-
-                    b.Navigation("SelectedMarkTypes");
                 });
 
             modelBuilder.Entity("MainService.Marks", b =>

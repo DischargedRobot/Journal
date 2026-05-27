@@ -13,6 +13,7 @@ namespace MainService
         public required Guid AcademicYearUuid { get; set; }
         public required Guid[] GroupsUuids { get; set; } = [];
         public Guid[]? ProfessorsUuids { get; set; } = [];
+        public required Guid DisciplineType { get; set; }
 
         public int Version { get; set; }
         public DisciplinesResponseDto() { }
@@ -30,6 +31,7 @@ namespace MainService
             GroupsUuids = discipline.Groups?.Select(g => g.Uuid).ToArray() ?? [];
             ProfessorsUuids = discipline.Professors?.Select(p => p.Uuid).ToArray() ?? [];
             Version = discipline.Version;
+            DisciplineType = discipline.DisciplinesTypes!.Uuid;
         }
     }
 }

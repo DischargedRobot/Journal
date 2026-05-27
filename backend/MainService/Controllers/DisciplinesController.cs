@@ -79,7 +79,8 @@ namespace MainService.Controllers
                     AcademicYearUuid = d.AcademicYear!.Uuid,
                     GroupsUuids = d.Groups.Select(g => g.Uuid).ToArray(),
                     ProfessorsUuids = d.Professors!.Select(p => p.Uuid).ToArray(),
-                    Version = d.Version
+                    Version = d.Version,
+                    DisciplineType = d.DisciplinesTypes!.Uuid
                 });
 
             Task<int> totalRecord = _context.Disciplines.CountAsync();
@@ -157,7 +158,8 @@ namespace MainService.Controllers
                     AcademicYearUuid = d.AcademicYear!.Uuid,
                     GroupsUuids = d.Groups.Select(g => g.Uuid).ToArray(),
                     ProfessorsUuids = d.Professors!.Select(p => p.Uuid).ToArray(),
-                    Version = d.Version
+                    Version = d.Version,
+                    DisciplineType = d.DisciplinesTypes!.Uuid
                 })
                 .FirstOrDefaultAsync();
 
@@ -373,7 +375,8 @@ namespace MainService.Controllers
                     AcademicYearUuid = d.AcademicYear!.Uuid,
                     GroupsUuids = d.Groups.Select(g => g.Uuid).ToArray(),
                     ProfessorsUuids = d.Professors!.Select(p => p.Uuid).ToArray(),
-                    Version = d.Version
+                    Version = d.Version,
+                    DisciplineType = d.DisciplinesTypes!.Uuid
                 })
                 .ToListAsync();
 
@@ -488,7 +491,8 @@ namespace MainService.Controllers
                     AcademicYearUuid = d.AcademicYear!.Uuid,
                     GroupsUuids = d.Groups.Select(g => g.Uuid).ToArray(),
                     ProfessorsUuids = d.Professors!.Select(p => p.Uuid).ToArray(),
-                    Version = d.Version
+                    Version = d.Version,
+                    DisciplineType = d.DisciplinesTypes!.Uuid
                 })
                 .ToListAsync();
 
@@ -604,6 +608,17 @@ namespace MainService.Controllers
                 });
             }
 
+            if (createDto.DisciplineType == Guid.Empty)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "DisciplineType обязателен и не может быть пустым",
+                    Field = nameof(createDto.DisciplineType)
+                });
+            }
+
             // запросы к БД и проверки существования связанных сущностей
             Semesters? semester = await _context.Semesters.FirstOrDefaultAsync(s => s.Uuid == createDto.SemesterUuid);
             if (semester == null)
@@ -682,6 +697,18 @@ namespace MainService.Controllers
                 }
             }
 
+            DisciplinesTypes? disciplineType = await _context.DisciplinesTypes.FirstOrDefaultAsync(dt => dt.Uuid == createDto.DisciplineType);
+            if (disciplineType == null)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "1.2.3",
+                    Title = "Некорректные данные",
+                    Message = "Тип дисциплины с указанным UUID не найден",
+                    Field = nameof(createDto.DisciplineType)
+                });
+            }
+
             Disciplines newDiscipline = new()
             {
                 Uuid = Guid.NewGuid(),
@@ -694,7 +721,8 @@ namespace MainService.Controllers
                 SemesterId = semester.SemesterId,
                 AcademicYearId = academicYear.AcademicYearId,
                 Groups = groups,
-                Professors = professors
+                Professors = professors,
+                DisciplineTypeId = disciplineType.DisciplineTypeId
             };
 
             _context.Disciplines.Add(newDiscipline);

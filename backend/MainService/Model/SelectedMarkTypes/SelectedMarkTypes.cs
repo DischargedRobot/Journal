@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.EntityFrameworkCore;
@@ -8,17 +9,17 @@ namespace MainService
     public class SelectedMarkTypes : BaseEntity
     {
 
-        public required int LessonTypeId { get; set; }
+        public int LessonTypeId { get; set; } = 0;
         [ForeignKey("LessonTypeId")]
         public LessonTypes? LessonType { get; set; }
 
-        public required int MarkTypeId { get; set; }
+        public int MarkTypeId { get; set; } = 0;
         [ForeignKey("MarkTypeId")]
         public MarkTypes? MarkType { get; set; }
 
         public required int DisciplineId { get; set; }
         [ForeignKey("DisciplineId")]
-        public Disciplines? Discipline { get; set; }
+        public Disciplines? Disciplines { get; set; }
 
     }
 }

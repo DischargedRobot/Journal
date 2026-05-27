@@ -3,6 +3,7 @@ using System;
 using MainService;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MainService.Migrations
 {
     [DbContext(typeof(MainServiceContext))]
-    partial class MainServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20260527135857_UpdateDefaultNullSelectedMarkTypes")]
+    partial class UpdateDefaultNullSelectedMarkTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -825,16 +828,15 @@ namespace MainService.Migrations
             modelBuilder.Entity("MainService.SelectedMarkTypes", b =>
                 {
                     b.Property<int>("LessonTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
                     b.Property<int>("MarkTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
                     b.Property<int>("DisciplineId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DisciplinesTypesDisciplineTypeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Version")
@@ -844,6 +846,8 @@ namespace MainService.Migrations
                     b.HasKey("LessonTypeId", "MarkTypeId", "DisciplineId");
 
                     b.HasIndex("DisciplineId");
+
+                    b.HasIndex("DisciplinesTypesDisciplineTypeId");
 
                     b.HasIndex("MarkTypeId");
 
@@ -1396,6 +1400,10 @@ namespace MainService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MainService.DisciplinesTypes", null)
+                        .WithMany("SelectedMarkTypes")
+                        .HasForeignKey("DisciplinesTypesDisciplineTypeId");
+
                     b.HasOne("MainService.LessonTypes", "LessonType")
                         .WithMany("SelectedMarkTypes")
                         .HasForeignKey("LessonTypeId")
@@ -1497,6 +1505,8 @@ namespace MainService.Migrations
             modelBuilder.Entity("MainService.DisciplinesTypes", b =>
                 {
                     b.Navigation("Disciplines");
+
+                    b.Navigation("SelectedMarkTypes");
                 });
 
             modelBuilder.Entity("MainService.EmployeePosts", b =>

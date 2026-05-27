@@ -17,5 +17,7 @@ namespace MainService
         public int? UniversityEmployerId { get; set; }
         [ForeignKey("UniversityEmployerId")]
         public UniversityEmployers? UniversityEmployer { get; set; }
+
+        public ICollection<SelectedMarkTypes>? SelectedMarkTypes { get; set; } = [];
     }
 }

@@ -12,5 +12,6 @@ namespace MainService
         public required Guid AcademicYearUuid { get; set; }
         public required Guid[] GroupsUuids { get; set; } = [];
         public Guid[]? ProfessorsUuids { get; set; } = [];
+        public required Guid DisciplineType { get; set; }
     }
 }
