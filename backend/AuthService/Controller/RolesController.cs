@@ -88,19 +88,7 @@ namespace AuthService.Controller
 				List<RolesResponseDto> items = await baseQuery
 					.SortByKey(r => r.Name, sortOrder)
 					.TakeWithOffset(offset, size)
-					.Select(r => new RolesResponseDto
-					{
-						Uuid = r.Uuid,
-						Name = r.Name,
-						Rights =
-							r.RoleRights != null
-								? r.RoleRights.Select(rr => new RoleRightsResponseDto
-								{
-									Uuid = rr.Uuid,
-									Name = rr.Name,
-								})
-								: null,
-					})
+					.Select(r => new RolesResponseDto(r))
 					.ToListAsync();
 
 				int total = await totalRecord;
@@ -172,21 +160,10 @@ namespace AuthService.Controller
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
-				var role = await _context
-						.Roles.Where(r => r.Uuid == uuid)
-						.Select(r => new RolesResponseDto
-						{
-							Uuid = r.Uuid,
-							Name = r.Name,
-							Rights = r.RoleRights != null
-								? r.RoleRights.Select(rr => new RoleRightsResponseDto
-								{
-									Uuid = rr.Uuid,
-									Name = rr.Name,
-								})
-								: null,
-						})
-						.FirstOrDefaultAsync();
+				RolesResponseDto? role = await _context.Roles
+					.Where(r => r.Uuid == uuid)
+					.Select(r => new RolesResponseDto(r))
+					.FirstOrDefaultAsync();
 
 				if (role == null)
 				{
@@ -272,6 +249,18 @@ namespace AuthService.Controller
 					);
 				}
 
+				if (createDto.RoleTypesUuids == null || !createDto.RoleTypesUuids.Any())
+				{
+					_logger.LogWarning("{Function}: RoleTypesUuids отсутствует или пустой", functionName);
+					return BadRequest(
+						new ApiError(
+							"0.2.0",
+							"Неверный запрос",
+							"Поле RoleTypesUuids обязательно и должно содержать хотя бы один UUID типа роли",
+							nameof(createDto.RoleTypesUuids))
+					);
+				}
+
 				bool exists = await _context.Roles.AnyAsync(r => r.Name == createDto.Name);
 				if (exists)
 				{
@@ -297,9 +286,11 @@ namespace AuthService.Controller
 				await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 				try
 				{
-					List<Guid> requested = createDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
+					List<Guid> requested = createDto.RightsUuids?.Distinct().ToList() ?? [];
 
-					List<RoleRights> rights = new List<RoleRights>();
+					List<Guid>? requestedRoleTypes = createDto.RoleTypesUuids?.Distinct().ToList();
+
+					List<RoleRights> rights = [];
 					if (requested.Count > 0)
 					{
 						rights = await _context.RoleRights
@@ -337,6 +328,50 @@ namespace AuthService.Controller
 								role.RoleRights.Add(rr);
 						}
 
+					}
+
+					if (requestedRoleTypes == null)
+					{
+						_logger.LogWarning("{Function}: RoleTypesUuids отсутствует", functionName);
+						await transaction.RollbackAsync();
+						return BadRequest(
+							new ApiError(
+								"0.2.0",
+								"Неверный запрос",
+								"Поле RoleTypesUuids обязательно для создания роли (может быть пустым массивом)",
+								nameof(createDto.RoleTypesUuids))
+						);
+					}
+					// Обработка типов ролей
+					if (requestedRoleTypes.Count > 0)
+					{
+						List<RolesTypes> roleTypes = await _context.RolesTypes
+							.Where(rt => requestedRoleTypes.Contains(rt.Uuid))
+							.ToListAsync();
+
+						List<Guid> missingRoleTypes = requestedRoleTypes.Except(roleTypes.Select(r => r.Uuid)).ToList();
+						if (missingRoleTypes.Count > 0)
+						{
+							_logger.LogWarning("{Function}: некоторые типы ролей не найдены: {Missing}", functionName, string.Join(", ", missingRoleTypes));
+							await transaction.RollbackAsync();
+							return BadRequest(
+								new ApiError
+								{
+									StatusCode = "0.2.4",
+									Title = "Неверный запрос",
+									Message = "Некоторые типы ролей не найдены",
+									Field = nameof(createDto.RoleTypesUuids),
+									Details = string.Join(", ", missingRoleTypes),
+								}
+							);
+						}
+
+						role.RoleType ??= new List<RolesTypes>();
+						foreach (RolesTypes rt in roleTypes)
+						{
+							if (!role.RoleType.Any(r => r.Uuid == rt.Uuid))
+								role.RoleType.Add(rt);
+						}
 					}
 					await _context.SaveChangesAsync();
 					await transaction.CommitAsync();
@@ -412,7 +447,7 @@ namespace AuthService.Controller
 					);
 				}
 
-				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
+				Roles? role = await _context.Roles.Include(r => r.RoleRights).Include(r => r.RoleType).FirstOrDefaultAsync(r => r.Uuid == uuid);
 				if (role == null)
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);
@@ -496,6 +531,50 @@ namespace AuthService.Controller
 						if (!role.RoleRights.Any(x => x.Uuid == rr.Uuid))
 							role.RoleRights.Add(rr);
 					}
+
+				}
+
+				if (request.RoleTypesUuids != null)
+				{
+					List<Guid> requestedRoleTypes = request.RoleTypesUuids.Distinct().ToList();
+
+					List<RolesTypes> roleTypes = await _context.RolesTypes
+						.Where(rt => requestedRoleTypes.Contains(rt.Uuid))
+						.ToListAsync();
+
+					List<Guid> missingRoleTypes = requestedRoleTypes.Except(roleTypes.Select(r => r.Uuid)).ToList();
+					if (missingRoleTypes.Count > 0)
+					{
+						_logger.LogWarning("{Function}: некоторые типы ролей не найдены: {Missing}", functionName, string.Join(", ", missingRoleTypes));
+						return BadRequest(
+							new ApiError
+							{
+								StatusCode = "0.2.4",
+								Title = "Неверный запрос",
+								Message = "Некоторые типы ролей не найдены",
+								Field = nameof(request.RoleTypesUuids),
+								Details = string.Join(", ", missingRoleTypes),
+							}
+						);
+					}
+
+					_logger.LogInformation("{Function}: изменяем типы роли uuid={Uuid}", functionName, uuid);
+
+					List<RolesTypes> currentTypes = role.RoleType.ToList();
+
+					List<RolesTypes> toRemoveTypes = currentTypes
+						.Where(cr => !requestedRoleTypes.Contains(cr.Uuid))
+						.ToList();
+					foreach (RolesTypes r in toRemoveTypes)
+					{
+						role.RoleType.Remove(r);
+					}
+
+					foreach (RolesTypes rt in roleTypes)
+					{
+						if (!role.RoleType.Any(x => x.Uuid == rt.Uuid))
+							role.RoleType.Add(rt);
+					}
 				}
 
 				await _context.SaveChangesAsync();
@@ -564,7 +643,20 @@ namespace AuthService.Controller
 					);
 				}
 
-				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
+				if (replaceDto.RoleTypesUuids == null || !replaceDto.RoleTypesUuids.Any())
+				{
+					_logger.LogWarning("{Function}: RoleTypesUuids отсутствует или пустой", functionName);
+					return BadRequest(
+						new ApiError(
+							"0.2.0",
+							"Неверный запрос",
+							"Поле RoleTypesUuids обязательно и должно содержать хотя бы один UUID типа роли",
+							nameof(replaceDto.RoleTypesUuids)
+						)
+					);
+				}
+
+				Roles? role = await _context.Roles.Include(r => r.RoleRights).Include(r => r.RoleType).FirstOrDefaultAsync(r => r.Uuid == uuid);
 				if (role == null)
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);
@@ -596,15 +688,16 @@ namespace AuthService.Controller
 
 				role.Name = replaceDto.Name.Trim();
 
-				List<Guid> requested = replaceDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
+				List<Guid> requestedRights = replaceDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
+				List<Guid> requestedRoleTypes = replaceDto.RoleTypesUuids?.Distinct().ToList() ?? [];
 
-				if (requested.Count > 0)
+				if (requestedRights.Count > 0)
 				{
 					List<RoleRights> rights = await _context.RoleRights
-						.Where(rr => requested.Contains(rr.Uuid))
+						.Where(rr => requestedRights.Contains(rr.Uuid))
 						.ToListAsync();
 
-					List<Guid> missing = requested.Except(rights.Select(r => r.Uuid)).ToList();
+					List<Guid> missing = requestedRights.Except(rights.Select(r => r.Uuid)).ToList();
 					if (missing.Count > 0)
 					{
 						_logger.LogWarning(
@@ -642,23 +735,54 @@ namespace AuthService.Controller
 				}
 				else
 				{
-					role.RoleRights ??= [];
-					role.RoleRights.Clear();
+					role.RoleRights?.Clear();
 				}
+
+				// Обработка типов ролей для Replace
+				List<RolesTypes> roleTypes = await _context.RolesTypes
+					.Where(rt => requestedRoleTypes.Contains(rt.Uuid))
+					.ToListAsync();
+
+				List<Guid> missingTypes = requestedRoleTypes.Except(roleTypes.Select(r => r.Uuid)).ToList();
+				if (missingTypes.Count > 0)
+				{
+					_logger.LogWarning(
+						"{Function}: некоторые типы ролей не найдены: {Missing}",
+						 functionName,
+						 string.Join(", ", missingTypes)
+						 );
+					return BadRequest(
+						new ApiError
+						{
+							StatusCode = "0.2.4",
+							Title = "Неверный запрос",
+							Message = "Некоторые типы ролей не найдены",
+							Field = nameof(replaceDto.RoleTypesUuids),
+							Details = string.Join(", ", missingTypes),
+						}
+					);
+				}
+
+				// Убираем привязку типов ролей
+				List<RolesTypes> current = role.RoleType?.ToList() ?? new List<RolesTypes>();
+				foreach (RolesTypes r in current)
+				{
+					role.RoleType?.Remove(r);
+				}
+
+				foreach (RolesTypes r in roleTypes)
+				{
+					if (role.RoleType?.Any(x => x.Uuid == r.Uuid) == false)
+					{
+						role.RoleType?.Add(r);
+					}
+				}
+
 				await _context.SaveChangesAsync();
 
 				_logger.LogInformation("{Function}: роль uuid={Uuid} заменена", functionName, uuid);
 				return Ok(
-					new RolesResponseDto
-					{
-						Uuid = role.Uuid,
-						Name = role.Name,
-						Rights = role.RoleRights?.Select(rr => new RoleRightsResponseDto
-						{
-							Uuid = rr.Uuid,
-							Name = rr.Name
-						}).ToList()
-					}
+					new RolesResponseDto(role)
 				);
 			}
 			catch (Exception ex)

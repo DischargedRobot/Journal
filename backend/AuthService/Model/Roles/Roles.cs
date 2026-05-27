@@ -12,6 +12,8 @@ namespace AuthService.Model
         public string Name { get; set; } = null!;
 
         public ICollection<Users>? Users { get; set; }
-        public ICollection<RoleRights>? RoleRights { get; set; }
+        public ICollection<RoleRights>? RoleRights { get; set; } = [];
+        [Required, MinLength(1)]
+        public ICollection<RolesTypes> RoleType { get; set; } = [];
     }
 }

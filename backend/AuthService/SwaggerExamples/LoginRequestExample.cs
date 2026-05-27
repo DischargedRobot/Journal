@@ -1,5 +1,7 @@
 using Swashbuckle.AspNetCore.Filters;
-using AuthService.Controller.Dto;
+
+using AuthService.Controller;
+using AuthService.Model.Auth.Dto;
 
 namespace AuthService.SwaggerExamples
 {

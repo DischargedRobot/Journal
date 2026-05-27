@@ -7,7 +7,8 @@ namespace AuthService.Model
 	{
 		public required Guid Uuid { get; set; }
 		public required string Name { get; set; }
-		public IEnumerable<RoleRightsResponseDto>? Rights { get; set; }
+		public IEnumerable<RoleRightsResponseDto> Rights { get; set; } = [];
+		public IEnumerable<RolesTypesResponseDto> RoleTypes { get; set; } = [];
 		public RolesResponseDto() { }
 		[SetsRequiredMembers]
 		public RolesResponseDto(Roles role)
@@ -18,6 +19,11 @@ namespace AuthService.Model
 			{
 				Uuid = rr.Uuid,
 				Name = rr.Name,
+			}) ?? [];
+			RoleTypes = role.RoleType.Select(rt => new RolesTypesResponseDto
+			{
+				Uuid = rt.Uuid,
+				Name = rt.Name,
 			});
 		}
 
@@ -25,7 +31,8 @@ namespace AuthService.Model
 		{
 			Uuid = Guid.NewGuid(),
 			Name = "Admin",
-			Rights = [RoleRightsResponseDto.Example]
+			Rights = [RoleRightsResponseDto.Example],
+			RoleTypes = [RolesTypesResponseDto.Example]
 		};
 	}
 }

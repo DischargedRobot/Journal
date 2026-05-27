@@ -13,6 +13,7 @@ namespace AuthService
         public DbSet<Roles> Roles => Set<Roles>();
         public DbSet<RoleRights> RoleRights => Set<RoleRights>();
         public DbSet<Sessions> Sessions => Set<Sessions>();
+        public DbSet<RolesTypes> RolesTypes => Set<RolesTypes>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,7 +37,7 @@ namespace AuthService
                 j => j.HasOne<RoleRights>().WithMany().HasForeignKey("RoleRightId"),
                 j => j.HasOne<Roles>().WithMany().HasForeignKey("RoleId")
             );
-            ;
+
 
             modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
             modelBuilder.Entity<Roles>().HasAlternateKey(e => e.Uuid);
