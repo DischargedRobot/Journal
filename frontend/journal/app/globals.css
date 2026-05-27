@@ -14,10 +14,20 @@
 	--color-primary: var(--color-primary);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-geist-sans);
-	--font-mono: var(--font-geist-mono);
 	--font-roboto-mono: var(--font-roboto-mono);
 	--font-afacad: var(--font-afacad);
+}
+
+text {
+	font-family: var(--font-roboto-mono);
+	font-size: 16px;
+	line-height: 1.2;
+}
+
+title {
+	font-family: var(--font-afacad);
+	font-size: 24px;
+	line-height: 1.2;
 }
 
 /* @media (prefers-color-scheme: dark) {

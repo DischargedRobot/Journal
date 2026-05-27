@@ -3,8 +3,8 @@
 import React, { JSX, useEffect, useState } from "react"
 import IconButton, { IconButtonProps } from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
-import DarkModeTwoToneIcon from "@mui/icons-material/DarkModeTwoTone"
-import LightModeTwoToneIcon from "@mui/icons-material/LightModeTwoTone"
+import LightModeIcon from "@mui/icons-material/LightMode"
+import DarkModeIcon from "@mui/icons-material/DarkMode"
 // import { IconProps } from "@mui/material/Icon"
 
 type ThemeMode = "dark" | "light"
@@ -14,6 +14,7 @@ type Props = {
 	onChange?: (theme: ThemeMode) => void
 	maxIconSize?: number
 	minIconSize?: number
+	color?: string
 } & Omit<IconButtonProps, "children">
 
 const ThemeIcon = ({
@@ -46,14 +47,16 @@ const ThemeIcon = ({
 				{...iconButtonProps}
 			>
 				{theme === "light" ? (
-					<DarkModeTwoToneIcon
+					<DarkModeIcon
 						sx={{
+							color: "black.main",
 							fontSize: `clamp(${minIconSize}px, 16.00px + 2.50vw, ${maxIconSize}px)`,
 						}}
 					/>
 				) : (
-					<LightModeTwoToneIcon
+					<LightModeIcon
 						sx={{
+							color: "white",
 							fontSize: `clamp(${minIconSize}px, 16.00px + 2.50vw, ${maxIconSize}px)`,
 						}}
 					/>
