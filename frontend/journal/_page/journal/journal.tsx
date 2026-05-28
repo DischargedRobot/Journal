@@ -182,7 +182,23 @@ const Journal = () => {
 					}}
 				/>
 			</Box>
-			<LessonTable lessons={mockLessons} rows={mockJournalRows} />
+			<LessonTable
+				lessons={mockLessons}
+				rows={mockJournalRows}
+				// moreToolsButton={({ onClick, row }) => (
+				// 	<MoreToolsButton
+				// 		items={[
+				// 			{ key: "1", label: "Удалить", onClick: () => { }, sx: { color: "warning.main" } },
+				// 			{ key: "2", label: "Редактировать", onClick: () => { }, },
+				// 		]}
+				// 		onMenuClick={onClick}
+				// 		sx={row ? undefined : { color: "common.white" }}
+				// 	/>
+				// )}
+				showMoreTools={false}
+				onHeaderMoreToolsClick={() => { }}
+				onRowMoreToolsClick={() => { }}
+			/>
 			<DisciplineTable disciplines={disciplines} />
 		</div>
 	)

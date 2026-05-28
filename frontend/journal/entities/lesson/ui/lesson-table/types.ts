@@ -19,7 +19,7 @@ export type LessonTableProps = {
 	/** Клик по ⋮ в строке (если не обрабатывается внутри `moreToolsButton`). */
 	onRowMoreToolsClick?: (row: TJournalRow) => void
 	/** Показать колонку ⋮ (по умолчанию `true`). */
-	moreTools?: boolean
+	showMoreTools?: boolean
 	/** Кастомная кнопка ⋮; по умолчанию — встроенная иконка. */
 	moreToolsButton?: ComponentType<LessonMoreToolsButtonProps>
 }

@@ -25,6 +25,9 @@ const main = "#5B69E3"
 
 const theme = createTheme({
 	palette: {
+		warning: {
+			main: "#FF0000",
+		},
 		black: base.palette.augmentColor({
 			color: { main: base.palette.grey[900] },
 			name: "black",

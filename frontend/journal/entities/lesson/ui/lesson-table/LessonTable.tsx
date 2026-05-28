@@ -24,7 +24,7 @@ const defaultColDef = {
 } as const
 
 const toggleRowInSelection = (selected: string[], uuid: string): string[] =>
-	selected.includes(uuid) ? selected.filter((id) => id !== uuid) : [...selected, uuid]
+    selected.includes(uuid) ? selected.filter((id) => id !== uuid) : [...selected, uuid]
 
 const extractLessonOrder = (event: ColumnMovedEvent): string[] => {
     const order: string[] = []
@@ -42,28 +42,27 @@ const extractLessonOrder = (event: ColumnMovedEvent): string[] => {
 const LessonTable = ({
     lessons,
     rows,
-	selectedRowUuids: selectedRowUuidsProp,
-	onRowSelect,
-	onHeaderMoreToolsClick,
-	onRowMoreToolsClick,
-	moreTools = true,
-	moreToolsButton: moreToolsButtonProp,
+    selectedRowUuids: selectedRowUuidsProp,
+    onRowSelect,
+    onHeaderMoreToolsClick,
+    onRowMoreToolsClick,
+    showMoreTools = true,
+    moreToolsButton: moreToolsButtonProp,
 }: LessonTableProps) => {
-	const MoreToolsButtonComponent = moreToolsButtonProp ?? DefaultLessonMoreToolsButton
+    const MoreToolsButtonComponent = moreToolsButtonProp ?? DefaultLessonMoreToolsButton
     const theme = useTheme()
     const gridRef = useRef<AgGridReactType<TJournalRow>>(null)
-	const [selectedRowUuidsInner, setSelectedRowUuidsInner] = useState<string[]>([])
-	const { orderedLessons, syncLessonOrder } = useOrderedLessons(lessons)
+    const [selectedRowUuidsInner, setSelectedRowUuidsInner] = useState<string[]>([])
+    const { orderedLessons, syncLessonOrder } = useOrderedLessons(lessons)
 
-	const selectedRowUuids = selectedRowUuidsProp ?? selectedRowUuidsInner
-	const selectedSet = useMemo(() => new Set(selectedRowUuids), [selectedRowUuids])
-	const hasRows = rows.length > 0
-	const domLayout = hasRows ? "autoHeight" : "normal"
-	const showMoreTools = moreTools
+    const selectedRowUuids = selectedRowUuidsProp ?? selectedRowUuidsInner
+    const selectedSet = useMemo(() => new Set(selectedRowUuids), [selectedRowUuids])
+    const hasRows = rows.length > 0
+    const domLayout = hasRows ? "autoHeight" : "normal"
 
-	useEffect(() => {
-		gridRef.current?.api?.redrawRows()
-	}, [selectedRowUuids])
+    useEffect(() => {
+        gridRef.current?.api?.redrawRows()
+    }, [selectedRowUuids])
 
     const gridTheme = useMemo(
         () =>
@@ -91,17 +90,17 @@ const LessonTable = ({
         [onHeaderMoreToolsClick, onRowMoreToolsClick, MoreToolsButtonComponent],
     )
 
-	const handleRowClick = useCallback(
-		(uuid: string) => {
-			const nextUuids = toggleRowInSelection(selectedRowUuids, uuid)
+    const handleRowClick = useCallback(
+        (uuid: string) => {
+            const nextUuids = toggleRowInSelection(selectedRowUuids, uuid)
 
-			if (selectedRowUuidsProp === undefined) {
-				setSelectedRowUuidsInner(nextUuids)
-			}
-			onRowSelect?.(nextUuids)
-		},
-		[onRowSelect, selectedRowUuids, selectedRowUuidsProp],
-	)
+            if (selectedRowUuidsProp === undefined) {
+                setSelectedRowUuidsInner(nextUuids)
+            }
+            onRowSelect?.(nextUuids)
+        },
+        [onRowSelect, selectedRowUuids, selectedRowUuidsProp],
+    )
 
     const handleColumnMoved = useCallback(
         (event: ColumnMovedEvent) => {
@@ -117,22 +116,22 @@ const LessonTable = ({
         [syncLessonOrder],
     )
 
-	useEffect(() => {
-		const api = gridRef.current?.api
-		if (!api) {
-			return
-		}
+    useEffect(() => {
+        const api = gridRef.current?.api
+        if (!api) {
+            return
+        }
 
-		api.setGridOption("domLayout", domLayout)
-	}, [domLayout])
+        api.setGridOption("domLayout", domLayout)
+    }, [domLayout])
 
-	const getRowClass = useCallback(
-		(params: { data?: TJournalRow }) =>
-			params.data && selectedSet.has(params.data.uuid)
-				? "lesson-grid-row-selected"
-				: undefined,
-		[selectedSet],
-	)
+    const getRowClass = useCallback(
+        (params: { data?: TJournalRow }) =>
+            params.data && selectedSet.has(params.data.uuid)
+                ? "lesson-grid-row-selected"
+                : undefined,
+        [selectedSet],
+    )
 
     return (
         <Paper
