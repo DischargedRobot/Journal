@@ -14,9 +14,8 @@ interface Props {
 const DisciplineCard = ({ discipline, professorName }: Props) => {
 	return (
 		<Card
-			className="relative rounded-xl border-b-4 transition-all duration-200 easy-in-out hover:cursor-pointer hover:scale-[1.1]"
+			className="relative rounded-xl border-b-4 w-full transition-all duration-200 easy-in-out hover:cursor-pointer hover:scale-[1.1]"
 			sx={{
-				width: 150,
 				bgcolor: "secondary.light",
 				borderColor: "grey.300",
 				"&:hover": {
@@ -25,9 +24,10 @@ const DisciplineCard = ({ discipline, professorName }: Props) => {
 			}}
 		>
 			<CardHeader
+				className="flex items-start h-20 wrap-anywhere"
 				variant="body2"
 				disableTypography
-				title={discipline.shortName}
+				title={discipline.name.length > 30 ? discipline.shortName : discipline.name}
 			/>
 			<CardContent>
 				<Typography variant="body2">{professorName}</Typography>

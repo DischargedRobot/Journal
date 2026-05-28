@@ -6,7 +6,9 @@ const JournalPage = () => {
 	return (
 		<>
 			<Header />
-			<Journal />
+			<main className="my-0 mx-auto w-fit overflow-auto">
+				<Journal />
+			</main>
 		</>
 	)
 }

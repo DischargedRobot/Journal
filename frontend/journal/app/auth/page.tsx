@@ -7,7 +7,7 @@ import { useState } from "react"
 const AuthPage = () => {
 	const [registrationOpen, setRegistrationOpen] = useState(false)
 	return (
-		<div className="content-center h-screen w-screen overflow-auto">
+		<main className="content-center h-screen w-screen overflow-auto">
 			<Container
 				className="relative flex items-stretch justify-between p-0!  w-full overflow-clip"
 				sx={(theme) => ({
@@ -29,7 +29,7 @@ const AuthPage = () => {
 					onToLogin={() => setRegistrationOpen(false)}
 				/>
 			</Container>
-		</div>
+		</main>
 	)
 }
 

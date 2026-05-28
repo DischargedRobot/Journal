@@ -10,14 +10,17 @@ interface Props {
 }
 
 const DisciplineTable = ({ disciplines }: Props) => {
-
 	const grouped = disciplines.reduce<Record<string, TDiscipline[]>>(
 		(acc, discipline) => {
-			if (!acc[discipline.name]) {
-				acc[discipline.name] = []
+			// чтобы всё нормально умещалось в пределах столбца
+			const displayName =
+				discipline.name.length > 12 ? discipline.shortName : discipline.name
+
+			if (!acc[displayName]) {
+				acc[displayName] = []
 			}
 
-			acc[discipline.name].push(discipline)
+			acc[displayName].push(discipline)
 
 			return acc
 		},
@@ -27,16 +30,17 @@ const DisciplineTable = ({ disciplines }: Props) => {
 	return (
 		<Box sx={{ display: "flex", gap: 4 }}>
 			{Object.entries(grouped).map(([name, disciplines]) => (
-				<div key={name} className="flex flex-col items-center gap-1">
+				<div key={name} className="flex flex-col items-center gap-1 w-[150px]">
 					<Typography
-						className="font-bold"
+						className="font-bold w-full"
 						sx={{ color: "primary.dark" }}
+						noWrap
 						align="center"
 						variant="h6"
 					>
 						{name}
 					</Typography>
-					<List className="flex flex-col gap-5">
+					<List className="flex flex-col gap-5 w-full">
 						{disciplines.map((discipline) => (
 							<ListItem key={discipline.uuid} disablePadding>
 								<DisciplineCard
