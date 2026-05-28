@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import "./main.css"
-import { ClientThemeProvider } from "@/shared/lib/client-theme-provider"
+import { ClientThemeProvider } from "@/shared/model/client-theme-provider"
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter"
 export const metadata: Metadata = {
 	title: "Авторизация",

@@ -1,4 +1,4 @@
-import { DisciplineType, DisciplineTypeShort } from "@/shared/lib/discipline"
+import { DisciplineType, DisciplineTypeShort } from "@/shared/model/discipline"
 import { Tag, TagColor } from "@/shared/ui/tag"
 import {
 	green,

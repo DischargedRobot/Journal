@@ -1,4 +1,4 @@
-import { TDiscipline } from "@/shared/lib/discipline"
+import { TDiscipline } from "@/shared/model/discipline"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
@@ -12,7 +12,7 @@ interface Props {
 
 const DisciplineCard = ({ discipline }: Props) => {
 	return (
-		<Card>
+		<Card sx={{ width: 200, bgcolor: "secondary.light" }}>
 			<CardHeader title={discipline.name} />
 			<CardContent>
 				<Typography variant="body1">{discipline.name}</Typography>
