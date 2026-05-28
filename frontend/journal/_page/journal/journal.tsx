@@ -1,14 +1,74 @@
-import { DisciplineCard } from "@/entities/discipline"
+import { TDiscipline } from "@/shared/model/discipline"
+import { DisciplineTable } from "@/widgets/discipline-table"
+
+const disciplines: TDiscipline[] = [
+	{
+		uuid: "1",
+		name: "Математика",
+		shortName: "Мат.",
+		type: "Лекция",
+		isArchived: false,
+		professorUuid: "1",
+		groupUuid: "1",
+		DisciplinesSet: "1",
+	},
+	{
+		uuid: "2",
+		name: "Физика",
+		shortName: "Физ.",
+		type: "Упражнение",
+		isArchived: false,
+		professorUuid: "2",
+		groupUuid: "1",
+		DisciplinesSet: "1",
+	},
+	{
+		uuid: "3",
+		name: "История",
+		shortName: "Ист.",
+		type: "Семинар",
+		isArchived: false,
+		professorUuid: "3",
+		groupUuid: "2",
+		DisciplinesSet: "1",
+	},
+	{
+		uuid: "4",
+		name: "Программирование",
+		shortName: "Прог.",
+		type: "Лабораторная",
+		isArchived: false,
+		professorUuid: "4",
+		groupUuid: "2",
+		DisciplinesSet: "2",
+	},
+	{
+		uuid: "7",
+		name: "Программирование",
+		shortName: "Прог.",
+		type: "Упражнение",
+		isArchived: false,
+		professorUuid: "4",
+		groupUuid: "2",
+		DisciplinesSet: "2",
+	},
+	{
+		uuid: "5",
+		name: "Английский язык",
+		shortName: "АЯ",
+		type: "Лекция",
+		isArchived: true,
+		professorUuid: "5",
+		groupUuid: "3",
+		DisciplinesSet: "2",
+	},
+
+]
 
 const Journal = () => {
-	return (
-		<DisciplineCard
-			discipline={{
-				name: "Математика",
-				type: "Практика",
-			}}
-		/>
-	)
+	return <div className="flex justify-center pt-4 w-full h-full overflow-auto">
+		<DisciplineTable disciplines={disciplines} />
+	</div>
 }
 
 export default Journal

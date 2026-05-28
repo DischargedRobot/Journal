@@ -1,8 +1,9 @@
+import { IBaseEntity } from "../utility-types/base-entity"
 import { Uuid } from "../utility-types/uuid"
 
 export type DisciplineType =
 	| "Лекция"
-	| "Практика"
+	| "Упражнение"
 	| "Лабораторная"
 	| "Семинар"
 	| "Курсовой проект"
@@ -14,7 +15,7 @@ export type DisciplineType =
 
 export type DisciplineTypeShort =
 	| "Лек."
-	| "Прак."
+	| "Упр."
 	| "Лаб."
 	| "Сем."
 	| "Курс."
@@ -27,8 +28,10 @@ export type DisciplineTypeShort =
 export type TDiscipline = {
 	uuid: Uuid
 	name: string
+	shortName: string
 	type: DisciplineType
 	isArchived: boolean
 	professorUuid: Uuid
 	groupUuid: Uuid
-}
+	DisciplinesSet: Uuid
+} & IBaseEntity

@@ -2,20 +2,37 @@ import { TDiscipline } from "@/shared/model/discipline"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
-import Typography from "@mui/material/Typography"
 import { memo } from "react"
 import DisciplineTag from "./DisciplineTag"
+import Typography from "@mui/material/Typography"
 
 interface Props {
-	discipline: Pick<TDiscipline, "name" | "type">
+	discipline: Pick<TDiscipline, "name" | "type" | "shortName">
+	professorName?: string
 }
 
-const DisciplineCard = ({ discipline }: Props) => {
+const DisciplineCard = ({ discipline, professorName }: Props) => {
 	return (
-		<Card sx={{ width: 200, bgcolor: "secondary.light" }}>
-			<CardHeader title={discipline.name} />
+		<Card
+			className="relative rounded-xl border-b-4 
+			transition-all duration-200 easy-in-out 
+			hover:cursor-pointer hover:scale-[1.1]"
+			sx={{
+				width: 150,
+				bgcolor: "secondary.light",
+				borderColor: "grey.300",
+				"&:hover": {
+					boxShadow: 5,
+				}
+			}}
+		>
+			<CardHeader
+				variant="body2"
+				disableTypography
+				title={discipline.shortName}
+			/>
 			<CardContent>
-				<Typography variant="body1">{discipline.name}</Typography>
+				<Typography variant="body2">{professorName}</Typography>
 				<DisciplineTag disciplineType={discipline.type} />
 			</CardContent>
 		</Card>

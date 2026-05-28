@@ -37,6 +37,8 @@ namespace MainService
         [ForeignKey("DisciplineTypeId")]
         public DisciplinesTypes? DisciplinesTypes { get; set; }
 
+        public Guid DisciplineSet { get; set; } = Guid.NewGuid();
+
         public ICollection<Brigades>? Brigades { get; set; } = [];
 
         [Required, MinLength(1)]

@@ -10,10 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout(props: { children: React.ReactNode }) {
 	const { children } = props
 	return (
-		<html suppressHydrationWarning>
-			<head>
-				<meta name="mui-insertion-point" />
-			</head>
+		<html lang="en">
 			<body>
 				<AppRouterCacheProvider options={{ enableCssLayer: true }}>
 					<ClientThemeProvider>{children}</ClientThemeProvider>

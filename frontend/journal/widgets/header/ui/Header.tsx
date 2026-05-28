@@ -26,6 +26,7 @@ const Header = () => {
 			}}
 		>
 			<Toolbar
+
 				component="nav"
 				aria-label="main navigation"
 				sx={{
@@ -41,6 +42,7 @@ const Header = () => {
 				</Box>
 
 				<Box
+					className="title"
 					sx={{
 						display: "flex",
 						alignItems: "center",
