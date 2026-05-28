@@ -1,281 +1,171 @@
 "use client"
 
-import {
-    closestCenter,
-    DndContext,
-    DragOverlay,
-    type DragEndEvent,
-    type DragOverEvent,
-    type DragStartEvent,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-} from "@dnd-kit/core"
-import {
-    horizontalListSortingStrategy,
-    SortableContext,
-    sortableKeyboardCoordinates,
-} from "@dnd-kit/sortable"
-import MoreVertIcon from "@mui/icons-material/MoreVert"
-import IconButton from "@mui/material/IconButton"
+import "./agGridSetup"
+import "./lesson-grid.css"
+
 import Paper from "@mui/material/Paper"
-import Table from "@mui/material/Table"
-import TableBody from "@mui/material/TableBody"
-import TableCell from "@mui/material/TableCell"
-import TableContainer from "@mui/material/TableContainer"
-import TableHead from "@mui/material/TableHead"
-import TableRow from "@mui/material/TableRow"
-import { memo, useMemo, useState } from "react"
-import { LessonBodyCells } from "./LessonBodyCells"
-import { LessonColumnOverlay } from "./LessonColumnOverlay"
-import { LessonDragContext } from "./LessonDragContext"
-import {
-    LessonMetaHeaderCell,
-    LessonSubHeaderCells,
-    LessonTopicHeaderCell,
-} from "./LessonHeaderCells"
-import { LessonSortableHandlesProvider } from "./LessonSortableHandlesProvider"
-import { bodyCellSx, headerCellSx } from "./styles"
-import type { LessonTableProps } from "./types"
+import { useTheme } from "@mui/material/styles"
+import type { ColumnMovedEvent } from "ag-grid-community"
+import { themeQuartz } from "ag-grid-community"
+import { AgGridReact } from "ag-grid-react"
+import type { TJournalRow } from "@/shared/model/lesson"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type { AgGridReact as AgGridReactType } from "ag-grid-react"
+import { buildLessonColumnDefs } from "./buildColumnDefs"
+import DefaultLessonMoreToolsButton from "./DefaultLessonMoreToolsButton"
+import type { LessonGridContext, LessonTableProps } from "./types"
 import { useOrderedLessons } from "./useOrderedLessons"
 
-const HEADER_ROW_SPAN = 3
-const LESSON_COL_WIDTH = 196
+const defaultColDef = {
+    sortable: false,
+    filter: false,
+    resizable: true,
+    suppressHeaderMenuButton: true,
+} as const
+
+const toggleRowInSelection = (selected: string[], uuid: string): string[] =>
+	selected.includes(uuid) ? selected.filter((id) => id !== uuid) : [...selected, uuid]
+
+const extractLessonOrder = (event: ColumnMovedEvent): string[] => {
+    const order: string[] = []
+
+    for (const col of event.api.getAllDisplayedColumns() ?? []) {
+        const colId = col.getColId()
+        if (colId.endsWith("_presence")) {
+            order.push(colId.replace(/_presence$/, ""))
+        }
+    }
+
+    return order
+}
 
 const LessonTable = ({
     lessons,
     rows,
-    selectedRowUuid: selectedRowUuidProp,
-    onRowSelect,
-    onRowMenuClick,
-    onHeaderMenuClick,
+	selectedRowUuids: selectedRowUuidsProp,
+	onRowSelect,
+	onHeaderMoreToolsClick,
+	onRowMoreToolsClick,
+	moreTools = true,
+	moreToolsButton: moreToolsButtonProp,
 }: LessonTableProps) => {
-    const [selectedRowUuidInner, setSelectedRowUuidInner] = useState<string | null>(null)
-    /** Какая колонка сейчас перетаскивается (для overlay и затемнения) */
-    const [activeLessonUuid, setActiveLessonUuid] = useState<string | null>(null)
+	const MoreToolsButtonComponent = moreToolsButtonProp ?? DefaultLessonMoreToolsButton
+    const theme = useTheme()
+    const gridRef = useRef<AgGridReactType<TJournalRow>>(null)
+	const [selectedRowUuidsInner, setSelectedRowUuidsInner] = useState<string[]>([])
+	const { orderedLessons, syncLessonOrder } = useOrderedLessons(lessons)
 
-    const selectedRowUuid = selectedRowUuidProp ?? selectedRowUuidInner
-    const { orderedLessons, moveLesson } = useOrderedLessons(lessons)
+	const selectedRowUuids = selectedRowUuidsProp ?? selectedRowUuidsInner
+	const selectedSet = useMemo(() => new Set(selectedRowUuids), [selectedRowUuids])
+	const hasRows = rows.length > 0
+	const domLayout = hasRows ? "autoHeight" : "normal"
+	const showMoreTools = moreTools
 
-    // distance: 6 — не путать клик по строке с началом drag
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
+	useEffect(() => {
+		gridRef.current?.api?.redrawRows()
+	}, [selectedRowUuids])
+
+    const gridTheme = useMemo(
+        () =>
+            themeQuartz.withParams({
+                headerBackgroundColor: theme.palette.primary.main,
+                headerTextColor: theme.palette.primary.contrastText,
+                headerCellHoverBackgroundColor: theme.palette.primary.dark,
+                borderColor: theme.palette.divider,
+                wrapperBorder: false,
+            }),
+        [theme],
+    )
+
+    const columnDefs = useMemo(
+        () => buildLessonColumnDefs(orderedLessons, { showMoreTools }),
+        [orderedLessons, showMoreTools],
+    )
+
+    const gridContext = useMemo<LessonGridContext>(
+        () => ({
+            onHeaderMoreToolsClick,
+            onRowMoreToolsClick,
+            moreToolsButton: MoreToolsButtonComponent,
         }),
+        [onHeaderMoreToolsClick, onRowMoreToolsClick, MoreToolsButtonComponent],
     )
 
-    const activeLesson = useMemo(
-        () => orderedLessons.find((lesson) => lesson.uuid === activeLessonUuid) ?? null,
-        [activeLessonUuid, orderedLessons],
+	const handleRowClick = useCallback(
+		(uuid: string) => {
+			const nextUuids = toggleRowInSelection(selectedRowUuids, uuid)
+
+			if (selectedRowUuidsProp === undefined) {
+				setSelectedRowUuidsInner(nextUuids)
+			}
+			onRowSelect?.(nextUuids)
+		},
+		[onRowSelect, selectedRowUuids, selectedRowUuidsProp],
+	)
+
+    const handleColumnMoved = useCallback(
+        (event: ColumnMovedEvent) => {
+            if (!event.finished) {
+                return
+            }
+
+            const lessonOrder = extractLessonOrder(event)
+            if (lessonOrder.length > 0) {
+                syncLessonOrder(lessonOrder)
+            }
+        },
+        [syncLessonOrder],
     )
 
-    // для сенсоров
-    const handleRowClick = (uuid: string) => {
-        if (selectedRowUuidProp === undefined) {
-            setSelectedRowUuidInner(uuid)
-        }
-        onRowSelect?.(uuid)
-    }
+	useEffect(() => {
+		const api = gridRef.current?.api
+		if (!api) {
+			return
+		}
 
-    const handleLessonDragStart = ({ active }: DragStartEvent) => {
-        setActiveLessonUuid(String(active.id))
-    }
+		api.setGridOption("domLayout", domLayout)
+	}, [domLayout])
 
-    // Колонки «разъезжаются» уже при движении, не только после отпускания
-    const handleLessonDragOver = ({ active, over }: DragOverEvent) => {
-        moveLesson(String(active.id), over ? String(over.id) : undefined)
-    }
-
-    const handleLessonDragEnd = ({ active, over }: DragEndEvent) => {
-        moveLesson(String(active.id), over ? String(over.id) : undefined)
-        setActiveLessonUuid(null)
-    }
-
-    const handleLessonDragCancel = () => {
-        setActiveLessonUuid(null)
-    }
+	const getRowClass = useCallback(
+		(params: { data?: TJournalRow }) =>
+			params.data && selectedSet.has(params.data.uuid)
+				? "lesson-grid-row-selected"
+				: undefined,
+		[selectedSet],
+	)
 
     return (
-        <LessonDragContext.Provider value={activeLessonUuid}>
-            {/* DndContext: сенсоры, коллизии, жизненный цикл drag */}
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragStart={handleLessonDragStart}
-                onDragOver={handleLessonDragOver}
-                onDragEnd={handleLessonDragEnd}
-                onDragCancel={handleLessonDragCancel}
-            >
-                <TableContainer
-                    component={Paper}
-                    elevation={0}
-                    className="w-full max-w-full overflow-auto rounded-2xl border"
-                    sx={{ borderColor: "divider" }}
-                >
-                    <Table size="small" stickyHeader sx={{ minWidth: 720 }}>
-                        {/* Sortable только для заголовков; тело следует за orderedLessons */}
-                        <SortableContext
-                            items={orderedLessons.map((lesson) => lesson.uuid)}
-                            strategy={horizontalListSortingStrategy}
-                        >
-                            <LessonSortableHandlesProvider lessons={orderedLessons}>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell rowSpan={HEADER_ROW_SPAN} sx={headerCellSx}>
-                                            №
-                                        </TableCell>
-                                        <TableCell
-                                            rowSpan={HEADER_ROW_SPAN}
-                                            sx={{
-                                                ...headerCellSx,
-                                                minWidth: 140,
-                                                textAlign: "left",
-                                            }}
-                                        >
-                                            Фамилия И.О.
-                                        </TableCell>
-                                        {orderedLessons.map((lesson) => (
-                                            <LessonMetaHeaderCell
-                                                key={`${lesson.uuid}-meta`}
-                                                lesson={lesson}
-                                            />
-                                        ))}
-                                        <TableCell rowSpan={HEADER_ROW_SPAN} sx={headerCellSx}>
-                                            %
-                                        </TableCell>
-                                        <TableCell rowSpan={HEADER_ROW_SPAN} sx={headerCellSx}>
-                                            Был/все
-                                        </TableCell>
-                                        <TableCell rowSpan={HEADER_ROW_SPAN} sx={headerCellSx}>
-                                            Аттестация
-                                        </TableCell>
-                                        <TableCell
-                                            rowSpan={HEADER_ROW_SPAN}
-                                            sx={{ ...headerCellSx, px: 0.5 }}
-                                        >
-                                            <IconButton
-                                                size="small"
-                                                onClick={onHeaderMenuClick}
-                                                sx={{ color: "common.white" }}
-                                                aria-label="Меню таблицы"
-                                            >
-                                                <MoreVertIcon fontSize="small" />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        {orderedLessons.map((lesson) => (
-                                            <LessonTopicHeaderCell
-                                                key={`${lesson.uuid}-topic`}
-                                                lesson={lesson}
-                                            />
-                                        ))}
-                                    </TableRow>
-                                    <TableRow>
-                                        {orderedLessons.map((lesson) => (
-                                            <LessonSubHeaderCells
-                                                key={`${lesson.uuid}-sub`}
-                                                lesson={lesson}
-                                            />
-                                        ))}
-                                    </TableRow>
-                                </TableHead>
-                            </LessonSortableHandlesProvider>
-                        </SortableContext>
-
-                        {/* Порядок ячеек = orderedLessons; dnd-kit здесь не используется */}
-                        <TableBody>
-                            {rows.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={2 + orderedLessons.length * 2 + 4}
-                                        align="center"
-                                        sx={bodyCellSx}
-                                    >
-                                        Нет данных
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                rows.map((row) => {
-                                    const isSelected = selectedRowUuid === row.uuid
-
-                                    return (
-                                        <TableRow
-                                            key={row.uuid}
-                                            hover
-                                            selected={isSelected}
-                                            onClick={() => handleRowClick(row.uuid)}
-                                            sx={{
-                                                cursor: "pointer",
-                                                bgcolor: "background.paper",
-                                                ...(isSelected && {
-                                                    boxShadow: 2,
-                                                    "& .journal-row-index": {
-                                                        borderLeft: 4,
-                                                        borderLeftColor: "primary.main",
-                                                        borderLeftStyle: "solid",
-                                                    },
-                                                }),
-                                            }}
-                                        >
-                                            <TableCell
-                                                className="journal-row-index"
-                                                sx={{ ...bodyCellSx, textAlign: "left" }}
-                                            >
-                                                {row.order}
-                                            </TableCell>
-                                            <TableCell
-                                                sx={{ ...bodyCellSx, textAlign: "left" }}
-                                            >
-                                                {row.fullName}
-                                            </TableCell>
-                                            {orderedLessons.map((lesson) => (
-                                                <LessonBodyCells
-                                                    key={`${row.uuid}-${lesson.uuid}`}
-                                                    lesson={lesson}
-                                                    row={row}
-                                                />
-                                            ))}
-                                            <TableCell sx={bodyCellSx}>{row.percent}</TableCell>
-                                            <TableCell sx={bodyCellSx}>
-                                                {row.attendedTotal}
-                                            </TableCell>
-                                            <TableCell sx={bodyCellSx}>
-                                                {row.attestation}
-                                            </TableCell>
-                                            <TableCell sx={{ ...bodyCellSx, px: 0.5 }}>
-                                                <IconButton
-                                                    size="small"
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        onRowMenuClick?.(row)
-                                                    }}
-                                                    aria-label="Меню строки"
-                                                >
-                                                    <MoreVertIcon fontSize="small" />
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    )
-                                })
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                {/* dropAnimation={null} — без анимации «приземления» после отпускания */}
-                <DragOverlay dropAnimation={null}>
-                    {activeLesson ? (
-                        <LessonColumnOverlay
-                            lesson={activeLesson}
-                            rows={rows}
-                            colWidth={LESSON_COL_WIDTH}
-                        />
-                    ) : null}
-                </DragOverlay>
-            </DndContext>
-        </LessonDragContext.Provider>
+        <Paper
+            elevation={0}
+            className={`w-full max-w-full overflow-hidden rounded-2xl border lesson-grid ${hasRows ? "lesson-grid--auto" : "lesson-grid--empty"}`}
+            sx={{
+                borderColor: "divider",
+                "--lesson-grid-primary": theme.palette.primary.main,
+            }}
+        >
+            <AgGridReact<TJournalRow>
+                ref={gridRef}
+                theme={gridTheme}
+                rowData={rows}
+                columnDefs={columnDefs}
+                defaultColDef={defaultColDef}
+                context={gridContext}
+                getRowId={({ data }) => data.uuid}
+                domLayout={domLayout}
+                onRowClicked={({ data, event }) => {
+                    const target = event?.target as HTMLElement | undefined
+                    if (target?.closest(".lesson-grid-more-tools") || !data) {
+                        return
+                    }
+                    handleRowClick(data.uuid)
+                }}
+                suppressCellFocus
+                onColumnMoved={handleColumnMoved}
+                getRowClass={getRowClass}
+                suppressColumnMoveAnimation={false}
+                overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">Нет данных</span>'
+            />
+        </Paper>
     )
 }
 
