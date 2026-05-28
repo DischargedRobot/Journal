@@ -1,5 +1,14 @@
+import { DisciplineCard } from "@/entities/discipline"
+
 const Journal = () => {
-	return <div>Journal</div>
+	return (
+		<DisciplineCard
+			discipline={{
+				name: "Математика",
+				type: "Практика",
+			}}
+		/>
+	)
 }
 
 export default Journal

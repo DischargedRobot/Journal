@@ -1,4 +1,6 @@
 @import "./reset.css";
+@layer theme, base, mui, components, utilities;
+@import "tailwindcss";
 @import "./globals.css";
 
 @import "../public/fonts/Afacad/stylesheet.css";

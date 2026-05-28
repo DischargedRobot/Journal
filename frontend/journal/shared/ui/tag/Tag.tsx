@@ -1,15 +1,23 @@
 import { Typography } from "@mui/material"
 import Box from "@mui/material/Box"
+import { grey } from "@mui/material/colors"
 
-interface Props {
+export type TagColor = { bg: string; text: string }
+
+export interface Props {
 	name: string
-	color?: string
+	color?: TagColor
 }
 
-const Tag = ({ name, color = "lightgray" }: Props) => {
+const Tag = ({ name, color = { bg: grey[300], text: grey[700] } }: Props) => {
 	return (
-		<Box className="p-2 " style={{ backgroundColor: color }}>
-			<Typography>{name}</Typography>
+		<Box
+			className="px-2 py-0.5 rounded-2xl w-fit"
+			sx={{ backgroundColor: color.bg }}
+		>
+			<Typography className="text-sm" sx={{ color: color.text }}>
+				{name}
+			</Typography>
 		</Box>
 	)
 }

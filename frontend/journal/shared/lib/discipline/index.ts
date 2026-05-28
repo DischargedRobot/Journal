@@ -1,1 +1,5 @@
-export { type TDiscipline } from "./TDiscipline"
+export {
+	type TDiscipline,
+	type DisciplineType,
+	type DisciplineTypeShort,
+} from "./TDiscipline"
