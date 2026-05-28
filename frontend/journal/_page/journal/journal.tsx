@@ -102,7 +102,7 @@ const mockJournalRows: TJournalRow[] = [
 		fullName: "Фамилия И. О.",
 		cells: {
 			...emptyCells,
-			"lesson-1": { presence: "Н", grade: "зачтено" },
+			"lesson-1": { presence: "Н", grade: "вы" },
 			"lesson-2": { presence: "Н", grade: "зачтено" },
 			"lesson-3": { presence: "Н", grade: "зачтено" },
 			"lesson-4": { presence: "Н", grade: "зачтено" },
@@ -119,7 +119,7 @@ const mockJournalRows: TJournalRow[] = [
 			...emptyCells,
 			"lesson-1": { presence: "1/2", grade: "зачтено" },
 			"lesson-2": { presence: "1/2", grade: "зачтено" },
-			"lesson-3": { presence: "1/2", grade: "зачтено" },
+			"lesson-3": { presence: "Н", grade: "зачтено" },
 			"lesson-4": { presence: "1/2", grade: "зачтено" },
 		},
 		percent: 38,
@@ -133,7 +133,7 @@ const mockJournalRows: TJournalRow[] = [
 		cells: {
 			...emptyCells,
 			"lesson-1": { presence: "Б", grade: "5" },
-			"lesson-2": { presence: "Б", grade: "5" },
+			"lesson-2": { presence: "Н", grade: "5" },
 			"lesson-3": { presence: "Б", grade: "5" },
 			"lesson-4": { presence: "Б", grade: "5" },
 		},
