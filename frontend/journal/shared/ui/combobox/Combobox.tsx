@@ -39,6 +39,7 @@ const Combobox = <T extends string | number>({
 			options={options}
 			disableClearable
 			size="medium"
+			autoComplete
 			sx={{ width: 200, ...sx }}
 			renderInput={(params) => (
 				<TextField
