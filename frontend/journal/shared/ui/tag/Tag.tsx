@@ -7,15 +7,21 @@ export type TagColor = { bg: string; text: string }
 export interface Props {
 	name: string
 	color?: TagColor
+	icon?: React.ReactNode
 }
 
-const Tag = ({ name, color = { bg: grey[300], text: grey[700] } }: Props) => {
+const Tag = ({ name, color = { bg: grey[300], text: grey[700] }, icon }: Props) => {
 	return (
 		<Box
-			className="px-2 py-0.5 rounded-2xl w-fit"
+			className="flex items-center gap-1 px-2 py-1 rounded-2xl w-fit"
 			sx={{ backgroundColor: color.bg }}
 		>
-			<Typography className="text-sm" sx={{ color: color.text }}>
+			{icon}
+			<Typography
+				component="span"
+				className="text-sm whitespace-nowrap"
+				sx={{ color: color.text }}
+			>
 				{name}
 			</Typography>
 		</Box>

@@ -1,29 +1,21 @@
 import { IBaseEntity } from "../utility-types/base-entity"
 import { Uuid } from "../utility-types/uuid"
 
-export type DisciplineType =
-	| "Лекция"
-	| "Упражнение"
-	| "Лабораторная"
-	| "Семинар"
-	| "Курсовой проект"
-	| "Колоквиум"
-	| "Доп. курсы"
-	| "НИИР"
-	// | "Военная кафедра"
-	| "Другое"
+export const DISCIPLINE_TYPE_SHORT_MAP = {
+	Лекция: "Лек.",
+	Упражнение: "Упр.",
+	Лабораторная: "Лаб.",
+	Семинар: "Сем.",
+	"Курсовой проект": "Курс.",
+	Колоквиум: "Колок.",
+	"Доп. курсы": "Доп. курсы",
+	НИИР: "НИИР",
+	Другое: "Другое",
+} as const
 
+export type DisciplineType = keyof typeof DISCIPLINE_TYPE_SHORT_MAP
 export type DisciplineTypeShort =
-	| "Лек."
-	| "Упр."
-	| "Лаб."
-	| "Сем."
-	| "Курс."
-	| "Колок."
-	| "Доп. курсы"
-	| "НИИР"
-	// | "военка"
-	| "Другое"
+	(typeof DISCIPLINE_TYPE_SHORT_MAP)[DisciplineType]
 
 export type TDiscipline = {
 	uuid: Uuid

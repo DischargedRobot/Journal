@@ -14,9 +14,7 @@ interface Props {
 const DisciplineCard = ({ discipline, professorName }: Props) => {
 	return (
 		<Card
-			className="relative rounded-xl border-b-4 
-			transition-all duration-200 easy-in-out 
-			hover:cursor-pointer hover:scale-[1.1]"
+			className="relative rounded-xl border-b-4 transition-all duration-200 easy-in-out hover:cursor-pointer hover:scale-[1.1]"
 			sx={{
 				width: 150,
 				bgcolor: "secondary.light",
