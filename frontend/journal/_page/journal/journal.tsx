@@ -156,18 +156,25 @@ const getExitAnimationClass = (panel: TVisiblePanel) =>
 const getEnterAnimationClass = (panel: TVisiblePanel) =>
 	panel === "discipline" ? "toDiscipline" : "toLesson"
 
-const renderPanel = (
-	key: TVisiblePanel,
-	onSwitchPanel: (panel: TVisiblePanel) => void,
-	renderDiscipline: (onClick: () => void) => React.ReactNode,
-	renderLesson: (onClick: () => void) => React.ReactNode,
-) => {
-	switch (key) {
-		case "discipline":
-			return renderDiscipline(() => onSwitchPanel("lesson"))
-		case "lesson":
-			return renderLesson(() => onSwitchPanel("discipline"))
+const getPanelClassName = (
+	panel: TVisiblePanel,
+	visiblePanel: TVisiblePanel,
+	prevVisiblePanel: TVisiblePanel | null,
+): string => {
+	const isAnimating = prevVisiblePanel != null
+	const isExiting = isAnimating && prevVisiblePanel === panel
+	const isEntering = isAnimating && visiblePanel === panel
+
+	if (isExiting) {
+		return `journal-panel__exit ${getExitAnimationClass(panel)}`
 	}
+	if (isEntering) {
+		return `journal-panel__enter ${getEnterAnimationClass(panel)}`
+	}
+	if (visiblePanel === panel) {
+		return "journal-panel__active"
+	}
+	return "journal-panel__inactive"
 }
 
 const Journal = () => {
@@ -200,7 +207,7 @@ const Journal = () => {
 		[visiblePanel],
 	)
 
-	const handleExitAnimationEnd = useCallback(
+	const handleAnimationEnd = useCallback(
 		(event: AnimationEvent<HTMLDivElement>) => {
 			if (event.target !== event.currentTarget) {
 				return
@@ -208,65 +215,44 @@ const Journal = () => {
 			if (!EXIT_ANIMATIONS.has(event.animationName)) {
 				return
 			}
+
+			if (event.animationName === "fromLesson") {
+				setSelectedDiscipline(null)
+			}
 			setPrevVisiblePanel(null)
 		},
 		[],
 	)
 
-	const LessonJournalComponent = useCallback(
-		(onClick: () => void) => (
-			<LessonJournalTable
-				lessons={selectedLessons}
-				rows={mockJournalRows}
-				title={selectedDiscipline?.name}
-				onBackClick={() => {
-					setSelectedDiscipline(null)
-					onClick()
-				}}
-			/>
-		),
-		[selectedLessons, selectedDiscipline],
-	)
-
-	const DisciplineTableComponent = useCallback(
-		(onClick: () => void) => (
-			<DisciplineTable
-				disciplines={disciplines}
-				onDisciplineClick={(discipline) => {
-					setSelectedDiscipline(discipline)
-					onClick()
-				}}
-			/>
-		),
-		[],
-	)
-
-	const isAnimation = prevVisiblePanel != null
-
 	return (
 		<div className="p-4 w-full justify-center overflow-x-auto journal-screen">
-			{prevVisiblePanel && (
-				<div
-					className={`journal-panel journal-panel--exit ${getExitAnimationClass(prevVisiblePanel)}`}
-					onAnimationEnd={handleExitAnimationEnd}
-				>
-					{renderPanel(
-						prevVisiblePanel,
-						handleSwitchPanel,
-						DisciplineTableComponent,
-						LessonJournalComponent,
-					)}
-				</div>
-			)}
 			<div
-				className={`journal-panel ${isAnimation ? `journal-panel--enter ${getEnterAnimationClass(visiblePanel)}` : ""}`}
-			>
-				{renderPanel(
+				className={`journal-panel ${getPanelClassName(
+					"discipline",
 					visiblePanel,
-					handleSwitchPanel,
-					DisciplineTableComponent,
-					LessonJournalComponent,
-				)}
+					prevVisiblePanel,
+				)}`}
+				onAnimationEnd={handleAnimationEnd}
+			>
+				<DisciplineTable
+					disciplines={disciplines}
+					onDisciplineClick={(discipline) => {
+						setSelectedDiscipline(discipline)
+						handleSwitchPanel("lesson")
+					}}
+				/>
+			</div>
+			<div
+				className={`journal-panel ${getPanelClassName("lesson", visiblePanel, prevVisiblePanel)}`}
+				onAnimationEnd={handleAnimationEnd}
+			>
+				<LessonJournalTable
+					lessons={selectedLessons}
+					discipline={selectedDiscipline ?? undefined}
+					rows={mockJournalRows}
+					title={selectedDiscipline?.name}
+					onBackClick={() => handleSwitchPanel("discipline")}
+				/>
 			</div>
 		</div>
 	)
