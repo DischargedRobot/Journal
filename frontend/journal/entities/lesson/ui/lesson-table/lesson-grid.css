@@ -1,21 +1,25 @@
 .lesson-grid {
 	--lesson-grid-primary: var(--mui-palette-primary-main, #1976d2);
-	width: 100%;
+	display: block;
+	width: fit-content;
+	max-width: 100%;
 	border-radius: 16px;
 	overflow: hidden;
 }
 
-/** Пустое состояние — фиксированная высота под overlay «Нет данных». */
+/* Пустое состояние — фиксированная высота под overlay «Нет данных». */
 .lesson-grid--empty {
 	height: 280px;
 }
 
-/** Есть строки — высота по контенту (domLayout: autoHeight). */
+/* Есть строки — высота по контенту (domLayout: autoHeight). */
 .lesson-grid--auto {
 	height: auto;
 }
 
-.lesson-grid .ag-root-wrapper {
+.lesson-grid .ag-root-wrapper,
+.lesson-grid .ag-root-wrapper-body {
+	width: auto;
 	border-radius: 16px;
 }
 
@@ -26,14 +30,30 @@
 	text-align: center;
 }
 
-.lesson-grid .ag-header-group-cell.lesson-grid-header-cell .ag-header-group-cell-label,
+.lesson-grid
+	.ag-header-group-cell.lesson-grid-header-cell
+	.ag-header-group-cell-label,
 .lesson-grid .ag-header-cell.lesson-grid-header-cell .ag-header-cell-label {
 	justify-content: center;
 }
 
-.lesson-grid .ag-header-group-cell.lesson-grid-header-cell .ag-header-cell-text {
+.lesson-grid
+	.ag-header-group-cell.lesson-grid-header-cell
+	.ag-header-cell-text {
 	white-space: normal;
 	line-height: 1.25;
+}
+
+/* Б/Н и Оценка: порядок фиксирован (слева/справа), drag только с групповых заголовков */
+.lesson-grid .ag-header-cell.lesson-grid-lesson-leaf-header {
+	pointer-events: none;
+}
+/* убираем ручки на ресайз колонок Б/Н и Оценка */
+.lesson-grid
+	.ag-header-cell.lesson-grid-lesson-leaf-header
+	.ag-header-cell-resize {
+	display: none;
+	pointer-events: none;
 }
 
 .lesson-grid .lesson-grid-cell-center {

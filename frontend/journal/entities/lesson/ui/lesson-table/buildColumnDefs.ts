@@ -8,11 +8,21 @@ export type BuildLessonColumnDefsOptions = {
 }
 
 const PINNED_COL = {
+	// запрет закрепления колонок
 	lockPinned: true,
+	// запрет перемещения колонок
+	lockPosition: true,
 	suppressMovable: true,
 } as const
 
+const PINNED_RIGHT_COL = {
+	...PINNED_COL,
+	lockPosition: "right",
+} as const
+
 const HEADER_CLASS = "lesson-grid-header-cell"
+/** Заголовки Б/Н и Оценка — без drag; перестановка блока занятия — по групповым заголовкам */
+const LESSON_LEAF_HEADER_CLASS = `${HEADER_CLASS} lesson-grid-lesson-leaf-header`
 
 // Группа колонок занятия
 const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
@@ -23,14 +33,17 @@ const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
 	children: [
 		{
 			headerName: getLessonTopic(lesson),
+			marryChildren: true,
+			lockPinned: true,
 			headerClass: HEADER_CLASS,
 			children: [
 				{
 					colId: `${lesson.uuid}_presence`,
 					headerName: "Б/Н",
-					width: 72,
 					minWidth: 64,
-					headerClass: HEADER_CLASS,
+					lockPinned: true,
+					width: 64,
+					headerClass: LESSON_LEAF_HEADER_CLASS,
 					cellClass: "lesson-grid-cell-center",
 					valueGetter: ({ data }) =>
 						data?.cells[lesson.uuid]?.presence ?? "",
@@ -38,9 +51,10 @@ const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
 				{
 					colId: `${lesson.uuid}_grade`,
 					headerName: "Оценка",
-					width: 72,
-					minWidth: 64,
-					headerClass: HEADER_CLASS,
+					lockPinned: true,
+					minWidth: 90,
+					width: 90,
+					headerClass: LESSON_LEAF_HEADER_CLASS,
 					cellClass: "lesson-grid-cell-center",
 					valueGetter: ({ data }) =>
 						data?.cells[lesson.uuid]?.grade ?? "",
@@ -55,8 +69,7 @@ const buildMoreToolsColumn = (): ColDef<TJournalRow> => ({
 	headerName: "",
 	pinned: "right",
 	width: 48,
-	maxWidth: 48,
-	...PINNED_COL,
+	...PINNED_RIGHT_COL,
 	sortable: false,
 	filter: false,
 	resizable: false,
@@ -78,6 +91,8 @@ export const buildLessonColumnDefs = (
 		headerName: "№",
 		pinned: "left",
 		width: 56,
+		minWidth: 56,
+		resizable: false,
 		...PINNED_COL,
 		headerClass: HEADER_CLASS,
 		cellClass: "lesson-grid-cell-left lesson-grid-order-cell",
@@ -90,6 +105,7 @@ export const buildLessonColumnDefs = (
 		width: 160,
 		minWidth: 140,
 		...PINNED_COL,
+		lockPosition: "left",
 		headerClass: HEADER_CLASS,
 		cellClass: "lesson-grid-cell-left",
 	},
@@ -99,8 +115,10 @@ export const buildLessonColumnDefs = (
 		colId: "percent",
 		headerName: "%",
 		pinned: "right",
+		resizable: false,
 		width: 72,
-		...PINNED_COL,
+		minWidth: 72,
+		...PINNED_RIGHT_COL,
 		headerClass: HEADER_CLASS,
 		cellClass: "lesson-grid-cell-center",
 	},
@@ -110,7 +128,8 @@ export const buildLessonColumnDefs = (
 		headerName: "Был/все",
 		pinned: "right",
 		width: 88,
-		...PINNED_COL,
+		minWidth: 88,
+		...PINNED_RIGHT_COL,
 		headerClass: HEADER_CLASS,
 		cellClass: "lesson-grid-cell-center",
 	},
@@ -120,7 +139,8 @@ export const buildLessonColumnDefs = (
 		headerName: "Аттестация",
 		pinned: "right",
 		width: 100,
-		...PINNED_COL,
+		minWidth: 100,
+		...PINNED_RIGHT_COL,
 		headerClass: HEADER_CLASS,
 		cellClass: "lesson-grid-cell-center",
 	},

@@ -1,7 +1,12 @@
+"use client"
+
 import { SelectJournalPeriod } from "@/features/select-journal-period"
 import { TDiscipline } from "@/shared/model/discipline"
 import type { TJournalRow, TLesson } from "@/shared/model/lesson"
 import { DisciplineTable } from "@/widgets/discipline-table"
+import { LessonJournalTable } from "@/widgets/lesson-journal-table"
+import Box from "@mui/material/Box"
+import { useMemo, useState } from "react"
 
 const disciplines: TDiscipline[] = [
 	{
@@ -154,13 +159,41 @@ const mockJournalRows: TJournalRow[] = [
 ]
 
 const Journal = () => {
+	const [selectedDiscipline, setSelectedDiscipline] = useState<TDiscipline | null>(
+		null,
+	)
+
+	const selectedLessons = useMemo(
+		() =>
+			selectedDiscipline
+				? mockLessons.filter(
+					(lesson) => lesson.disciplineUuid === selectedDiscipline.uuid,
+				)
+				: [],
+		[selectedDiscipline],
+	)
+
+	const handleDisciplineClick = (discipline: TDiscipline) => {
+		setSelectedDiscipline((current) =>
+			current?.uuid === discipline.uuid ? null : discipline,
+		)
+	}
+
 	return (
-		<div className="flex flex-col  items-center justify-center gap-4  p-4 w-fit overflow-auto ">
-			<DisciplineTable
-				disciplines={disciplines}
-				lessons={mockLessons}
-				rows={mockJournalRows}
-			/>
+		<div className="flex flex-col gap-4 p-4 w-full overflow-auto">
+			{selectedDiscipline ? (
+				<LessonJournalTable
+					lessons={selectedLessons}
+					rows={mockJournalRows}
+					title={selectedDiscipline.name}
+					onBackClick={() => setSelectedDiscipline(null)}
+				/>
+			) : (
+				<DisciplineTable
+					disciplines={disciplines}
+					onDisciplineClick={handleDisciplineClick}
+				/>
+			)}
 		</div>
 	)
 }

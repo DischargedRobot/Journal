@@ -18,36 +18,35 @@
 ```tsx
 import { LessonTable } from "@/entities/lesson"
 import type { TJournalRow, TLesson } from "@/shared/model/lesson"
-
-<LessonTable
-  lessons={lessons}
-  rows={journalRows}
-  selectedRowUuids={["uuid-1", "uuid-2"]}
-  onRowSelect={(uuids) => {}}
-  onHeaderMoreToolsClick={() => {}}
-  onRowMoreToolsClick={(row) => {}}
-  moreToolsButton={({ onClick, row }) => (
-    <MoreToolsButton
-      items={row ? rowMenuItems(row) : headerMenuItems}
-      onMenuClick={onClick}
-      sx={row ? undefined : { color: "common.white" }}
-    />
-  )}
+;<LessonTable
+	lessons={lessons}
+	rows={journalRows}
+	selectedRowUuids={["uuid-1", "uuid-2"]}
+	onRowSelect={(uuids) => {}}
+	onHeaderMoreToolsClick={() => {}}
+	onRowMoreToolsClick={(row) => {}}
+	moreToolsButton={({ onClick, row }) => (
+		<MoreToolsButton
+			items={row ? rowMenuItems(row) : headerMenuItems}
+			onMenuClick={onClick}
+			sx={row ? undefined : { color: "common.white" }}
+		/>
+	)}
 />
 ```
 
 ## Props (`LessonTableProps`)
 
-| Prop                | Тип              | Обязательный | Описание                                                               |
-| ------------------- | ---------------- | ------------ | ---------------------------------------------------------------------- |
-| `lessons`           | `TLesson[]`      | да           | Занятия — источник колонок                                             |
-| `rows`              | `TJournalRow[]`  | да           | Студенты и ячейки журнала                                              |
-| `selectedRowUuids`  | `string[]`       | нет          | Контролируемый набор выбранных строк. Без prop — state внутри таблицы |
-| `onRowSelect`       | `(uuids) => void`| нет          | Клик по строке: добавляет/убирает uuid из выбора (toggle)              |
-| `onHeaderMoreToolsClick` | `() => void` | нет | Клик по ⋮ в шапке (пробрасывается в `moreToolsButton`) |
-| `onRowMoreToolsClick` | `(row) => void` | нет | Клик по ⋮ в строке |
-| `moreTools` | `boolean` | нет | Колонка ⋮; по умолчанию `true` |
-| `moreToolsButton` | `ComponentType<{ onClick, row? }>` | нет | Кастомная кнопка; по умолчанию встроенная ⋮ |
+| Prop                     | Тип                                | Обязательный | Описание                                                              |
+| ------------------------ | ---------------------------------- | ------------ | --------------------------------------------------------------------- |
+| `lessons`                | `TLesson[]`                        | да           | Занятия — источник колонок                                            |
+| `rows`                   | `TJournalRow[]`                    | да           | Студенты и ячейки журнала                                             |
+| `selectedRowUuids`       | `string[]`                         | нет          | Контролируемый набор выбранных строк. Без prop — state внутри таблицы |
+| `onRowSelect`            | `(uuids) => void`                  | нет          | Клик по строке: добавляет/убирает uuid из выбора (toggle)             |
+| `onHeaderMoreToolsClick` | `() => void`                       | нет          | Клик по ⋮ в шапке (пробрасывается в `moreToolsButton`)                |
+| `onRowMoreToolsClick`    | `(row) => void`                    | нет          | Клик по ⋮ в строке                                                    |
+| `moreTools`              | `boolean`                          | нет          | Колонка ⋮; по умолчанию `true`                                        |
+| `moreToolsButton`        | `ComponentType<{ onClick, row? }>` | нет          | Кастомная кнопка; по умолчанию встроенная ⋮                           |
 
 ## Структура файлов
 
