@@ -190,6 +190,7 @@ const LessonTable = ({
         [selectedSet],
     )
 
+    // TODO: доделать так чтобы ширина грида была 1000px но изменялись раземеры колонок если не хватает столбцов
     const gridStyle =
         gridWidth || gridMinWidth
             ? {
@@ -200,8 +201,8 @@ const LessonTable = ({
 
     return (
         <div
-            className={`lesson-grid max-w-full overflow-x-auto ${hasRows ? "lesson-grid--auto" : "lesson-grid--empty"}`}
-            style={gridStyle}
+            className={`lesson-grid  max-w-full overflow-x-auto ${hasRows ? "lesson-grid--auto" : "lesson-grid--empty"}`}
+            style={{ width: "1000px" }}
         >
             <AgGridReact<TJournalRow>
                 ref={gridRef}

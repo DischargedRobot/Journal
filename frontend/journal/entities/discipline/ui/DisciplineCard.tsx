@@ -2,14 +2,15 @@ import { TDiscipline } from "@/shared/model/discipline"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
 import CardHeader from "@mui/material/CardHeader"
-import { memo } from "react"
+import { memo, MouseEvent } from "react"
 import DisciplineTag from "./DisciplineTag"
 import Typography from "@mui/material/Typography"
 
+
 interface Props {
-	discipline: Pick<TDiscipline, "name" | "type" | "shortName">
+	discipline: TDiscipline
 	professorName?: string
-	onClick?: () => void
+	onClick?: (discipline: TDiscipline, e: MouseEvent<HTMLDivElement>) => void
 }
 
 const DisciplineCard = ({ discipline, professorName, onClick }: Props) => {
@@ -23,7 +24,7 @@ const DisciplineCard = ({ discipline, professorName, onClick }: Props) => {
 					boxShadow: 5,
 				}
 			}}
-			onClick={onClick}
+			onClick={(e) => onClick?.(discipline, e)}
 		>
 			<CardHeader
 				className="flex items-start h-20 wrap-anywhere"

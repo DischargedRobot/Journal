@@ -1,0 +1,81 @@
+.journal-screen {
+	display: grid;
+	width: 100%;
+	max-width: 100%;
+	overflow: hidden;
+	justify-items: center;
+}
+
+.journal-panel {
+	/* накладываем друг на друга по сетке чтобы были на 1 линии */
+	grid-area: 1 / 1;
+}
+
+.journal-panel--enter {
+	z-index: 2;
+}
+
+.journal-panel--exit {
+	z-index: 1;
+	pointer-events: none;
+}
+
+@keyframes toLesson {
+	from {
+		opacity: 0;
+		transform: translateX(100vw);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes fromDiscipline {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(-100vw);
+		opacity: 0;
+	}
+}
+
+@keyframes toDiscipline {
+	from {
+		transform: translateX(-100vw);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes fromLesson {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(100vw);
+		opacity: 0;
+	}
+}
+
+.fromLesson {
+	animation: fromLesson 0.45s ease-in-out forwards;
+}
+
+.fromDiscipline {
+	animation: fromDiscipline 0.45s ease-in-out forwards;
+}
+
+.toDiscipline {
+	animation: toDiscipline 0.45s ease-in-out forwards;
+}
+
+.toLesson {
+	animation: toLesson 0.45s ease-in-out forwards;
+}

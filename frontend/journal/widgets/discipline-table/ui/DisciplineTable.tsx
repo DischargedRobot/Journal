@@ -5,13 +5,17 @@ import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import Typography from "@mui/material/Typography"
 import { SelectJournalPeriod } from "@/features/select-journal-period"
+import { MouseEvent } from "react"
+import { SxProps, Theme } from "@mui/material"
 
 interface Props {
 	disciplines: TDiscipline[]
-	onDisciplineClick?: (discipline: TDiscipline) => void
+	onDisciplineClick?: (discipline: TDiscipline, e: MouseEvent<HTMLDivElement>) => void
+	sx?: SxProps<Theme>
+	className?: string
 }
 
-const DisciplineTable = ({ disciplines, onDisciplineClick }: Props) => {
+const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Props) => {
 	// группировка дисциплин по названию
 	const grouped = disciplines.reduce<Record<string, TDiscipline[]>>(
 		(acc, discipline) => {
@@ -30,7 +34,7 @@ const DisciplineTable = ({ disciplines, onDisciplineClick }: Props) => {
 	)
 
 	return (
-		<Box className="flex flex-col w-fit gap-4">
+		<Box className={`flex flex-col w-fit gap-4 ${className}`} sx={sx}>
 			<SelectJournalPeriod />
 			<Box className="flex gap-4">
 				{Object.entries(grouped).map(([name, disciplines]) => (
@@ -49,7 +53,7 @@ const DisciplineTable = ({ disciplines, onDisciplineClick }: Props) => {
 								<ListItem key={discipline.uuid} disablePadding>
 									<DisciplineCard
 										discipline={discipline}
-										onClick={() => onDisciplineClick?.(discipline)}
+										onClick={(discipline, e) => onDisciplineClick?.(discipline, e)}
 									/>
 								</ListItem>
 							))}
