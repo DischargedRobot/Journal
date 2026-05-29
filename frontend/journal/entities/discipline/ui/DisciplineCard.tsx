@@ -9,9 +9,10 @@ import Typography from "@mui/material/Typography"
 interface Props {
 	discipline: Pick<TDiscipline, "name" | "type" | "shortName">
 	professorName?: string
+	onClick?: () => void
 }
 
-const DisciplineCard = ({ discipline, professorName }: Props) => {
+const DisciplineCard = ({ discipline, professorName, onClick }: Props) => {
 	return (
 		<Card
 			className="relative rounded-xl border-b-4 w-full transition-all duration-200 easy-in-out hover:cursor-pointer hover:scale-[1.1]"
@@ -22,6 +23,7 @@ const DisciplineCard = ({ discipline, professorName }: Props) => {
 					boxShadow: 5,
 				}
 			}}
+			onClick={onClick}
 		>
 			<CardHeader
 				className="flex items-start h-20 wrap-anywhere"
