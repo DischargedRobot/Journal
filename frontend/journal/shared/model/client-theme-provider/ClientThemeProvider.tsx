@@ -5,19 +5,23 @@ import {
 	lighten,
 	darken,
 	ThemeProvider,
+	PaletteColor,
+	PaletteColorOptions,
 } from "@mui/material/styles"
 
 declare module "@mui/material/styles" {
-	interface PaletteColor {
-		black?: PaletteOptions["primary"]
-		default?: PaletteOptions["primary"]
-		contrastingSecondary?: PaletteOptions["primary"]
-	}
+
 
 	interface PaletteOptions {
-		black?: PaletteOptions["primary"]
-		default?: PaletteOptions["primary"]
-		contrastingSecondary?: PaletteOptions["primary"]
+		black: PaletteColorOptions
+		default: PaletteColorOptions
+		contrastingSecondary: PaletteColorOptions
+	}
+
+	interface Palette {
+		contrastingSecondary: PaletteColor
+		black: PaletteColor
+		default: PaletteColor
 	}
 }
 
@@ -26,6 +30,7 @@ const base = createTheme()
 const main = "#5B69E3"
 
 const theme = createTheme({
+	cssVariables: true,
 	palette: {
 		warning: {
 			main: "#FF0000",

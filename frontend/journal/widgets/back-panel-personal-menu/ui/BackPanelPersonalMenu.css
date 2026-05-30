@@ -1,0 +1,16 @@
+.back-panel-personal-menu__item {
+	transition: all 0.2s ease-out;
+}
+
+.back-panel-personal-menu__item::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	transition: clip-path 0.3s ease-in-out;
+}
+
+.back-panel-personal-menu__item:hover {
+	background-color: var(--mui-palette-primary-main);
+	color: var(--mui-palette-secondary-light);
+}

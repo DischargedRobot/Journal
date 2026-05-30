@@ -26,7 +26,6 @@ const Header = () => {
 			}}
 		>
 			<Toolbar
-
 				component="nav"
 				aria-label="main navigation"
 				sx={{
