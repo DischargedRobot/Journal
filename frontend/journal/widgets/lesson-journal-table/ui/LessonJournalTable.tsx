@@ -6,7 +6,6 @@ import { memo, MouseEventHandler } from "react"
 import Typography from "@mui/material/Typography"
 import { SxProps, Theme } from "@mui/material"
 import { TDiscipline } from "@/shared/model/discipline"
-import { Tag } from "@/shared/ui/tag"
 import DisciplineTag from "@/entities/discipline/ui/DisciplineTag"
 
 interface Props {

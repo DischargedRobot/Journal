@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography"
 import { SelectJournalPeriod } from "@/features/select-journal-period"
 import { MouseEvent } from "react"
 import { SxProps, Theme } from "@mui/material"
+import { ComboboxOption } from "@/shared/ui/combobox/Combobox"
 
 interface Props {
 	disciplines: TDiscipline[]
@@ -33,9 +34,18 @@ const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Prop
 		{},
 	)
 
+	const handleYearChange = (year: ComboboxOption<number> | null) => {
+		console.log(year)
+	}
+
+	const handleSemesterChange = (semester: ComboboxOption<number> | null) => {
+		console.log(semester)
+	}
+
+
 	return (
 		<Box className={`flex flex-col w-fit gap-4 ${className}`} sx={sx}>
-			<SelectJournalPeriod />
+			<SelectJournalPeriod onYearChange={handleYearChange} onSemesterChange={handleSemesterChange} />
 			<Box className="flex gap-4">
 				{Object.entries(grouped).map(([name, disciplines]) => (
 					<div key={name} className="flex flex-col items-center gap-1 w-[150px]">

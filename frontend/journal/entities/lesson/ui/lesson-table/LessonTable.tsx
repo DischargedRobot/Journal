@@ -4,7 +4,7 @@ import "./agGridSetup"
 import "./lesson-grid.css"
 
 import { useTheme } from "@mui/material/styles"
-import type { ColumnMovedEvent, GridApi } from "ag-grid-community"
+import type { ColumnMovedEvent, GridApi, RowClassParams } from "ag-grid-community"
 import { themeQuartz } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
 import type { TJournalRow } from "@/shared/model/lesson"
@@ -95,7 +95,9 @@ const LessonTable = ({
             themeQuartz.withParams({
                 headerBackgroundColor: theme.palette.primary.main,
                 headerTextColor: theme.palette.primary.contrastText,
-                headerCellHoverBackgroundColor: theme.palette.primary.dark,
+                headerCellHoverBackgroundColor: theme.palette.primary.light,
+                rowHoverColor: "none",
+                selectedRowBackgroundColor: "none",
                 borderColor: theme.palette.divider,
                 wrapperBorder: false,
             }),
@@ -183,10 +185,37 @@ const LessonTable = ({
     }, [columnDefs, syncGridWidth])
 
     const getRowClass = useCallback(
-        (params: { data?: TJournalRow }) =>
-            params.data && selectedSet.has(params.data.uuid)
-                ? "lesson-grid-row-selected"
-                : undefined,
+        (params: RowClassParams<TJournalRow>) => {
+            if (!params.data || !selectedSet.has(params.data.uuid)) {
+                return undefined
+            }
+
+            const classes = ["lesson-grid-row-selected"]
+            const rowIndex = params.node.rowIndex
+            const prevRow =
+                rowIndex != null && rowIndex > 0
+                    ? params.api.getDisplayedRowAtIndex(rowIndex - 1)
+                    : null
+            const prevSelected =
+                prevRow?.data?.uuid != null && selectedSet.has(prevRow.data.uuid)
+
+            if (!prevSelected) {
+                classes.push("lesson-grid-row-selected-first")
+            }
+
+            const nextRow =
+                rowIndex != null
+                    ? params.api.getDisplayedRowAtIndex(rowIndex + 1)
+                    : null
+            const nextSelected =
+                nextRow?.data?.uuid != null && selectedSet.has(nextRow.data.uuid)
+
+            if (!nextSelected) {
+                classes.push("lesson-grid-row-selected-last")
+            }
+
+            return classes.join(" ")
+        },
         [selectedSet],
     )
 
@@ -198,6 +227,7 @@ const LessonTable = ({
                 minWidth: gridMinWidth ?? gridWidth,
             }
             : undefined
+
 
     return (
         <div
@@ -228,6 +258,13 @@ const LessonTable = ({
                         return
                     }
                     handleRowClick(data.uuid)
+                }}
+                rowSelection={{
+                    mode: "multiRow",
+                    checkboxes: false,        // нет чекбокса в строках
+                    headerCheckbox: false,    // нет чекбокса в шапке
+                    enableClickSelection: true, // выбор кликом по строке
+                    enableSelectionWithoutKeys: true, // выбор без клавиш
                 }}
                 suppressCellFocus
                 onColumnMoved={(event) => {
