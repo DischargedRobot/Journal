@@ -22,7 +22,7 @@ const PINNED_RIGHT_COL = {
 
 const HEADER_CLASS = "lesson-grid-header-cell"
 /** Заголовки Б/Н и Оценка — без drag; перестановка блока занятия — по групповым заголовкам */
-const LESSON_LEAF_HEADER_CLASS = `${HEADER_CLASS} lesson-grid-lesson-leaf-header`
+const LESSON_LEAF_HEADER_CLASS = `${HEADER_CLASS} lesson-grid-lesson-leaf-header lesson-grid-no-resize`
 
 // Группа колонок занятия
 const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({

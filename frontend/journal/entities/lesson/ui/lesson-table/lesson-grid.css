@@ -51,3 +51,12 @@
 	border-left: 0 !important;
 	border-right: 0 !important;
 }
+
+.lesson-grid .ag-header-cell.lesson-grid-no-resize .ag-header-cell-resize {
+	display: none;
+	pointer-events: none;
+}
+
+.lesson-grid .lesson-grid-no-resize {
+	pointer-events: none;
+}
