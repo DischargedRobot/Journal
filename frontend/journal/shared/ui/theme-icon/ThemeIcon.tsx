@@ -5,7 +5,7 @@ import IconButton, { IconButtonProps } from "@mui/material/IconButton"
 import Tooltip from "@mui/material/Tooltip"
 import LightModeIcon from "@mui/icons-material/LightMode"
 import DarkModeIcon from "@mui/icons-material/DarkMode"
-// import { IconProps } from "@mui/material/Icon"
+import { fluidClamp } from "@/shared/lib/fluidClampPx"
 
 type ThemeMode = "dark" | "light"
 
@@ -31,6 +31,7 @@ const ThemeIcon = ({
 	}, [theme, onChange])
 
 	const toggle = () => setTheme((t) => (t === "light" ? "dark" : "light"))
+	const iconSize = fluidClamp(minIconSize, maxIconSize)
 
 	return (
 		<Tooltip
@@ -43,21 +44,20 @@ const ThemeIcon = ({
 			<IconButton
 				onClick={toggle}
 				aria-label="Сменить тему"
-				sx={{ height: 64 }}
 				{...iconButtonProps}
 			>
 				{theme === "light" ? (
 					<DarkModeIcon
 						sx={{
 							color: "black.main",
-							fontSize: `clamp(${minIconSize}px, 16.00px + 2.50vw, ${maxIconSize}px)`,
+							fontSize: iconSize,
 						}}
 					/>
 				) : (
 					<LightModeIcon
 						sx={{
 							color: "white",
-							fontSize: `clamp(${minIconSize}px, 16.00px + 2.50vw, ${maxIconSize}px)`,
+							fontSize: iconSize,
 						}}
 					/>
 				)}

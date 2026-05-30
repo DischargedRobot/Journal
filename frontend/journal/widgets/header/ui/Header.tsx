@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation"
 import Toolbar from "@mui/material/Toolbar"
 import Box from "@mui/material/Box"
 import { Logo } from "@/shared/ui/Logo"
-import Avatar from "@mui/material/Avatar"
+import { ProfileAvatarMenu } from "@/features/profile-avatar-menu"
 import { ThemeIcon } from "@/shared/ui/theme-icon"
 
 const Header = () => {
@@ -94,7 +94,7 @@ const Header = () => {
 
 				<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 					<ThemeIcon />
-					<Avatar />
+					<ProfileAvatarMenu />
 				</Box>
 			</Toolbar>
 		</AppBar>
