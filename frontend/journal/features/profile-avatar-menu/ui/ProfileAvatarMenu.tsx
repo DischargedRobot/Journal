@@ -10,6 +10,9 @@ import ListItemText from "@mui/material/ListItemText"
 import PersonIcon from "@mui/icons-material/Person"
 import Logout from "@mui/icons-material/Logout"
 import { fluidClamp } from "@/shared/lib/fluidClampPx"
+import NextLink from "next/link"
+
+
 
 interface Props {
 	minIconSize?: number
@@ -26,6 +29,8 @@ const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 
 	const closeMenu = () => setAnchorEl(null)
 	const avatarSize = fluidClamp(minIconSize, maxIconSize)
+
+
 
 	return (
 		<>
@@ -46,13 +51,18 @@ const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 				onClick={closeMenu}
 				transformOrigin={{ vertical: "top", horizontal: "center" }}
 			>
-				<MenuItem onClick={() => { }}>
-					<ListItemIcon>
-						<PersonIcon fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>Профиль</ListItemText>
+				<MenuItem >
+					<NextLink
+						className="flex "
+						href="/personal/my-disciplines"
+					>
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Профиль</ListItemText>
+					</NextLink>
 				</MenuItem>
-				<MenuItem onClick={() => { }}>
+				<MenuItem>
 					<ListItemIcon>
 						<Logout fontSize="small" />
 					</ListItemIcon>
