@@ -11,11 +11,13 @@ declare module "@mui/material/styles" {
 	interface PaletteColor {
 		black?: PaletteOptions["primary"]
 		default?: PaletteOptions["primary"]
+		contrastingSecondary?: PaletteOptions["primary"]
 	}
 
 	interface PaletteOptions {
 		black?: PaletteOptions["primary"]
 		default?: PaletteOptions["primary"]
+		contrastingSecondary?: PaletteOptions["primary"]
 	}
 }
 
@@ -51,6 +53,11 @@ const theme = createTheme({
 			main: "#F3F3F3",
 			light: "#FCFCFC",
 			dark: "#EFEFEF",
+		},
+		contrastingSecondary: {
+			main: "#282827",
+			light: "#404040",
+			dark: "#141414",
 		},
 		default: {
 			main: "#8E8D8D",
