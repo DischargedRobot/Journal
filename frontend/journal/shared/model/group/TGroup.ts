@@ -1,3 +1,4 @@
+import { IBaseEntity } from "../utility-types/base-entity"
 import { Uuid } from "../utility-types/uuid"
 
 export type TGroup = {
@@ -7,5 +8,4 @@ export type TGroup = {
 	trainingDirectionUuid: Uuid
 	facultyUuid: Uuid
 	curatorsUuids: Uuid[]
-	version: number
-}
+} & IBaseEntity
