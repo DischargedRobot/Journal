@@ -1,5 +1,11 @@
+import { Uuid } from "../uuid"
+
 interface IBaseEntity {
-	uuid: string
+	uuid: Uuid
 }
 
-export type { IBaseEntity }
+interface IBaseEntityWithVersion extends IBaseEntity {
+	version: number
+}
+
+export type { IBaseEntity, IBaseEntityWithVersion }

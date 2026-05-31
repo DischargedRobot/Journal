@@ -6,15 +6,19 @@ import CheckboxUncheckedIcon from "./CheckboxUncheckedIcon"
 
 export type CheckboxProps = MuiCheckboxProps
 
+const iconSx = {
+	padding: 0,
+	width: 32,
+	height: 32,
+} as const
+
 const Checkbox = ({ sx, ...props }: CheckboxProps) => (
 	<MuiCheckbox
 		{...props}
 		icon={<CheckboxUncheckedIcon />}
 		checkedIcon={<CheckboxCheckedIcon />}
 		sx={[
-			{
-				padding: 0,
-			},
+			iconSx,
 			...(Array.isArray(sx) ? sx : [sx]),
 		]}
 	/>

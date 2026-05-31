@@ -1,12 +1,12 @@
 import SvgIcon, { SvgIconProps } from "@mui/material/SvgIcon"
 
 const iconSx = {
-	width: 16,
-	height: 16,
+	width: 32,
+	height: 32,
 	"& path": {
 		fill: "none",
 		stroke: "var(--mui-palette-primary-main)",
-		strokeWidth: 2,
+		strokeWidth: 1.5,
 		strokeLinecap: "round",
 		strokeLinejoin: "round",
 	},
