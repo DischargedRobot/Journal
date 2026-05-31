@@ -84,9 +84,7 @@ const mockStudents: TStudent[] = [
 
 const Students = () => {
 	return (
-		<div className="p-6">
-			<StudentTable students={mockStudents} />
-		</div>
+		<StudentTable students={mockStudents} />
 	)
 }
 

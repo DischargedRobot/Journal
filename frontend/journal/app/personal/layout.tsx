@@ -5,9 +5,9 @@ const PersonalLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             <Header />
-            <main className="my-0 mx-auto w-full h-full overflow-auto">
+            <main className="flex my-0 mx-auto w-full h-full overflow-auto">
                 <BackPanelPersonalMenu />
-                {children}
+                <div className="flex flex-col p-6">{children}</div>
             </main>
         </>
     )
