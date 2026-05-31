@@ -33,7 +33,7 @@ const menuItems = [
     {
         icon: <ArrowBack fontSize="small" />,
         text: "ДИСЦИПЛИНЫ",
-        href: "/personal/my-disciplines",
+        href: "/personal/disciplines",
     },
     {
         icon: <TeacherIcon fontSize="small" />,

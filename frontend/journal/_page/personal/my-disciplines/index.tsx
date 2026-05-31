@@ -1,1 +1,0 @@
-export { default as MyDisciplines } from "./ui/MyDisciplines"
