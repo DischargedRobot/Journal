@@ -10,7 +10,8 @@ import { DepartmentsIcon } from "@/shared/ui/departments-icon"
 import BookOpenIcon from "@/shared/ui/book-open-icon/BookOpenIcon"
 import { TeacherIcon } from "@/shared/ui/teacher-icon"
 import { usePathname } from "next/navigation"
-import "./BackPanelPersonalMenu.css"
+import "./SidePanelPersonalMenu.css"
+import NextLink from "next/link"
 
 
 const menuItems = [
@@ -45,7 +46,7 @@ const menuItems = [
 
 
 
-const BackPanelPersonalMenu = () => {
+const SidePanelPersonalMenu = () => {
 
     const pathname = usePathname()
     const activeItem = (href: string) => {
@@ -61,8 +62,10 @@ const BackPanelPersonalMenu = () => {
             }}>
             {menuItems.map((item) => (
                 <ListItem
-                    className={`back-panel-personal-menu__item flex flex-col min-h-[95px] items-center justify-center py-0 w-full rounded-[20px] cursor-pointer ${activeItem(item.href) ? "back-panel-personal-menu__item_active" : ""}`}
+                    className={`side-panel-personal-menu__item flex flex-col min-h-[95px] items-center justify-center py-0 w-full rounded-[20px] cursor-pointer ${activeItem(item.href) ? "side-panel-personal-menu__item_active" : ""}`}
                     key={item.href}
+                    component={NextLink}
+                    href={item.href}
                     sx={{
                         backgroundColor: activeItem(item.href)
                             ? "primary.main"
@@ -92,4 +95,4 @@ const BackPanelPersonalMenu = () => {
     )
 }
 
-export default BackPanelPersonalMenu
+export default SidePanelPersonalMenu
