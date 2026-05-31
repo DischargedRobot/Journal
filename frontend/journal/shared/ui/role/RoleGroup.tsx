@@ -30,11 +30,15 @@ const RoleGroup = (props: Props) => {
                 onClick={(e) => {
                     onAddRole?.(e, roles)
                 }}
+                className="border-2"
                 sx={{
+                    borderColor: "secondary.dark",
                     backgroundColor: "secondary.light",
+
                     ":hover": {
                         backgroundColor: "primary.main",
                         color: "primary.contrastText",
+
                         "& .MuiSvgIcon-root": {
                             color: "primary.contrastText",
                         },
@@ -52,7 +56,9 @@ const RoleGroup = (props: Props) => {
                     }}
                     deleteIcon={<ClearIcon />}
                     clickable
+                    className="border-2"
                     sx={{
+                        borderColor: "secondary.dark",
                         backgroundColor: "secondary.light",
                         "& .MuiChip-label": {
                             position: "relative",

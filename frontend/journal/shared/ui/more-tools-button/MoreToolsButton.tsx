@@ -8,7 +8,7 @@ import MenuItem from "@mui/material/MenuItem"
 import { SxProps, Theme } from "@mui/material/styles"
 import { memo, useState } from "react"
 
-export type MenuItemConfig = {
+export type TMenuItemConfig = {
     key: string
     label: React.ReactNode
     onClick: () => void
@@ -17,7 +17,7 @@ export type MenuItemConfig = {
 }
 
 interface Props extends Omit<IconButtonProps, "onClick"> {
-    items: MenuItemConfig[]
+    items: TMenuItemConfig[]
     onMenuClick?: () => void
 }
 

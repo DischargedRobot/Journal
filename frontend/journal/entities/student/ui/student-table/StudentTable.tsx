@@ -5,58 +5,110 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { TStudent } from '@/shared/model/student';
-import { MoreToolsButton } from '@/shared/ui/more-tools-button';
+import { TBrigade } from '@/shared/model/brigade';
+import { MoreToolsButton, type TMenuItemConfig } from '@/shared/ui/more-tools-button';
 import { RoleGroup } from '@/shared/ui/role';
 
-const BRIGADE_COLORS: Record<number, { bg: string; text: string }> = {
-    1: { bg: "#D4ED9A", text: "#000000" },
-    2: { bg: "#FFD700", text: "#000000" },
-    3: { bg: "#FFA500", text: "#FFFFFF" },
-    4: { bg: "#FF0000", text: "#FFFFFF" },
-    5: { bg: "#800080", text: "#FFFFFF" },
-    6: { bg: "#008000", text: "#FFFFFF" },
+type BrigadeColor = { bg: string; text: string }
+
+const BRIGADE_COLOR_POOL: BrigadeColor[] = [
+    { bg: "#D4ED9A", text: "#000000" },
+    { bg: "#B8D9F5", text: "#000000" },
+    { bg: "#FFD700", text: "#000000" },
+    { bg: "#FFA500", text: "#FFFFFF" },
+    { bg: "#FF6B6B", text: "#FFFFFF" },
+    { bg: "#800080", text: "#FFFFFF" },
+]
+
+const getBrigade = (student: TStudent): TBrigade | null =>
+    student.brigades[0] ?? null
+
+const buildBrigadeColorMap = (students: TStudent[]): Map<string, BrigadeColor> => {
+    // Собираем все бригады из студентов и сортируем их по uuid
+    const brigadeUuids = [
+        ...new Set(
+            students.flatMap((student) =>
+                student.brigades.map((brigade) => brigade.uuid),
+            ),
+        ),
+    ].sort()
+
+    // Создаем мапу с цветами для каждой бригады
+    return new Map(
+        brigadeUuids.map((uuid, index) => [
+            uuid,
+            BRIGADE_COLOR_POOL[index % BRIGADE_COLOR_POOL.length],
+        ]),
+    )
 }
 
-const getBrigadeNumber = (student: TStudent): number | null => {
-    const brigade = student.brigades[0]
-    if (!brigade) {
-        return null
-    }
+const moreToolsButtonItems: TMenuItemConfig[] = [
+    {
+        key: "download",
+        label: "Скачать список",
+        onClick: () => { },
 
-    const parsed = Number.parseInt(brigade.name, 10)
-    return Number.isFinite(parsed) ? parsed : null
-}
+    },
+    {
+        key: "print",
+        label: "Расчптать список",
+        onClick: () => { },
+    },
+    {
+        key: "create-brigade-template",
+        label: "Создать шаблон бригады",
+        onClick: () => { },
+    },
+    {
+        key: "delete",
+        label: "Удалить",
+        onClick: () => { },
+        sx: {
+            color: "warning.main",
+        },
+    },
 
-const getBrigadeColor = (brigadeNumber: number | null) => {
-    if (!brigadeNumber || brigadeNumber < 1) {
-        return null
-    }
 
-    return BRIGADE_COLORS[brigadeNumber]
-}
+]
 
 const StudentTable = ({ students }: { students: TStudent[] }) => {
+    const brigadeColorByUuid = buildBrigadeColorMap(students)
+    const hasBrigade = students.some((student) => getBrigade(student))
+
     return (
-        <TableContainer sx={{ overflow: "visible" }}>
-            <Table sx={{ overflow: "visible" }}>
-                <TableHead >
-                    <TableRow >
-                        <TableCell width={100}>Бригада</TableCell>
+        <TableContainer className="rounded-[20px]" >
+            <Table>
+                <TableHead
+                    sx={{
+                        position: "sticky",
+                        top: 0,
+                        "& .MuiTableCell-head": {
+                            backgroundColor: "primary.main",
+                            color: "primary.contrastText",
+                        },
+                    }}
+                >
+                    <TableRow>
+                        {hasBrigade && <TableCell width={100}>Бригада</TableCell>}
                         <TableCell>Фамилия И.О.</TableCell>
                         <TableCell width={150}>Студ. билет</TableCell>
                         <TableCell width={100}>Группа</TableCell>
                         <TableCell width={100}>Роли</TableCell>
-                        <TableCell width={100}><MoreToolsButton items={[]} /></TableCell>
+                        <TableCell width={100}>
+                            <MoreToolsButton items={moreToolsButtonItems} sx={{ color: "inherit" }} />
+                        </TableCell>
                     </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody sx={{ backgroundColor: "secondary.light" }}>
                     {students.map((student) => {
-                        const brigadeNumber = getBrigadeNumber(student)
-                        const brigadeColor = getBrigadeColor(brigadeNumber)
+                        const brigade = getBrigade(student)
+                        const brigadeColor = brigade
+                            ? brigadeColorByUuid.get(brigade.uuid)
+                            : undefined
 
                         return (
                             <TableRow key={student.uuid}>
-                                {brigadeNumber
+                                {hasBrigade && (brigade
                                     ? <TableCell
                                         className="flex items-center justify-center rounded-full w-10 h-10"
                                         sx={
@@ -68,9 +120,9 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
                                                 : undefined
                                         }
                                     >
-                                        {brigadeNumber}
+                                        {brigade.name}
                                     </TableCell>
-                                    : <TableCell />}
+                                    : <TableCell />)}
                                 <TableCell>
                                     {student.lastName} {student.firstName} {student.patronymic}
                                 </TableCell>
