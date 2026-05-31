@@ -32,9 +32,3 @@ const TPerm = {
 export type TPerm = (typeof TPerm)[keyof typeof TPerm]
 
 export type TPermKey = keyof typeof TPerm
-
-export interface IRole {
-	uuid: string
-	name: string
-	permissions: TPerm[]
-}
