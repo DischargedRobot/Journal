@@ -1,0 +1,23 @@
+import SvgIcon, { SvgIconProps } from "@mui/material/SvgIcon"
+
+const iconSx = {
+	width: 16,
+	height: 16,
+	"& rect": {
+		fill: "none",
+		stroke: "var(--mui-palette-contrastingSecondary-main)",
+		strokeWidth: 2,
+	},
+} as const
+
+const CheckboxUncheckedIcon = ({ sx, ...props }: SvgIconProps) => (
+	<SvgIcon
+		{...props}
+		viewBox="0 0 16 16"
+		sx={[iconSx, ...(Array.isArray(sx) ? sx : [sx])]}
+	>
+		<rect x="2" y="2" width="12" height="12" rx="6" />
+	</SvgIcon>
+)
+
+export default CheckboxUncheckedIcon
