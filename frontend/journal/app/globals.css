@@ -1,6 +1,6 @@
 :root {
 	--background: #ebf1fe;
-	--foreground: #171717;
+	--foreground: #282827;
 	--color-primary: #5b69e3;
 	--color-black: #282827;
 
@@ -18,27 +18,27 @@
 	--font-ibm-plex: var(--font-ibm-plex);
 }
 
-.text {
+@utility text {
 	font-family: var(--font-roboto-mono);
 	font-size: 16px;
 	line-height: 1.2;
 }
 
-.title {
+@utility title {
 	font-family: var(--font-ibm-plex);
 	font-size: 32px;
 	line-height: 1.2;
 }
 
-.title_x-litle {
+@utility title_x-litle {
 	font-size: 16px;
 }
 
-.title_litle {
+@utility title_litle {
 	font-size: 24px;
 }
 
-.title_x-large {
+@utility title_large {
 	font-size: 48px;
 }
 

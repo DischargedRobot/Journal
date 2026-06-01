@@ -82,19 +82,23 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
                     sx={{
                         position: "sticky",
                         top: 0,
+                        backgroundColor: "primary.main",
+
                         "& .MuiTableCell-head": {
-                            backgroundColor: "primary.main",
                             color: "primary.contrastText",
+                            textAlign: "center",
+                            fontWeight: "normal",
                         },
                     }}
+
                 >
-                    <TableRow>
-                        {hasBrigade && <TableCell width={100}>Бригада</TableCell>}
-                        <TableCell>Фамилия И.О.</TableCell>
-                        <TableCell width={150}>Студ. билет</TableCell>
-                        <TableCell width={100}>Группа</TableCell>
-                        <TableCell width={100}>Роли</TableCell>
-                        <TableCell width={100}>
+                    <TableRow className="flex gap-[15px] px-1.25">
+                        {hasBrigade && <TableCell width={100} className="py-2.5 text-center text">Бригада</TableCell>}
+                        <TableCell width={160} sx={{ width: 160, maxWidth: 160 }} className="text-center text">Фамилия И.О.</TableCell>
+                        <TableCell width={120} className="py-2.5 text-center text">Студ. билет</TableCell>
+                        <TableCell width={80} className="py-2.5 text-center text">Группа</TableCell>
+                        <TableCell width={280} className="py-2.5 text-center text">Роли</TableCell>
+                        <TableCell width={50} className="py-2.5 text-center text">
                             <MoreToolsButton items={moreToolsButtonItems} sx={{ color: "inherit" }} />
                         </TableCell>
                     </TableRow>
@@ -110,7 +114,7 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
                             <TableRow key={student.uuid}>
                                 {hasBrigade && (brigade
                                     ? <TableCell
-                                        className="flex items-center justify-center rounded-full w-10 h-10"
+                                        className="flex items-center justify-center rounded-full w-10 h-10 text-center text"
                                         sx={
                                             brigadeColor
                                                 ? {
@@ -123,19 +127,19 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
                                         {brigade.name}
                                     </TableCell>
                                     : <TableCell />)}
-                                <TableCell>
+                                <TableCell className="text-center text">
                                     {student.lastName} {student.firstName} {student.patronymic}
                                 </TableCell>
-                                <TableCell>{student.group.code}</TableCell>
-                                <TableCell>{student.studentCode}</TableCell>
-                                <TableCell><RoleGroup roles={student.roles} /></TableCell>
-                                <TableCell><MoreToolsButton items={[]} /></TableCell>
+                                <TableCell className="text-center text">{student.group.code}</TableCell>
+                                <TableCell className="text-center text">{student.studentCode}</TableCell>
+                                <TableCell className="text-center text"><RoleGroup roles={student.roles} /></TableCell>
+                                <TableCell className="text-center text"><MoreToolsButton items={[]} /></TableCell>
                             </TableRow>
                         )
                     })}
                 </TableBody>
             </Table>
-        </TableContainer>
+        </TableContainer >
     )
 }
 

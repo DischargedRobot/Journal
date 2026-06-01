@@ -55,8 +55,8 @@ const SidePanelPersonalMenu = () => {
 
     return (
         <List
-            component="aside"
-            className="flex self-stretch flex-col items-center justify-start gap-2 p-2 w-fit h-full shadow-[0_0_20px_0px_rgba(0,0,0,0.15)]"
+            component="menu"
+            className="flex self-stretch flex-col items-center justify-start gap-2 p-2 w-fit h-full shadow-2xl z-10"
             sx={{
                 backgroundColor: "secondary.main",
             }}>

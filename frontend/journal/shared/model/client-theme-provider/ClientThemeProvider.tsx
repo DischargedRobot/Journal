@@ -55,6 +55,7 @@ const theme = createTheme({
 			900: darken(main, 0.4),
 		}, // или расширить типы палитры
 		secondary: {
+			contrastText: "#282827",
 			main: "#F3F3F3",
 			light: "#FCFCFC",
 			dark: "#EFEFEF",

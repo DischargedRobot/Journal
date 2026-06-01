@@ -4,6 +4,7 @@ import { StudentTable } from "@/entities/student"
 import { TGroup } from "@/shared/model/group"
 import { TRole } from "@/shared/model/role"
 import { TStudent } from "@/shared/model/student"
+import Sidebar from "@/shared/ui/sidebar/Sidebar"
 
 const mockRoles: TRole[] = [
 	{
@@ -82,9 +83,51 @@ const mockStudents: TStudent[] = [
 	} satisfies TStudent,
 ] satisfies TStudent[]
 
+const mockGroups: TGroup[] = [
+	{
+		uuid: "22222222-2222-2222-2222-222222222201",
+		code: "2415",
+		name: "2415",
+		admissionDate: "2026-01-01",
+		trainingDirectionUuid: "33333333-3333-3333-3333-333333333301",
+		facultyUuid: "44444444-4444-4444-4444-444444444401",
+		curatorsUuids: [],
+		version: 1,
+	},
+	{
+		uuid: "22222222-2222-2222-2222-222222222202",
+		code: "2416",
+		name: "2416",
+		admissionDate: "2026-01-01",
+		trainingDirectionUuid: "33333333-3333-3333-3333-333333333301",
+		facultyUuid: "44444444-4444-4444-4444-444444444401",
+		curatorsUuids: [],
+		version: 1,
+	},
+	{
+		uuid: "22222222-2222-2222-2222-222222222203",
+		code: "2417",
+		name: "2417",
+		admissionDate: "2026-01-01",
+		trainingDirectionUuid: "33333333-3333-3333-3333-333333333301",
+		facultyUuid: "44444444-4444-4444-4444-444444444401",
+		curatorsUuids: [],
+		version: 1,
+	},
+]
+
 const Students = () => {
 	return (
-		<StudentTable students={mockStudents} />
+		<div className="flex h-full">
+			<Sidebar open={true} onClose={() => { }} title="Группы" items={mockGroups.map((group, index) => ({
+				text: group.name,
+				href: `/personal/groups/${group.uuid}`,
+				onClick: () => { },
+				selected: index === 0,
+			}))} />
+
+			<StudentTable students={mockStudents} />
+		</div>
 	)
 }
 
