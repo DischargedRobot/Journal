@@ -3,21 +3,23 @@ import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
-import { Fragment } from "react"
+import { Fragment, useState } from "react"
 
+
+
+interface Item {
+    text: string
+    href?: string
+    icon?: React.ReactNode
+    onClick?: () => void
+}
 
 interface Props {
     open?: boolean
     children?: React.ReactNode
     onClose?: () => void
     title?: string
-    items?: {
-        text: string
-        href?: string
-        icon?: React.ReactNode
-        onClick?: () => void
-        selected?: boolean
-    }[]
+    items?: Item[]
 }
 const Sidebar = (props: Props) => {
 
@@ -27,6 +29,8 @@ const Sidebar = (props: Props) => {
         title,
         items,
     } = props
+
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
 
     return (
         <List
@@ -55,8 +59,11 @@ const Sidebar = (props: Props) => {
                 <Fragment key={item.href ?? item.text}>
                     <ListItem
                         className=" cursor-pointer"
-                        onClick={item.onClick}
-                        sx={item.selected ? {
+                        onClick={() => {
+                            setSelectedItem(item)
+                            item.onClick?.()
+                        }}
+                        sx={selectedItem?.href === item.href ? {
                             borderLeftWidth: 5,
                             borderColor: "primary.main",
                         } : {

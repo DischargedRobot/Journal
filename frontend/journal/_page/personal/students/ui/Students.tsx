@@ -1,10 +1,14 @@
 "use client"
 
-import { StudentTable } from "@/entities/student"
 import { TGroup } from "@/shared/model/group"
 import { TRole } from "@/shared/model/role"
 import { TStudent } from "@/shared/model/student"
 import Sidebar from "@/shared/ui/sidebar/Sidebar"
+import { StatCard } from "@/shared/ui/stat-card"
+import { VisitIcon } from "@/shared/ui/visit-icon"
+import PersonalStudentTable from "@/widgets/personla-student-table/ui/PersonalStudentTable"
+import Box from "@mui/material/Box"
+import { AttestationIcon } from "@/shared/ui/attestation-icon"
 
 const mockRoles: TRole[] = [
 	{
@@ -126,7 +130,13 @@ const Students = () => {
 				selected: index === 0,
 			}))} />
 
-			<StudentTable students={mockStudents} />
+			<div className="flex flex-col gap-4 px-16 py-8">
+				<Box className="flex gap-4">
+					<StatCard icon={<VisitIcon />} value={"70%"} label="Посещаемость" />
+					<StatCard icon={<AttestationIcon />} value={"4.5"} label="Средний балл" />
+				</Box>
+				<PersonalStudentTable students={mockStudents} />
+			</div>
 		</div>
 	)
 }
