@@ -1,8 +1,10 @@
 .lesson-grid .ag-row {
-	transition: all 0.3s ease;
+	transition:
+		box-shadow 0.2s ease,
+		border-radius 0.2s ease;
 }
 
-.lesson-grid .ag-row.ag-row-selected {
+.lesson-grid-row-selected {
 	border-left: 4px solid var(--ag-header-background-color);
 	border-right: 4px solid var(--ag-header-background-color);
 }
@@ -35,7 +37,7 @@
 	z-index: 100;
 }
 .lesson-grid
-	.lesson-grid-row-selected:not(.lesson-grid-row-selected-first):not(
+	.ag-row.lesson-grid-row-selected:not(.lesson-grid-row-selected-first):not(
 		.lesson-grid-row-selected-last
 	) {
 	box-shadow: none;
@@ -48,6 +50,23 @@
 }
 
 .lesson-grid .ag-row.ag-row-hover .ag-cell {
+	border-left: 0 !important;
+	border-right: 0 !important;
+}
+
+.lesson-grid .locked {
+	z-index: 10;
+	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.325);
+}
+
+.lesson-grid .lesson-grid-row-selected.locked {
+	z-index: 10000 !important;
+	box-shadow:
+		0 -5px 5px 0 rgba(0, 0, 0, 0.101),
+		0 5px 5px 0 rgba(0, 0, 0, 0.101) !important;
+}
+
+.lesson-grid .ag-row.locked .ag-cell {
 	border-left: 0 !important;
 	border-right: 0 !important;
 }

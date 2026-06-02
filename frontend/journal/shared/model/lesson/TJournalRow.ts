@@ -1,18 +1,15 @@
 import { Uuid } from "../utility-types/uuid"
-
-/** Ячейка занятия: посещаемость и оценка */
-export type TJournalLessonCell = {
-	presence: string
-	grade: string
-}
+import { TPresencesStatus } from "../presences-status"
+import { TStudent } from "../student/TStudent"
+import { TLesson } from "./TLesson"
 
 /** Строка журнала (студент) */
 export type TJournalRow = {
-	uuid: Uuid
+	student: TStudent
 	/** Порядковый № в журнале (может не совпадать с индексом) */
 	order: number
 	fullName: string
-	cells: Record<Uuid, TJournalLessonCell>
+	lessons: TStudent["lessons"]
 	percent: string | number
 	attendedTotal: string
 	attestation: string

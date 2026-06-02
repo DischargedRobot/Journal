@@ -4,15 +4,15 @@ import "./agGridSetup"
 import "./lesson-grid.css"
 
 import { useTheme } from "@mui/material/styles"
-import type { ColumnMovedEvent, GridApi, RowClassParams } from "ag-grid-community"
+import type { CellClickedEvent, ColumnMovedEvent, GridApi, RowClassParams, RowClassRules } from "ag-grid-community"
 import { themeQuartz } from "ag-grid-community"
 import { AgGridReact } from "ag-grid-react"
-import type { TJournalRow } from "@/shared/model/lesson"
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type { TJournalRow, TLesson } from "@/shared/model/lesson"
+import { ComponentType, memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { AgGridReact as AgGridReactType } from "ag-grid-react"
 import { buildLessonColumnDefs } from "./buildColumnDefs"
 import DefaultLessonMoreToolsButton from "./DefaultLessonMoreToolsButton"
-import type { LessonGridContext, LessonTableProps } from "./types"
+import type { LessonGridContext, LessonMoreToolsButtonProps } from "./types"
 import { useOrderedLessons } from "./useOrderedLessons"
 
 // настройки по умолчанию для колонок
@@ -59,6 +59,29 @@ const extractLessonOrder = (event: ColumnMovedEvent): string[] => {
     return order // возвращаем порядок колонок
 }
 
+
+
+export type Props = {
+    lessons: TLesson[]
+    rows: TJournalRow[]
+    // Контролируемый набор выбранных строк (uuid студентов).
+    selectedRowUuids?: string[]
+    onRowSelect?: (uuids: string[]) => void
+    // Клик по ⋮ в шапке (если не обрабатывается внутри `moreToolsButton`).
+    onHeaderMoreToolsClick?: () => void
+    // Клик по ⋮ в строке (если не обрабатывается внутри `moreToolsButton`).
+    onRowMoreToolsClick?: (row: TJournalRow) => void
+    // Показать колонку ⋮ (по умолчанию `true`).
+    showMoreTools?: boolean
+    // Кастомная кнопка ⋮; по умолчанию — встроенная иконка.
+    moreToolsButton?: ComponentType<LessonMoreToolsButtonProps>
+
+    onPresenceCellClick?: (
+        params: CellClickedEvent<TJournalRow>,
+        lesson: TLesson,
+    ) => void
+}
+
 const LessonTable = ({
     lessons,
     rows,
@@ -68,7 +91,8 @@ const LessonTable = ({
     onRowMoreToolsClick,
     showMoreTools = true,
     moreToolsButton,
-}: LessonTableProps) => {
+    onPresenceCellClick,
+}: Props) => {
     const MoreToolsButtonComponent = moreToolsButton ?? DefaultLessonMoreToolsButton
     const theme = useTheme()
     const gridRef = useRef<AgGridReactType<TJournalRow>>(null)
@@ -83,11 +107,6 @@ const LessonTable = ({
     // стркои есть - автовысота, иначе фиксированная высота с "Нет данных"
     const hasRows = rows.length > 0
     const domLayout = hasRows ? "autoHeight" : "normal"
-
-    // используется для перерисовки строк при изменении выбранных строк
-    useEffect(() => {
-        gridRef.current?.api?.redrawRows()
-    }, [selectedRowUuids])
 
     // тема для компонента AgGridReact
     const gridTheme = useMemo(
@@ -106,8 +125,8 @@ const LessonTable = ({
 
     // колонки для компонента AgGridReact
     const columnDefs = useMemo(
-        () => buildLessonColumnDefs(orderedLessons, { showMoreTools }),
-        [orderedLessons, showMoreTools],
+        () => buildLessonColumnDefs(orderedLessons, onPresenceCellClick, { showMoreTools }),
+        [onPresenceCellClick, orderedLessons, showMoreTools],
     )
 
     // контекст для компонента AgGridReact, передается в компонент AgGridReact
@@ -184,39 +203,50 @@ const LessonTable = ({
         syncGridWidth(api)
     }, [columnDefs, syncGridWidth])
 
-    const getRowClass = useCallback(
-        (params: RowClassParams<TJournalRow>) => {
-            if (!params.data || !selectedSet.has(params.data.uuid)) {
-                return undefined
-            }
-
-            const classes = ["lesson-grid-row-selected"]
+    // для настройки выделения строк
+    const isPrevRowSelected = useCallback(
+        (params: RowClassParams<TJournalRow>, selectedSet: Set<string>): boolean => {
             const rowIndex = params.node.rowIndex
-            const prevRow =
-                rowIndex != null && rowIndex > 0
-                    ? params.api.getDisplayedRowAtIndex(rowIndex - 1)
-                    : null
-            const prevSelected =
-                prevRow?.data?.uuid != null && selectedSet.has(prevRow.data.uuid)
-
-            if (!prevSelected) {
-                classes.push("lesson-grid-row-selected-first")
+            if (rowIndex == null || rowIndex <= 0) {
+                return false
             }
-
-            const nextRow =
-                rowIndex != null
-                    ? params.api.getDisplayedRowAtIndex(rowIndex + 1)
-                    : null
-            const nextSelected =
-                nextRow?.data?.uuid != null && selectedSet.has(nextRow.data.uuid)
-
-            if (!nextSelected) {
-                classes.push("lesson-grid-row-selected-last")
-            }
-
-            return classes.join(" ")
+            const prevRow = params.api.getDisplayedRowAtIndex(rowIndex - 1)
+            return prevRow?.data?.student.uuid != null && selectedSet.has(prevRow.data.student.uuid)
         },
-        [selectedSet],
+        [],
+    )
+
+    const isNextRowSelected = useCallback(
+        (params: RowClassParams<TJournalRow>, selectedSet: Set<string>): boolean => {
+            const rowIndex = params.node.rowIndex
+            if (rowIndex == null) {
+                return false
+            }
+            const nextRow = params.api.getDisplayedRowAtIndex(rowIndex + 1)
+            return nextRow?.data?.student.uuid != null && selectedSet.has(nextRow.data.student.uuid)
+        },
+        [],
+    )
+
+    // выставляем классы для строк по правилам
+    const rowClassRules = useMemo<RowClassRules<TJournalRow>>(
+        () => ({
+            "lesson-grid-row-selected": (params) =>
+                Boolean(params.data?.student.uuid && selectedSet.has(params.data.student.uuid)),
+            "lesson-grid-row-selected-first": (params) => {
+                if (!params.data?.student.uuid || !selectedSet.has(params.data.student.uuid)) {
+                    return false
+                }
+                return !isPrevRowSelected(params, selectedSet)
+            },
+            "lesson-grid-row-selected-last": (params) => {
+                if (!params.data?.student.uuid || !selectedSet.has(params.data.student.uuid)) {
+                    return false
+                }
+                return !isNextRowSelected(params, selectedSet)
+            },
+        }),
+        [isNextRowSelected, isPrevRowSelected, selectedSet],
     )
 
     // TODO: доделать так чтобы ширина грида была 1000px но изменялись раземеры колонок если не хватает столбцов
@@ -241,7 +271,7 @@ const LessonTable = ({
                 columnDefs={columnDefs}
                 defaultColDef={defaultColDef}
                 context={gridContext}
-                getRowId={({ data }) => data.uuid}
+                getRowId={({ data }) => data.student.uuid}
                 // высота грида по контенту
                 domLayout={domLayout}
                 // синхронизация ширины грида при загрузке
@@ -257,13 +287,20 @@ const LessonTable = ({
                     if (target?.closest(".lesson-grid-more-tools") || !data) {
                         return
                     }
-                    handleRowClick(data.uuid)
+
+                    const cellEl = target?.closest(".ag-cell")
+                    const colId = cellEl?.getAttribute("col-id")
+                    if (colId?.endsWith("_presence")) {
+                        return;
+                    }
+
+                    handleRowClick(data.student.uuid)
                 }}
                 rowSelection={{
                     mode: "multiRow",
                     checkboxes: false,        // нет чекбокса в строках
                     headerCheckbox: false,    // нет чекбокса в шапке
-                    enableClickSelection: true, // выбор кликом по строке
+                    enableClickSelection: false, // выбор кликом по строке
                     enableSelectionWithoutKeys: true, // выбор без клавиш
                 }}
                 suppressCellFocus
@@ -273,7 +310,7 @@ const LessonTable = ({
                         syncGridWidth(event.api)
                     }
                 }}
-                getRowClass={getRowClass}
+                rowClassRules={rowClassRules}
                 suppressColumnMoveAnimation={false}
                 overlayNoRowsTemplate='<span class="ag-overlay-no-rows-center">Нет данных</span>'
             />

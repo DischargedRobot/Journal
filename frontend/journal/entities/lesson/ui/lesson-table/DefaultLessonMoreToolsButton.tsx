@@ -18,7 +18,7 @@ const DefaultLessonMoreToolsButton = ({
 		}}
 		onMouseDown={(event) => event.stopPropagation()}
 		onPointerDown={(event) => event.stopPropagation()}
-		sx={row ? undefined : { color: "common.white" }}
+		sx={row ? undefined : { color: "secondary.main" }}
 		aria-label={row ? "Меню строки" : "Меню таблицы"}
 	>
 		<MoreVertIcon fontSize="small" />

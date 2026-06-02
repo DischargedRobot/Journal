@@ -6,6 +6,76 @@ import { DisciplineTable } from "@/widgets/discipline-table"
 import { LessonJournalTable } from "@/widgets/lesson-journal-table"
 import { useCallback, useMemo, useState, type AnimationEvent } from "react"
 import "./journal.css"
+import { TStudent } from "@/shared/model/student"
+import { TGroup } from "@/shared/model/group"
+
+const mockGroups: TGroup[] = [
+	{
+		uuid: "1",
+		name: "1",
+		code: "1",
+		trainingDirectionUuid: "1",
+		facultyUuid: "1",
+		curatorsUuids: [],
+		version: 1,
+		admissionDate: "2024-12-25",
+	},
+	{
+		uuid: "2",
+		name: "2",
+		code: "2",
+		trainingDirectionUuid: "2",
+		facultyUuid: "2",
+		curatorsUuids: [],
+		version: 1,
+		admissionDate: "2024-12-25",
+	},
+]
+
+const mockStudents: TStudent[] = [
+	{
+		uuid: "1",
+		studentCode: 1,
+		firstName: "Иван",
+		lastName: "Иванов",
+		patronymic: "Иванович",
+		groupUuid: "1",
+		group: mockGroups[0],
+		brigadesUuids: [],
+		brigades: [],
+		lessons: new Map(),
+		roles: [],
+		version: 1,
+	},
+	{
+		uuid: "2",
+		studentCode: 2,
+		firstName: "Петр",
+		lastName: "Петров",
+		patronymic: "Петрович",
+		groupUuid: "2",
+		group: mockGroups[1],
+		brigadesUuids: [],
+		brigades: [],
+		lessons: new Map(),
+		roles: [],
+		version: 1,
+	},
+	{
+		uuid: "3",
+		studentCode: 3,
+		firstName: "Сидор",
+		lastName: "Сидоров",
+		patronymic: "Сидорович",
+		groupUuid: "3",
+		group: mockGroups[2],
+		brigadesUuids: [],
+		brigades: [],
+		lessons: new Map(),
+		roles: [],
+		version: 1,
+	},
+]
 
 const disciplines: TDiscipline[] = [
 	{
@@ -72,7 +142,7 @@ const disciplines: TDiscipline[] = [
 
 const lessonTopic = "Преобразование Фурье"
 
-const mockLessons: TLesson[] = Array.from({ length: 4 }, (_, index) => ({
+const mockLessons: TLesson[] = Array.from({ length: 5 }, (_, index) => ({
 	uuid: `lesson-${index + 1}`,
 	code: 13,
 	startDate: "2024-12-25T10:00:00Z",
@@ -85,61 +155,43 @@ const mockLessons: TLesson[] = Array.from({ length: 4 }, (_, index) => ({
 
 const mockJournalRows: TJournalRow[] = [
 	{
-		uuid: "student-1",
+		student: mockStudents[0],
 		order: 1,
 		fullName: "Фамилия И. О.",
-		cells: {
-			"lesson-1": { presence: "Н", grade: "вы" },
-			"lesson-2": { presence: "Н", grade: "зачтено" },
-			"lesson-3": { presence: "Н", grade: "зачтено" },
-			"lesson-4": { presence: "Н", grade: "зачтено" },
-		},
+		lessons: new Map([
+			[mockLessons[0].uuid, { presenceStatus: "Н", mark: "неуд." }],
+			[mockLessons[1].uuid, { presenceStatus: "Н", mark: "зачтено" }],
+			[mockLessons[2].uuid, { presenceStatus: "Н", mark: "зачтено" }],
+			[mockLessons[3].uuid, { presenceStatus: "Н", mark: "зачтено" }],
+		]),
 		percent: 38,
 		attendedTotal: "",
 		attestation: "Хор",
 	},
 	{
-		uuid: "student-2",
+		student: mockStudents[1],
 		order: 5,
 		fullName: "Фамилия И. О.",
-		cells: {
-			"lesson-1": { presence: "1/2", grade: "зачтено" },
-			"lesson-2": { presence: "1/2", grade: "зачтено" },
-			"lesson-3": { presence: "Н", grade: "зачтено" },
-			"lesson-4": { presence: "1/2", grade: "зачтено" },
-		},
+		lessons: new Map([
+			[mockLessons[0].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
+			[mockLessons[1].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
+			[mockLessons[2].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
+			[mockLessons[3].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
+		]),
 		percent: 38,
 		attendedTotal: "",
 		attestation: "Хор",
 	},
 	{
-		uuid: "student-3",
+		student: mockStudents[2],
 		order: 3,
 		fullName: "Фамилия И. О.",
-		cells: {
-			"lesson-1": { presence: "Б", grade: "5" },
-			"lesson-2": { presence: "Н", grade: "5" },
-			"lesson-3": { presence: "Б", grade: "5" },
-			"lesson-4": { presence: "Б", grade: "5" },
-		},
-		percent: 38,
-		attendedTotal: "",
-		attestation: "Хор",
-	},
-	{
-		uuid: "student-4",
-		order: 2,
-		fullName: "Фамилия И. О.",
-		cells: {},
-		percent: 38,
-		attendedTotal: "",
-		attestation: "Хор",
-	},
-	{
-		uuid: "student-5",
-		order: 4,
-		fullName: "Фамилия И. О.",
-		cells: {},
+		lessons: new Map([
+			[mockLessons[0].uuid, { presenceStatus: "Б", mark: "5" }],
+			[mockLessons[1].uuid, { presenceStatus: "Б", mark: "5" }],
+			[mockLessons[2].uuid, { presenceStatus: "Б", mark: "5" }],
+			[mockLessons[3].uuid, { presenceStatus: "Б", mark: "5" }],
+		]),
 		percent: 38,
 		attendedTotal: "",
 		attestation: "Хор",

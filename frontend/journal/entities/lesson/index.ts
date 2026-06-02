@@ -1,2 +1,5 @@
-export { default as LessonTable } from "./ui/LessonTable"
-export type { LessonMoreToolsButtonProps, LessonTableProps } from "./ui/lesson-table"
+export { LessonTable } from "./ui/LessonTable"
+export type {
+	LessonMoreToolsButtonProps,
+	LessonTableProps,
+} from "./ui/lesson-table"

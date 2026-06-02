@@ -40,6 +40,7 @@ const mockStudents: TStudent[] = [
 			curatorsUuids: [],
 			version: 1,
 		} satisfies TGroup,
+		lessons: new Map(),
 	},
 	{
 		uuid: "11111111-1111-1111-1111-111111111102",
@@ -62,6 +63,7 @@ const mockStudents: TStudent[] = [
 			version: 1,
 		} satisfies TGroup,
 		roles: mockRoles,
+		lessons: new Map(),
 	},
 	{
 		uuid: "11111111-1111-1111-1111-111111111104",
@@ -84,7 +86,8 @@ const mockStudents: TStudent[] = [
 			version: 1,
 		} satisfies TGroup,
 		roles: mockRoles,
-	} satisfies TStudent,
+		lessons: new Map(),
+	},
 ] satisfies TStudent[]
 
 const mockGroups: TGroup[] = [

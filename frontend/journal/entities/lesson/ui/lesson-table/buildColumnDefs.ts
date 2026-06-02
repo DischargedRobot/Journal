@@ -1,8 +1,7 @@
-import type { ColDef, ColGroupDef } from "ag-grid-community"
+import type { ColDef, ColGroupDef, CellClickedEvent } from "ag-grid-community"
 import type { TJournalRow, TLesson } from "@/shared/model/lesson"
 import { formatLessonDate, getLessonTopic } from "./lessonFormat"
 import { HeaderMoreToolsCell, RowMoreToolsCell } from "./LessonGridMenuCells"
-
 export type BuildLessonColumnDefsOptions = {
 	showMoreTools?: boolean
 }
@@ -25,7 +24,13 @@ const HEADER_CLASS = "lesson-grid-header-cell"
 const LESSON_LEAF_HEADER_CLASS = `${HEADER_CLASS} lesson-grid-lesson-leaf-header lesson-grid-no-resize`
 
 // Группа колонок занятия
-const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
+const buildLessonGroup = (
+	lesson: TLesson,
+	onPresenceCellClick?: (
+		params: CellClickedEvent<TJournalRow>,
+		lesson: TLesson,
+	) => void,
+): ColGroupDef<TJournalRow> => ({
 	groupId: `lesson-${lesson.uuid}`,
 	headerName: `№${lesson.code} ${formatLessonDate(lesson.startDate)}`,
 	marryChildren: true,
@@ -46,7 +51,10 @@ const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
 					headerClass: LESSON_LEAF_HEADER_CLASS,
 					cellClass: "lesson-grid-cell-center",
 					valueGetter: ({ data }) =>
-						data?.cells[lesson.uuid]?.presence ?? "",
+						data?.lessons.get(lesson.uuid)?.presenceStatus ?? "",
+					onCellClicked: onPresenceCellClick
+						? (params) => onPresenceCellClick(params, lesson)
+						: undefined,
 				},
 				{
 					colId: `${lesson.uuid}_grade`,
@@ -57,7 +65,7 @@ const buildLessonGroup = (lesson: TLesson): ColGroupDef<TJournalRow> => ({
 					headerClass: LESSON_LEAF_HEADER_CLASS,
 					cellClass: "lesson-grid-cell-center",
 					valueGetter: ({ data }) =>
-						data?.cells[lesson.uuid]?.grade ?? "",
+						data?.lessons.get(lesson.uuid)?.mark ?? "",
 				},
 			],
 		},
@@ -83,6 +91,10 @@ const buildMoreToolsColumn = (): ColDef<TJournalRow> => ({
 // Все колонки таблицы
 export const buildLessonColumnDefs = (
 	orderedLessons: TLesson[],
+	onPresenceCellClick?: (
+		params: CellClickedEvent<TJournalRow>,
+		lesson: TLesson,
+	) => void,
 	{ showMoreTools = false }: BuildLessonColumnDefsOptions = {},
 ): (ColDef<TJournalRow> | ColGroupDef<TJournalRow>)[] => [
 	{
@@ -104,7 +116,9 @@ export const buildLessonColumnDefs = (
 		...PINNED_COL,
 		headerClass: HEADER_CLASS,
 	},
-	...orderedLessons.map(buildLessonGroup),
+	...orderedLessons.map((lesson) =>
+		buildLessonGroup(lesson, onPresenceCellClick),
+	),
 	{
 		field: "percent",
 		colId: "percent",
