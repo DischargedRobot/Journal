@@ -1,6 +1,8 @@
 import { TStudent } from "@/shared/model/student"
 import { mockJournalGroups, mockPersonalGroups } from "./mockGroups"
 import { mockPersonalRoles } from "./mockRoles"
+import { mockDisciplines } from "./mockDisciplines"
+import { setStudentAttestationMark } from "./mockAttestations"
 
 export const mockJournalStudents: TStudent[] = [
 	{
@@ -15,6 +17,7 @@ export const mockJournalStudents: TStudent[] = [
 		brigades: [],
 		lessons: new Map(),
 		roles: [],
+		attestations: new Map(),
 		version: 1,
 	},
 	{
@@ -29,6 +32,7 @@ export const mockJournalStudents: TStudent[] = [
 		brigades: [],
 		lessons: new Map(),
 		roles: [],
+		attestations: new Map(),
 		version: 1,
 	},
 	{
@@ -43,6 +47,7 @@ export const mockJournalStudents: TStudent[] = [
 		brigades: [],
 		lessons: new Map(),
 		roles: [],
+		attestations: new Map(),
 		version: 1,
 	},
 ]
@@ -61,6 +66,7 @@ export const mockPersonalStudents: TStudent[] = [
 		version: 1,
 		group: mockPersonalGroups[0],
 		lessons: new Map(),
+		attestations: new Map(),
 	},
 	{
 		uuid: "11111111-1111-1111-1111-111111111102",
@@ -75,6 +81,7 @@ export const mockPersonalStudents: TStudent[] = [
 		group: mockPersonalGroups[0],
 		roles: mockPersonalRoles,
 		lessons: new Map(),
+		attestations: new Map(),
 	},
 	{
 		uuid: "11111111-1111-1111-1111-111111111104",
@@ -89,5 +96,24 @@ export const mockPersonalStudents: TStudent[] = [
 		group: mockPersonalGroups[0],
 		roles: mockPersonalRoles,
 		lessons: new Map(),
+		attestations: new Map(),
 	},
 ] satisfies TStudent[]
+
+const mathDiscipline = mockDisciplines[0]
+
+for (const [student, mark] of [
+	[mockJournalStudents[0], "4"],
+	[mockJournalStudents[1], "5"],
+	[mockJournalStudents[2], "5"],
+] as const) {
+	setStudentAttestationMark(student, mathDiscipline, mark)
+}
+
+for (const [student, mark] of [
+	[mockPersonalStudents[0], "4"],
+	[mockPersonalStudents[1], "5"],
+	[mockPersonalStudents[2], "3"],
+] as const) {
+	setStudentAttestationMark(student, mathDiscipline, mark)
+}

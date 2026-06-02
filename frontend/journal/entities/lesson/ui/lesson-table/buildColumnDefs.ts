@@ -1,5 +1,6 @@
 import type { ColDef, ColGroupDef, CellClickedEvent } from "ag-grid-community"
 import type { TJournalRow, TLesson } from "@/shared/model/lesson"
+import { formatStudentShortName } from "@/shared/model/student"
 import { formatLessonDate, getLessonTopic } from "./lessonFormat"
 import { HeaderMoreToolsCell, RowMoreToolsCell } from "./LessonGridMenuCells"
 export type BuildLessonColumnDefsOptions = {
@@ -108,13 +109,14 @@ export const buildLessonColumnDefs = (
 		headerClass: HEADER_CLASS,
 	},
 	{
-		field: "fullName",
 		colId: "fullName",
 		headerName: "Фамилия И.О.",
 		width: 160,
 		minWidth: 140,
 		...PINNED_COL,
 		headerClass: HEADER_CLASS,
+		valueGetter: ({ data }) =>
+			data ? formatStudentShortName(data.student) : "",
 	},
 	...orderedLessons.map((lesson) =>
 		buildLessonGroup(lesson, onPresenceCellClick),
