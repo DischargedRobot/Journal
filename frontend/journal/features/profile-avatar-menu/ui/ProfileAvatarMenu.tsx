@@ -54,12 +54,23 @@ const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 				<MenuItem >
 					<NextLink
 						className="flex "
-						href="/personal/my-disciplines"
+						href="/personal/my-lessons"
 					>
 						<ListItemIcon>
 							<PersonIcon fontSize="small" />
 						</ListItemIcon>
 						<ListItemText>Профиль</ListItemText>
+					</NextLink>
+				</MenuItem>
+				<MenuItem >
+					<NextLink
+						className="flex "
+						href="/personal/my-lessons"
+					>
+						<ListItemIcon>
+							<PersonIcon fontSize="small" />
+						</ListItemIcon>
+						<ListItemText>Мои занятия</ListItemText>
 					</NextLink>
 				</MenuItem>
 				<MenuItem>
