@@ -10,7 +10,7 @@ const iconSx = {
 	},
 } as const
 
-const CheckboxUncheckedIcon = ({ sx, ...props }: SvgIconProps) => (
+const CheckboxCircleUncheckedIcon = ({ sx, ...props }: SvgIconProps) => (
 	<SvgIcon
 		{...props}
 		viewBox="0 0 16 16"
@@ -20,4 +20,4 @@ const CheckboxUncheckedIcon = ({ sx, ...props }: SvgIconProps) => (
 	</SvgIcon>
 )
 
-export default CheckboxUncheckedIcon
+export default CheckboxCircleUncheckedIcon
