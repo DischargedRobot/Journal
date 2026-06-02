@@ -5,6 +5,8 @@ import { IBaseEntityWithVersion } from "../utility-types/base-entity"
 import { TRole } from "../role/TRole"
 import { TLesson } from "../lesson/TLesson"
 import { TPresencesStatus } from "../presences-status"
+import { TAttestation } from "../attestation"
+import { TDiscipline } from "../discipline"
 
 export type TStudent = {
 	uuid: Uuid
@@ -21,4 +23,5 @@ export type TStudent = {
 		{ presenceStatus: TPresencesStatus; mark: string }
 	>
 	roles: TRole[]
+	attestations: Map<TDiscipline["uuid"], TAttestation>
 } & IBaseEntityWithVersion
