@@ -1,5 +1,6 @@
 import { ComeBackButton } from "@/shared/ui/come-back-button"
 import type { TJournalRow, TLesson } from "@/shared/model/lesson"
+import type { TStudent } from "@/shared/model/student"
 import Box from "@mui/material/Box"
 import { memo, MouseEventHandler, SyntheticEvent, useCallback, useRef, useState } from "react"
 import Typography from "@mui/material/Typography"
@@ -39,8 +40,8 @@ const LessonJournalTable = (props: Props) => {
 	const [selectedPresencesStatus, setSelectedPresencesStatus] = useState<TPresencesStatus>("О")
 	const [journalRows, setJournalRows] = useState<TJournalRow[]>(rows)
 	const [selectedLesson, setSelectedLesson] = useState<{
-		lessonUuid: TLesson["uuid"]
-		studentUuid: TJournalRow["student"]["uuid"]
+		lesson: TLesson
+		student: TStudent
 	} | null>(null)
 	const lockedRowRef = useRef<HTMLElement | null>(null)
 
@@ -75,8 +76,8 @@ const LessonJournalTable = (props: Props) => {
 
 			setSelectedPresencesStatus(params.data.lessons.get(lesson.uuid)?.presenceStatus ?? "О")
 			setSelectedLesson({
-				lessonUuid: lesson.uuid,
-				studentUuid: params.data.student.uuid,
+				lesson,
+				student: params.data.student,
 			})
 			setSelectPresencesStatusAnchorEl(cellEl)
 		},
@@ -91,18 +92,18 @@ const LessonJournalTable = (props: Props) => {
 			}
 			setJournalRows((prevRows) =>
 				prevRows.map((row) => {
-					if (row.student.uuid !== selectedLesson.studentUuid) {
+					if (row.student.uuid !== selectedLesson.student.uuid) {
 						return row
 					}
 
-					const lessonEntry = row.lessons.get(selectedLesson.lessonUuid)
-					if (!lessonEntry) {
-						return row
-					}
+					const lessonEntry = row.lessons.get(selectedLesson.lesson.uuid)
+					// if (!lessonEntry) {
+					// 	return row
+					// }
 
 					const nextLessons = new Map(row.lessons)
-					nextLessons.set(selectedLesson.lessonUuid, {
-						...lessonEntry,
+					nextLessons.set(selectedLesson.lesson.uuid, {
+						mark: lessonEntry?.mark ?? "",
 						presenceStatus: status,
 					})
 
@@ -155,6 +156,7 @@ const LessonJournalTable = (props: Props) => {
 				onClose={handleSelectPresencesStatusClose}
 				onChange={handleStatusChange}
 				selectedStatus={selectedPresencesStatus}
+				absenceStatusDenominator={2}
 			/>
 		</Box>
 	)
