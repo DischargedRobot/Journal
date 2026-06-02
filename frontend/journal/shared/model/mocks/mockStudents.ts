@@ -1,7 +1,9 @@
 import { TStudent } from "@/shared/model/student"
+import { TPresencesStatus } from "@/shared/model/presences-status"
 import { mockJournalGroups, mockPersonalGroups } from "./mockGroups"
 import { mockPersonalRoles } from "./mockRoles"
 import { mockDisciplines } from "./mockDisciplines"
+import { mockLessons } from "./mockLessons"
 import { setStudentAttestationMark } from "./mockAttestations"
 
 export const mockJournalStudents: TStudent[] = [
@@ -116,4 +118,17 @@ for (const [student, mark] of [
 	[mockPersonalStudents[2], "3"],
 ] as const) {
 	setStudentAttestationMark(student, mathDiscipline, mark)
+}
+
+for (const [student, presenceStatuses] of [
+	[mockPersonalStudents[0], ["О", "Н", "О", "Б", "О"]],
+	[mockPersonalStudents[1], ["О", "О", "О", "О", "Н"]],
+	[mockPersonalStudents[2], ["Н", "О", "О", "О", "О"]],
+] as ReadonlyArray<readonly [TStudent, readonly TPresencesStatus[]]>) {
+	mockLessons.forEach((lesson, index) => {
+		student.lessons.set(lesson.uuid, {
+			presenceStatus: presenceStatuses[index],
+			mark: "",
+		})
+	})
 }
