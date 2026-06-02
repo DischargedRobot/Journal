@@ -93,12 +93,12 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
 
                 >
                     <TableRow className="flex gap-[15px] px-1.25">
-                        {hasBrigade && <TableCell width={100} className="py-2.5 text-center text">Бригада</TableCell>}
-                        <TableCell width={160} sx={{ width: 160, maxWidth: 160 }} className="text-center text">Фамилия И.О.</TableCell>
-                        <TableCell width={120} className="py-2.5 text-center text">Студ. билет</TableCell>
-                        <TableCell width={80} className="py-2.5 text-center text">Группа</TableCell>
-                        <TableCell width={280} className="py-2.5 text-center text">Роли</TableCell>
-                        <TableCell width={50} className="py-2.5 text-center text">
+                        {hasBrigade && <TableCell width={100} className="py-2.5 text-center text content-end">Бригада</TableCell>}
+                        <TableCell width={160} className="py-2.5 text-center text content-end">Фамилия И.О.</TableCell>
+                        <TableCell width={180} className="py-2.5 text-center text content-end">Студ. билет</TableCell>
+                        <TableCell width={80} className="py-2.5 text-center text content-end">Группа</TableCell>
+                        <TableCell width={280} className="py-2.5 text-center text content-end">Роли</TableCell>
+                        <TableCell width={50} className="py-2.5 text-center text content-end">
                             <MoreToolsButton items={moreToolsButtonItems} sx={{ color: "inherit" }} />
                         </TableCell>
                     </TableRow>
@@ -133,7 +133,24 @@ const StudentTable = ({ students }: { students: TStudent[] }) => {
                                 <TableCell className="text-center text">{student.group.code}</TableCell>
                                 <TableCell className="text-center text">{student.studentCode}</TableCell>
                                 <TableCell className="text-center text"><RoleGroup roles={student.roles} /></TableCell>
-                                <TableCell className="text-center text"><MoreToolsButton items={[]} /></TableCell>
+                                <TableCell className="text-center text">
+                                    <MoreToolsButton items={[
+
+                                        {
+                                            key: "select",
+                                            label: "Выбрать",
+                                            onClick: () => { },
+                                        },
+                                        {
+                                            key: "delete",
+                                            label: "Удалить",
+                                            onClick: () => { },
+                                            sx: {
+                                                color: "warning.main",
+                                            },
+                                        },
+                                    ]} />
+                                </TableCell>
                             </TableRow>
                         )
                     })}
