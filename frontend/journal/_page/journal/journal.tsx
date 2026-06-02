@@ -1,202 +1,15 @@
 "use client"
 
-import { TDiscipline } from "@/shared/model/discipline"
-import type { TJournalRow, TLesson } from "@/shared/model/lesson"
+import type { TDiscipline } from "@/shared/model/discipline"
+import {
+	mockDisciplines,
+	mockJournalRows,
+	mockLessons,
+} from "@/shared/model/mocks"
 import { DisciplineTable } from "@/widgets/discipline-table"
 import { LessonJournalTable } from "@/widgets/lesson-journal-table"
 import { useCallback, useMemo, useState, type AnimationEvent } from "react"
 import "./journal.css"
-import { TStudent } from "@/shared/model/student"
-import { TGroup } from "@/shared/model/group"
-
-const mockGroups: TGroup[] = [
-	{
-		uuid: "1",
-		name: "1",
-		code: "1",
-		trainingDirectionUuid: "1",
-		facultyUuid: "1",
-		curatorsUuids: [],
-		version: 1,
-		admissionDate: "2024-12-25",
-	},
-	{
-		uuid: "2",
-		name: "2",
-		code: "2",
-		trainingDirectionUuid: "2",
-		facultyUuid: "2",
-		curatorsUuids: [],
-		version: 1,
-		admissionDate: "2024-12-25",
-	},
-]
-
-const mockStudents: TStudent[] = [
-	{
-		uuid: "1",
-		studentCode: 1,
-		firstName: "Иван",
-		lastName: "Иванов",
-		patronymic: "Иванович",
-		groupUuid: "1",
-		group: mockGroups[0],
-		brigadesUuids: [],
-		brigades: [],
-		lessons: new Map(),
-		roles: [],
-		version: 1,
-	},
-	{
-		uuid: "2",
-		studentCode: 2,
-		firstName: "Петр",
-		lastName: "Петров",
-		patronymic: "Петрович",
-		groupUuid: "2",
-		group: mockGroups[1],
-		brigadesUuids: [],
-		brigades: [],
-		lessons: new Map(),
-		roles: [],
-		version: 1,
-	},
-	{
-		uuid: "3",
-		studentCode: 3,
-		firstName: "Сидор",
-		lastName: "Сидоров",
-		patronymic: "Сидорович",
-		groupUuid: "3",
-		group: mockGroups[2],
-		brigadesUuids: [],
-		brigades: [],
-		lessons: new Map(),
-		roles: [],
-		version: 1,
-	},
-]
-
-const disciplines: TDiscipline[] = [
-	{
-		uuid: "1",
-		name: "Математика",
-		shortName: "Мат.",
-		type: "Лекция",
-		isArchived: false,
-		professorUuid: "1",
-		groupUuid: "1",
-		DisciplinesSet: "1",
-	},
-	{
-		uuid: "2",
-		name: "Физика",
-		shortName: "Физ.",
-		type: "Упражнение",
-		isArchived: false,
-		professorUuid: "2",
-		groupUuid: "1",
-		DisciplinesSet: "1",
-	},
-	{
-		uuid: "3",
-		name: "История",
-		shortName: "Ист.",
-		type: "Семинар",
-		isArchived: false,
-		professorUuid: "3",
-		groupUuid: "2",
-		DisciplinesSet: "1",
-	},
-	{
-		uuid: "4",
-		name: "Программирование",
-		shortName: "Прог.",
-		type: "Лабораторная",
-		isArchived: false,
-		professorUuid: "4",
-		groupUuid: "2",
-		DisciplinesSet: "2",
-	},
-	{
-		uuid: "7",
-		name: "Программирование",
-		shortName: "Прог.",
-		type: "Упражнение",
-		isArchived: false,
-		professorUuid: "4",
-		groupUuid: "2",
-		DisciplinesSet: "2",
-	},
-	{
-		uuid: "5",
-		name: "Английский язык",
-		shortName: "АЯ",
-		type: "Лекция",
-		isArchived: true,
-		professorUuid: "5",
-		groupUuid: "3",
-		DisciplinesSet: "2",
-	},
-]
-
-const lessonTopic = "Преобразование Фурье"
-
-const mockLessons: TLesson[] = Array.from({ length: 5 }, (_, index) => ({
-	uuid: `lesson-${index + 1}`,
-	code: 13,
-	startDate: "2024-12-25T10:00:00Z",
-	name: lessonTopic,
-	shortName: "Преобр. Фурье",
-	lessonTypeUuid: "lesson-type-1",
-	disciplineUuid: "1",
-	version: 0,
-}))
-
-const mockJournalRows: TJournalRow[] = [
-	{
-		student: mockStudents[0],
-		order: 1,
-		fullName: "Фамилия И. О.",
-		lessons: new Map([
-			[mockLessons[0].uuid, { presenceStatus: "Н", mark: "неуд." }],
-			[mockLessons[1].uuid, { presenceStatus: "Н", mark: "зачтено" }],
-			[mockLessons[2].uuid, { presenceStatus: "Н", mark: "зачтено" }],
-			[mockLessons[3].uuid, { presenceStatus: "Н", mark: "зачтено" }],
-		]),
-		percent: 38,
-		attendedTotal: "",
-		attestation: "Хор",
-	},
-	{
-		student: mockStudents[1],
-		order: 5,
-		fullName: "Фамилия И. О.",
-		lessons: new Map([
-			[mockLessons[0].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
-			[mockLessons[1].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
-			[mockLessons[2].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
-			[mockLessons[3].uuid, { presenceStatus: "1/2", mark: "зачтено" }],
-		]),
-		percent: 38,
-		attendedTotal: "",
-		attestation: "Хор",
-	},
-	{
-		student: mockStudents[2],
-		order: 3,
-		fullName: "Фамилия И. О.",
-		lessons: new Map([
-			[mockLessons[0].uuid, { presenceStatus: "Б", mark: "5" }],
-			[mockLessons[1].uuid, { presenceStatus: "Б", mark: "5" }],
-			[mockLessons[2].uuid, { presenceStatus: "Б", mark: "5" }],
-			[mockLessons[3].uuid, { presenceStatus: "Б", mark: "5" }],
-		]),
-		percent: 38,
-		attendedTotal: "",
-		attestation: "Хор",
-	},
-]
 
 type TVisiblePanel = "lesson" | "discipline"
 
@@ -287,7 +100,7 @@ const Journal = () => {
 				onAnimationEnd={handleAnimationEnd}
 			>
 				<DisciplineTable
-					disciplines={disciplines}
+					disciplines={mockDisciplines}
 					onDisciplineClick={(discipline) => {
 						setSelectedDiscipline(discipline)
 						handleSwitchPanel("lesson")

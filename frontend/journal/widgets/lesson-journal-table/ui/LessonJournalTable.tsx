@@ -136,7 +136,7 @@ const LessonJournalTable = (props: Props) => {
 			className={`flex w-fit max-w-full flex-col gap-4 ${className}`}
 			sx={sx}>
 			<Box className="flex justify-start items-center gap-2">
-				<ComeBackButton onClick={onBackClick} />
+				{onBackClick && <ComeBackButton onClick={onBackClick} />}
 				<Typography className="flex gap-2" variant="h6">
 					{discipline?.name ?? title}
 					<DisciplineTag disciplineType={discipline?.type ?? "Другое"} />
