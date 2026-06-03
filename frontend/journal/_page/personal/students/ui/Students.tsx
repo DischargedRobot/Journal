@@ -6,7 +6,7 @@ import PersonalStudentTable from "@/widgets/personla-student-table/ui/PersonalSt
 
 const Students = () => {
 	return (
-		<div className="flex h-full">
+		<div className="flex h-full w-full">
 			<Sidebar open={true} onClose={() => { }} title="Группы" items={mockPersonalGroups.map((group, index) => ({
 				text: group.name,
 				href: `/personal/groups/${group.uuid}`,

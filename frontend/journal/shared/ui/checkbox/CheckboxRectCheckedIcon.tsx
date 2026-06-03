@@ -11,7 +11,7 @@ const iconSx = {
 	},
 	"& .checkbox-box": {
 		fill: "none",
-		stroke: "var(--mui-palette-contrastingSecondary-main)",
+		stroke: "primary.main",
 		strokeLinecap: "round",
 		strokeLinejoin: "round",
 	},

@@ -17,16 +17,38 @@ const averageStudentsPerLesson =
         return sum + present
     }, 0) / mockLessons.length
 
+const sidebarItems = [
+    {
+        text: "Сегодня",
+        href: "/personal/my-lessons/today",
+    },
+    {
+        text: "Завтра",
+        href: "/personal/my-lessons/tomorrow",
+    },
+    {
+        text: "Неделя",
+        href: "/personal/my-lessons/week",
+    },
+]
+
+const groupItems = mockPersonalGroups.map((group) => ({
+    text: group.name,
+    href: `/personal/my-lessons/group/${group.uuid}`,
+    items: mockLessons.map((lesson) => ({
+        text: lesson.name ?? lesson.shortName ?? `Занятие ${lesson.code}`,
+        href: `/personal/my-lessons/group/${group.uuid}/${lesson.uuid}`,
+    })),
+}))
+
 const MyLessons = () => {
 
     return (
-        <div className="flex h-full">
-            <Sidebar open={true} onClose={() => { }} title="Группы" items={mockPersonalGroups.map((group, index) => ({
-                text: group.name,
-                href: `/personal/groups/${group.uuid}`,
-                onClick: () => { },
-                selected: index === 0,
-            }))} />
+        <>
+            <div className="flex w-full h-full flex-1">
+                <Sidebar className="z-1" items={sidebarItems} />
+                <Sidebar items={groupItems} />
+            </div>
             <div className="flex flex-col gap-4 px-16 py-8">
                 <Box className="flex gap-4">
                     <StatCard
@@ -53,8 +75,7 @@ const MyLessons = () => {
                     discipline={mockDisciplines[0]}
                 />
             </div>
-
-        </div>
+        </>
     )
 }
 

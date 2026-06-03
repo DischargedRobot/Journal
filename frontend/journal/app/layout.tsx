@@ -11,7 +11,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
 	const { children } = props
 	return (
 		<html lang="en">
-			<body className="flex flex-col h-full">
+			<body className="flex flex-col min-h-full h-full">
 				<AppRouterCacheProvider options={{ enableCssLayer: true }}>
 					<ClientThemeProvider>{children}</ClientThemeProvider>
 				</AppRouterCacheProvider>
