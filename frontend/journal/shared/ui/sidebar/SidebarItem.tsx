@@ -11,7 +11,7 @@ export interface Item {
     href?: string
     icon?: React.ReactNode
     onClick?: () => void
-    items?: Omit<Item, "items">[]
+    items?: Omit<Item, "items" | "icon">[]
 }
 
 interface Props {
@@ -26,15 +26,19 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
 
     const [isOpen, setIsOpen] = useState(false)
 
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+    const [selectedSubItem, setSelectedSubItem] = useState<Item | null>(null)
+
     return (
         <Fragment>
             <ListItem
                 className="cursor-pointer"
                 onClick={() => {
                     if (hasItems) {
-                        setIsOpen(!isOpen)
+                        setIsOpen(isSelected ? !isOpen : true)
                     }
                     onSelect(item)
+                    setSelectedSubItem(null)
                     item.onClick?.()
                 }}
                 sx={isSelected ? {
@@ -53,12 +57,42 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
                     {item.text}
                 </ListItemText>
                 {hasItems && <ListItemIcon>
-                    <ExpandMoreIcon className="transition-transform duration-300" fontSize="large" sx={isOpen ? { transform: "rotate(180deg)" } : {}} />
+                    <ExpandMoreIcon
+                        className="transition-transform duration-300"
+                        fontSize="large"
+                        sx={isOpen && isSelected ? { transform: "rotate(180deg)" } : {}}
+                        onClick={() => setIsOpen(!isOpen)}
+                    />
                 </ListItemIcon>}
             </ListItem>
-            {hasItems && isOpen && item.items!.map((item) => (
+            {hasItems && isOpen && isSelected && item.items!.map((item) => (
                 <Fragment key={item.href ?? item.text}>
-                    <ListItem>
+                    <ListItem
+                        sx={
+                            selectedSubItem?.href === item.href
+                                ? {
+                                    backgroundColor: "secondary.light",
+                                    color: "contrastingSecondary.main",
+                                }
+                                : {
+                                    backgroundColor: "secondary.main",
+                                    color: "contrastingSecondary.light",
+                                }}
+                        onClick={() => setSelectedSubItem(item)}
+                    >
+                        {selectedSubItem === item &&
+                            <ListItemIcon>
+                                <ExpandMoreIcon
+                                    fontSize="large"
+                                    sx={selectedSubItem === item
+                                        ? {
+                                            transform: "rotate(270deg)",
+                                            color: "primary.main"
+                                        } : {
+                                            color: "contrastingSecondary.main"
+                                        }}
+                                />
+                            </ListItemIcon>}
                         <ListItemText>{item.text}</ListItemText>
                     </ListItem>
                 </Fragment>

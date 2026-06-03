@@ -56,13 +56,13 @@ const SidePanelPersonalMenu = () => {
     return (
         <List
             component="menu"
-            className="overflow-y-auto flex self-stretch flex-col items-center justify-start gap-2 p-2 w-fit h-full shadow-2xl z-10"
+            className="overflow-y-auto flex self-stretch flex-col items-center justify-start gap-2 p-2 min-w-fit h-full shadow-2xl z-10"
             sx={{
                 backgroundColor: "secondary.main",
             }}>
             {menuItems.map((item) => (
                 <ListItem
-                    className={`side-panel-personal-menu__item flex flex-col items-center justify-center py-0 w-full min-h-[95px] rounded-[20px] cursor-pointer ${activeItem(item.href) ? "side-panel-personal-menu__item_active" : ""}`}
+                    className={`side-panel-personal-menu__item flex flex-col items-center justify-center py-0 min-w-[162px] w-full min-h-[95px] rounded-[20px] cursor-pointer ${activeItem(item.href) ? "side-panel-personal-menu__item_active" : ""}`}
                     key={item.href}
                     component={NextLink}
                     href={item.href}

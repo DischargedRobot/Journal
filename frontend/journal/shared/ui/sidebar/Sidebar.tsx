@@ -27,7 +27,7 @@ const Sidebar = (props: Props) => {
 
     return (
         <List
-            className={`flex flex-col p-0 w-full max-w-[240px] h-full shadow-2xl ${className}`}
+            className={`flex flex-col p-0 w-full min-w-[240px] h-full shadow-2xl ${className}`}
             sx={{
                 backgroundColor: "secondary.light",
             }}
