@@ -29,9 +29,9 @@ const PersonalStudentTable = ({ students }: Props) => {
     return (
         <div className="flex flex-col flex-4 mx-16 my-8 ">
             <StudentTable students={students} />
+
             <AddStudentForm
                 addButton={renderAddButton}
-                onSubmit={(data) => console.log(data)}
             />
         </div>
     )

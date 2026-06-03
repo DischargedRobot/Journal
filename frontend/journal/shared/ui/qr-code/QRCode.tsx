@@ -8,31 +8,60 @@ interface Props {
 }
 
 const QRCode = ({ value }: Props) => {
-    const ref = useRef<HTMLDivElement>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
+    const qrCodeRef = useRef<QRCodeStyling | null>(null)
 
     useEffect(() => {
-        if (ref.current) {
-            const qrCode = new QRCodeStyling({
-                width: 100,
-                height: 100,
-                data: value,
-                margin: 5,
-                type: "svg",
-                shape: "square",
-                cornersDotOptions: {
-                    type: "dot",
-                },
-                cornersSquareOptions: {
-                    type: "extra-rounded",
-                    color: "var(--mui-palette-primary-main)",
-                }
-            })
-            ref.current.innerHTML = ""
-            qrCode.append(ref.current)
+        const container = containerRef.current
+        if (!container) {
+            return
+        }
+
+        const qrCode = new QRCodeStyling({
+            width: 100,
+            height: 100,
+            data: value,
+            margin: 5,
+            type: "svg",
+            shape: "square",
+            cornersDotOptions: {
+                type: "dot",
+            },
+            cornersSquareOptions: {
+                type: "extra-rounded",
+                color: "var(--mui-palette-primary-main)",
+            },
+        })
+
+        qrCodeRef.current = qrCode
+        container.innerHTML = ""
+        qrCode.append(container)
+
+        // обновляем размер QR кода при изменении размера контейнера
+        const updateSize = () => {
+            const size = container.offsetWidth
+            if (size > 0) {
+                qrCode.update({ width: size, height: size })
+            }
+        }
+
+        updateSize()
+
+        const observer = new ResizeObserver(updateSize)
+        observer.observe(container)
+
+        return () => {
+            observer.disconnect()
+            qrCodeRef.current = null
         }
     }, [value])
 
-    return <div ref={ref} />
+    return (
+        <div
+            ref={containerRef}
+            style={{ height: "100%", aspectRatio: "1 / 1" }}
+        />
+    )
 }
 
 export default QRCode

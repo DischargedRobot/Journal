@@ -18,7 +18,7 @@ const RoleGroup = (props: Props) => {
     } = props
 
     return (
-        <Box className="flex items-center gap-1 rounded-[20px] p-1 "
+        <Box className="flex items-center gap-1 rounded-[20px] "
             sx={{
                 // backgroundColor: "secondary.dark",
 

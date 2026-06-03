@@ -1,48 +1,55 @@
-import { Box } from "@mui/material"
 import { useState } from "react"
-import { useForm } from "react-hook-form"
 import type { Dispatch, SetStateAction, ReactNode } from "react"
 import { QRCode } from "@/shared/ui/qr-code"
-
-interface FormValues {
-    firstName: string
-    lastName: string
-    patronymic: string
-    group: string
-}
+import { CopyField } from "@/shared/ui/copy-field"
+import Box from "@mui/material/Box"
+import RadioGroup from "@mui/material/RadioGroup"
+import FormControlLabel from "@mui/material/FormControlLabel"
+import Radio from "@mui/material/Radio"
+import RoleGroup from "@/shared/ui/role/RoleGroup"
 
 
 interface Props {
     addButton: (setIsOpen: Dispatch<SetStateAction<boolean>>) => ReactNode
-    onSubmit: (data: FormValues) => void
 }
 
 export const AddStudentForm = (props: Props) => {
-    const { addButton, onSubmit } = props
+    const { addButton } = props
 
     const [isOpen, setIsOpen] = useState(false)
-    const {
-        register,
-        handleSubmit,
-        formState: { errors }
-    } = useForm<FormValues>()
 
     return (
-        <>
+        <Box className="flex flex-col gap-4">
             {addButton(setIsOpen)}
             {isOpen && (
                 <Box
-                    className="flex flex-col gap-4"
-                    component="form"
+                    className="flex gap-4 p-4 rounded-[20px] w-fit"
                     sx={{
                         backgroundColor: "white",
                     }}
-                    onSubmit={handleSubmit(onSubmit)}
                 >
                     <QRCode value="1234567890" />
+                    <Box className="flex flex-col gap-2">
+                        <CopyField value="1234567890" />
+                        <RadioGroup
+                            name="role"
+                            defaultValue="Студент"
+                            row
+                        >
+                            <FormControlLabel value="STUDENT" control={<Radio />} label="Студент" />
+                            <FormControlLabel value="GROUP" control={<Radio />} label="Группа" />
+                        </RadioGroup>
+                        <RoleGroup
+                            roles={[
+                                { uuid: "1", name: "Студент", permissions: [] },
+                            ]}
+                            onAddRole={() => { }}
+                            onClickRole={() => { }}
+                        />
+                    </Box>
                 </Box>
             )}
-        </>
+        </Box>
     )
 }
 export default AddStudentForm
