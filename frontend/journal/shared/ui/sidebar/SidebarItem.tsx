@@ -76,7 +76,7 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
                                 }
                                 : {
                                     backgroundColor: "secondary.main",
-                                    color: "contrastingSecondary.light",
+                                    color: "secondary.contrastText",
                                 }}
                         onClick={() => setSelectedSubItem(item)}
                     >
@@ -89,7 +89,7 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
                                             transform: "rotate(270deg)",
                                             color: "primary.main"
                                         } : {
-                                            color: "contrastingSecondary.main"
+                                            color: "contrastingSecondary.light"
                                         }}
                                 />
                             </ListItemIcon>}
@@ -99,7 +99,7 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
             ))}
             <Divider
                 sx={{
-                    borderColor: "grey.400",
+                    borderColor: "contrastingSecondary.light",
                 }}
             />
         </Fragment>

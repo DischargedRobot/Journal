@@ -69,18 +69,7 @@ const moreToolsButtonItems: TMenuItemConfig[] = [
     },
 ]
 
-type ClassNames = {
-    tableContainer?: string
-    table?: string
-    tableHead?: string
-    tableBody?: string
-    tableHeaderRow?: string
-    tableBodyRow?: string
-    tableHeaderCell?: string
-    tableBodyCell?: string
-}
-
-const flexCell = { display: "block", boxSizing: "border-box" } as const
+const flexCell = { display: "block", boxSizing: "border-box", borderBottom: "none" } as const
 const columnSx = {
     brigade: { ...flexCell, width: 100, flexShrink: 0 },
     name: { ...flexCell, flex: 1, minWidth: 160 },
@@ -92,18 +81,16 @@ const columnSx = {
 
 interface Props {
     students: TStudent[]
-    classNames?: ClassNames
 }
 
-const StudentTable = ({ students, classNames }: Props) => {
+const StudentTable = ({ students }: Props) => {
     const brigadeColorByUuid = buildBrigadeColorMap(students)
     const hasBrigade = students.some((student) => getBrigade(student))
 
     return (
-        <TableContainer className={`rounded-[20px] h-fit ${classNames?.tableContainer}`} >
-            <Table className={classNames?.table}>
+        <TableContainer className="rounded-t-[20px] h-fit" >
+            <Table>
                 <TableHead
-                    className={classNames?.tableHead}
                     sx={{
                         position: "sticky",
                         top: 0,
@@ -117,13 +104,13 @@ const StudentTable = ({ students, classNames }: Props) => {
                     }}
 
                 >
-                    <TableRow className={`flex gap-[15px] px-1.25 ${classNames?.tableHeaderRow}`}>
-                        {hasBrigade && <TableCell sx={columnSx.brigade} className={`py-2.5 text-start text content-end ${classNames?.tableHeaderCell}`}>Бригада</TableCell>}
-                        <TableCell sx={columnSx.name} className={`py-2.5 text-center text content-end ${classNames?.tableHeaderCell}`}>Фамилия И.О.</TableCell>
-                        <TableCell sx={columnSx.studentCode} className={`py-2.5 text-center text content-end ${classNames?.tableHeaderCell}`}>Студ. билет</TableCell>
-                        <TableCell sx={columnSx.group} className={`py-2.5 text-center text content-end ${classNames?.tableHeaderCell}`}>Группа</TableCell>
-                        <TableCell sx={columnSx.roles} className={`py-2.5 text-center text content-end ${classNames?.tableHeaderCell}`}>Роли</TableCell>
-                        <TableCell sx={columnSx.actions} className={`py-2.5 text-center text content-end ${classNames?.tableHeaderCell}`}>
+                    <TableRow className="flex gap-[15px] px-1.25">
+                        {hasBrigade && <TableCell sx={columnSx.brigade} className="py-2.5 text-start text content-end">Бригада</TableCell>}
+                        <TableCell sx={columnSx.name} className="py-2.5 text-center text content-end">Фамилия И.О.</TableCell>
+                        <TableCell sx={columnSx.studentCode} className="py-2.5 text-center text content-end">Студ. билет</TableCell>
+                        <TableCell sx={columnSx.group} className="py-2.5 text-center text content-end">Группа</TableCell>
+                        <TableCell sx={columnSx.roles} className="py-2.5 text-center text content-end">Роли</TableCell>
+                        <TableCell sx={columnSx.actions} className="py-2.5 text-center text content-end">
                             <MoreToolsButton items={moreToolsButtonItems} sx={{ color: "inherit" }} />
                         </TableCell>
                     </TableRow>
@@ -136,11 +123,17 @@ const StudentTable = ({ students, classNames }: Props) => {
                             : undefined
 
                         return (
-                            <TableRow key={student.uuid}
-                                className={`flex gap-[15px] px-1.25 ${classNames?.tableBodyRow}`}>
+                            <TableRow
+                                key={student.uuid}
+                                className="flex gap-[15px] px-1.25"
+                                sx={{
+                                    borderBottom: "1px solid ",
+                                    borderColor: "secondary.dark"
+                                }}
+                            >
                                 {hasBrigade && (brigade
                                     ? <TableCell
-                                        className={`flex items-center justify-center rounded-full h-10 text-center text ${classNames?.tableBodyCell}`}
+                                        className="flex items-center justify-center rounded-full h-10 text-center text"
                                         sx={
                                             brigadeColor
                                                 ? {
@@ -153,13 +146,13 @@ const StudentTable = ({ students, classNames }: Props) => {
                                         {brigade.name}
                                     </TableCell>
                                     : <TableCell />)}
-                                <TableCell sx={columnSx.name} className={`text-start text ${classNames?.tableBodyCell}`}>
+                                <TableCell sx={columnSx.name} className="text-start content-center text">
                                     {student.lastName} {student.firstName} {student.patronymic}
                                 </TableCell>
-                                <TableCell sx={columnSx.studentCode} className={`text-center text ${classNames?.tableBodyCell}`}>{student.studentCode}</TableCell>
-                                <TableCell sx={columnSx.group} className={`text-center text ${classNames?.tableBodyCell}`}>{student.group.code}</TableCell>
-                                <TableCell sx={columnSx.roles} className={`text-center text ${classNames?.tableBodyCell}`}><RoleGroup roles={student.roles} /></TableCell>
-                                <TableCell sx={columnSx.actions} className={`text-center text ${classNames?.tableBodyCell}`}>
+                                <TableCell sx={columnSx.studentCode} className="text-center content-center text">{student.studentCode}</TableCell>
+                                <TableCell sx={columnSx.group} className="text-center content-center text">{student.group.code}</TableCell>
+                                <TableCell sx={columnSx.roles} className="text-center content-center text"><RoleGroup roles={student.roles} /></TableCell>
+                                <TableCell sx={columnSx.actions} className="text-center content-center text">
                                     <MoreToolsButton items={[
 
                                         {

@@ -62,7 +62,7 @@ const theme = createTheme({
 		},
 		contrastingSecondary: {
 			main: "#282827",
-			light: "#404040",
+			light: "#bebebe",
 			dark: "#141414",
 		},
 		default: {

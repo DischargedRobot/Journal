@@ -1,5 +1,8 @@
 import { StudentTable } from "@/entities/student"
 import { TStudent } from "@/shared/model/student"
+import { AddField } from "@/shared/ui/add-field"
+import { AddStudentForm } from "@/features/add-student-form"
+import { Dispatch, SetStateAction } from "react"
 
 type ClassNames = {
     tableContainer?: string
@@ -11,13 +14,26 @@ type ClassNames = {
 }
 interface Props {
     students: TStudent[]
-    classNames?: ClassNames
 }
 
-const PersonalStudentTable = ({ students, classNames }: Props) => {
+
+const renderAddButton = (setIsOpen: Dispatch<SetStateAction<boolean>>) => (
+    <AddField
+        className="rounded-b-[20px] rounded-t-none"
+        label="Добавить студента"
+        onClick={() => setIsOpen((prev) => !prev)}
+    />
+)
+const PersonalStudentTable = ({ students }: Props) => {
 
     return (
-        <StudentTable students={students} classNames={classNames} />
+        <div className="flex flex-col flex-4 mx-16 my-8 ">
+            <StudentTable students={students} />
+            <AddStudentForm
+                addButton={renderAddButton}
+                onSubmit={(data) => console.log(data)}
+            />
+        </div>
     )
 
 }

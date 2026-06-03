@@ -15,11 +15,7 @@ const Students = () => {
 					selected: index === 0,
 				}))} />
 			</div>
-			<PersonalStudentTable
-				classNames={{
-					tableContainer: "mx-16 my-8 flex-4",
-				}}
-				students={mockPersonalStudents} />
+			<PersonalStudentTable students={mockPersonalStudents} />
 		</>
 	)
 }
