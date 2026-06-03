@@ -1,7 +1,8 @@
-import { Box, TextField } from "@mui/material"
+import { Box } from "@mui/material"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import type { Dispatch, SetStateAction, ReactNode } from "react"
+import { QRCode } from "@/shared/ui/qr-code"
 
 interface FormValues {
     firstName: string
@@ -38,10 +39,7 @@ export const AddStudentForm = (props: Props) => {
                     }}
                     onSubmit={handleSubmit(onSubmit)}
                 >
-                    <TextField label="Имя" size="small" variant="outlined" {...register("firstName")} />
-                    <TextField label="Фамилия" size="small" variant="outlined" {...register("lastName")} />
-                    <TextField label="Отчество" size="small" variant="outlined" {...register("patronymic")} />
-                    <TextField label="Группа" size="small" variant="outlined" {...register("group")} />
+                    <QRCode value="1234567890" />
                 </Box>
             )}
         </>
