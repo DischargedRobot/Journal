@@ -11,7 +11,7 @@ interface Props {
 const AddDepartment = ({ onClick }: Props) => {
 	return (
 		<Box
-			className="flex flex-col items-center justify-center gap-2 p-4 border rounded-[20px] w-[300px] h-[211px]"
+			className="flex flex-col items-center justify-center gap-2 p-4 border rounded-[20px] w-[300px] h-[211px] cursor-pointer"
 			sx={{
 				bgcolor: "secondary.light",
 				borderColor: "contrastingSecondary.light",

@@ -1,20 +1,17 @@
 "use client"
 
-import { DepartmentCard } from "@/entities/department"
 import { mockDepartments, mockProfessors } from "@/shared/model/mocks"
-import { AddDepartment } from "@/widgets/add-department"
+import { DepartmentsList } from "@/widgets/departments-list"
 
 const Structure = () => {
 	return (
-		<div>
-			<DepartmentCard
-				department={mockDepartments[0]}
-				professors={mockProfessors}
-			/>
-			<AddDepartment
-				onClick={() => {
-					console.log("add department")
-				}}
+		<div className="p-10 w-full">
+			<DepartmentsList
+				items={mockDepartments.map((department) => ({
+					department,
+					professors: mockProfessors,
+				}))}
+				title="Кафедры"
 			/>
 		</div>
 	)
