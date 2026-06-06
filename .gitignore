@@ -16,6 +16,9 @@ copilot-instructions*
 .vs/
 .vscode/
 
+/docs
+/scripts
+
 # Logs
 *.log
 logs/

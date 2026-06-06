@@ -114,11 +114,11 @@ namespace AuthService.Controller
                     user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
                 );
                 string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
-                _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
                 Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
 
                 _logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, user.Uuid);
                 string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
+                _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
                 Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
                 {
                     HttpOnly = true,

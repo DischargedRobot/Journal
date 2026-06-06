@@ -2,11 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MainService
 {
+
     public enum UserRole
     {
-        Unknown = 0,
-        Student = 1,
-        Professor = 2
+        Student = 0,
+        Professor = 1,
+        All = 2
     }
 
     public class Users : BaseEntity
@@ -21,7 +22,9 @@ namespace MainService
         public StudentPersons? StudentPerson { get; set; }
         public UniversityEmployers? UniversityEmployer { get; set; }
 
-        public UserRole Role { get; set; } = UserRole.Unknown;
+    //  определяет в какой таблице будет храниться пользователь 
+    // в студенческой или преподавательской, чтобы не делать два запроса в базу данных
+        public UserRole Role { get; set; } = UserRole.Student;
 
     }
 }
