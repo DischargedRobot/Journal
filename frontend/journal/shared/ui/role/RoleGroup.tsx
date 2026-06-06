@@ -1,8 +1,8 @@
 import { TRole } from "@/shared/model/role"
+import { AddChip } from "@/shared/ui/add-chip"
 import Box from "@mui/material/Box"
 import Chip from "@mui/material/Chip"
-import AddIcon from '@mui/icons-material/Add';
-import ClearIcon from '@mui/icons-material/Clear';
+import ClearIcon from "@mui/icons-material/Clear"
 interface Props {
     roles: TRole[]
     onAddRole?: (e: React.MouseEvent<HTMLDivElement>, roles: TRole[]) => void
@@ -23,27 +23,10 @@ const RoleGroup = (props: Props) => {
                 // backgroundColor: "secondary.dark",
 
             }}>
-            <Chip
-                clickable
-                icon={<AddIcon />}
+            <AddChip
                 label="Добавить роль"
                 onClick={(e) => {
                     onAddRole?.(e, roles)
-                }}
-                className="border-2"
-                sx={{
-                    borderColor: "secondary.dark",
-                    backgroundColor: "secondary.light",
-
-                    ":hover": {
-                        backgroundColor: "primary.main",
-                        color: "primary.contrastText",
-
-                        "& .MuiSvgIcon-root": {
-                            color: "primary.contrastText",
-                        },
-                    },
-
                 }}
             />
             {roles.map((role) => (
