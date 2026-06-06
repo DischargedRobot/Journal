@@ -50,6 +50,9 @@ const CopyField = ({ value }: { value: string }) => {
                     "&:hover .copy-field-icon": {
                         color: "primary.main",
                     },
+                    "& .copy-field-icon": {
+                        color: "contrastingSecondary.main",
+                    },
                     "& .MuiOutlinedInput-notchedOutline": {
                         borderWidth: 1,
                     },
