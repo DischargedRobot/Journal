@@ -35,13 +35,13 @@ const StatCard = ({
 		<Box className="flex shrink-0 items-center justify-center">{icon}</Box>
 		<Box className="flex min-w-0 flex-col">
 			<Typography
-				className="title title_x-litle font-bold"
+				className="title title_x-small font-bold"
 				sx={{ color: "contrastingSecondary.main" }}
 			>
 				{value}
 			</Typography>
 			<Typography
-				className="title title_x-litle"
+				className="title title_x-small"
 				sx={{ color: "default.main" }}
 			>
 				{label}

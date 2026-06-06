@@ -9,7 +9,7 @@ const iconSx = {
 		},
 	"& path:nth-of-type(3), & path:nth-of-type(4), & path:nth-of-type(6), & path:nth-of-type(7)":
 		{
-			fill: "var(--mui-palette-contrastingSecondary-main)",
+			fill: "var(--mui-palette-contrastingSecondary-dark)",
 		},
 } as const
 

@@ -4,7 +4,7 @@ const iconSx = {
 	width: 64,
 	height: 53,
 	"& path:nth-of-type(1)": {
-		fill: "var(--mui-palette-contrastingSecondary-main)",
+		fill: "var(--mui-palette-contrastingSecondary-dark)",
 	},
 	"& path:nth-of-type(n+2)": {
 		fill: "var(--mui-palette-secondary-main)",

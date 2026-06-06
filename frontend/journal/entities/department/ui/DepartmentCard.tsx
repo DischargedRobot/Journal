@@ -6,6 +6,7 @@ import { TProfessor } from "@/shared/model/professor"
 import Box from "@mui/material/Box"
 import Chip from "@mui/material/Chip"
 import { AddChip } from "@/shared/ui/add-chip"
+import Typography from "@mui/material/Typography"
 
 interface Props {
 	department: TDepartment
@@ -15,19 +16,37 @@ interface Props {
 const DepartmentCard = ({ department, professors }: Props) => {
 	return (
 		<Box
-			className="flex flex-col gap-2 p-4 border rounded-[20px] max-w-[300px] w-fit h-[211px] shadow-lg"
+			className="flex flex-col gap-2 p-4 border rounded-[20px] w-[300px]  h-[211px]"
 			sx={{
 				bgcolor: "secondary.light",
-				borderColor: "secondary.dark",
+				borderColor: "contrastingSecondary.light",
+				transition: "box-shadow 0.2s ease-in-out",
+				"&:hover": {
+					boxShadow: "0 4px 10px 0 var(--color-shadow)",
+				},
 			}}
 		>
-			<div className="flex justify-between">
-				<span className="text-lg  px-[10px] py-[5px] rounded-[20px] border">
+			<div className="flex gap-2">
+				<Typography
+					noWrap
+					variant="body2"
+					className="text text-center text_small px-[10px] py-[5px] w-full max-w-[50px] rounded-[20px] border"
+					sx={{
+						borderColor: "contrastingSecondary.light",
+					}}
+				>
 					{department.shortName}
-				</span>
-				<span className="text-lg px-[10px] py-[5px] rounded-[20px] border">
+				</Typography>
+				<Typography
+					noWrap
+					variant="body2"
+					className="text text_small px-[10px] py-[5px] w-full rounded-[20px] border"
+					sx={{
+						borderColor: "contrastingSecondary.light",
+					}}
+				>
 					{department.name}
-				</span>
+				</Typography>
 
 				<MoreToolsButton
 					items={[

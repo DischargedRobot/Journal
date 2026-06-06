@@ -67,7 +67,7 @@ const SidePanelPersonalMenu = () => {
 							: "transparent",
 						color: activeItem(item.href)
 							? "secondary.light"
-							: "contrastingSecondary.main",
+							: "contrastingSecondary.dark",
 						// "&:hover": {
 						//     backgroundColor: "primary.main",
 						//     color: "secondary.light",
@@ -79,7 +79,7 @@ const SidePanelPersonalMenu = () => {
 						className="flex-0!"
 						slotProps={{
 							primary: {
-								className: "title title_x-litle font-bold",
+								className: "title title_x-small font-bold",
 							},
 						}}
 					>

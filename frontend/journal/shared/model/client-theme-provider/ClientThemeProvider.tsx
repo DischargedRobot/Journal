@@ -10,8 +10,6 @@ import {
 } from "@mui/material/styles"
 
 declare module "@mui/material/styles" {
-
-
 	interface PaletteOptions {
 		black: PaletteColorOptions
 		default: PaletteColorOptions
@@ -61,9 +59,9 @@ const theme = createTheme({
 			dark: "#EFEFEF",
 		},
 		contrastingSecondary: {
-			main: "#282827",
-			light: "#bebebe",
-			dark: "#141414",
+			main: "#8E8D8D",
+			light: "#E3E3E3",
+			dark: "#282827",
 		},
 		default: {
 			main: "#8E8D8D",

@@ -4,8 +4,8 @@ const iconSx = {
 	width: 64,
 	height: 64,
 	"& path": {
-		fill: "var(--mui-palette-secondary-light)",
-		stroke: "var(--mui-palette-contrastingSecondary-main)",
+		fill: "var(--mui-palette-secondary-dark)",
+		stroke: "var(--mui-palette-contrastingSecondary-dark)",
 		strokeWidth: 3,
 		strokeLinecap: "round",
 		strokeLinejoin: "round",
