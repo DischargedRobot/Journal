@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainService", "backend\Main
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthService", "backend\AuthService\AuthService.csproj", "{71148234-AEEB-4254-A705-925777BC7AB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainService.Tests", "backend\MainService.Tests\MainService.Tests.csproj", "{99627F80-2A36-4BF5-B097-C7804796B6E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{71148234-AEEB-4254-A705-925777BC7AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71148234-AEEB-4254-A705-925777BC7AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71148234-AEEB-4254-A705-925777BC7AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99627F80-2A36-4BF5-B097-C7804796B6E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99627F80-2A36-4BF5-B097-C7804796B6E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99627F80-2A36-4BF5-B097-C7804796B6E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99627F80-2A36-4BF5-B097-C7804796B6E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -29,6 +35,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C5F7C06F-DB40-20F4-AE6D-33C799FC2B9B} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 		{71148234-AEEB-4254-A705-925777BC7AB1} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{99627F80-2A36-4BF5-B097-C7804796B6E2} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0D195F7D-76CB-4284-8B48-FC7E89D7FDDD}
