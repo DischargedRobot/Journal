@@ -3,62 +3,61 @@ import ListItem from "@mui/material/ListItem"
 import ListItemText from "@mui/material/ListItemText"
 import { useState } from "react"
 import SideBarItem, { type Item } from "./SidebarItem"
+import { SxProps, Theme } from "@mui/material"
 
 interface Props {
-    open?: boolean
-    children?: React.ReactNode
-    onClose?: () => void
-    title?: string
-    items?: Item[]
-    className?: string
+	open?: boolean
+	children?: React.ReactNode
+	onClose?: () => void
+	title?: string
+	items?: Item[]
+	className?: string
+	sx?: SxProps<Theme>
 }
 const Sidebar = (props: Props) => {
+	const { open = true, onClose, title, items, className, sx = {} } = props
 
-    const {
-        open = true,
-        onClose,
-        title,
-        items,
-        className,
-    } = props
+	const [selectedItem, setSelectedItem] = useState<Item | null>(null)
 
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
-
-
-    return (
-        <List
-            className={`flex flex-col p-0 w-full min-w-[240px] h-full shadow-2xl ${className}`}
-            sx={{
-                backgroundColor: "secondary.light",
-            }}
-        >
-            {title && title.length > 0 && <ListItem
-                className="flex items-center justify-center py-4 text-center"
-                sx={{
-                    backgroundColor: "primary.main",
-                    color: "secondary.light",
-                }}>
-                <ListItemText
-                    slotProps={{
-                        primary: {
-                            className: "title title_large",
-                        },
-                    }}
-                >
-                    {title}
-                </ListItemText>
-            </ListItem>}
-            {items?.map((item) => (
-                <SideBarItem
-                    key={item.href ?? item.text}
-                    item={item}
-                    isSelected={selectedItem === item}
-                    onSelect={setSelectedItem}
-                />
-            ))}
-        </List>
-
-    )
+	return (
+		<List
+			className={`flex flex-col p-0 w-full min-w-[240px] h-full shadow-2xl ${className}`}
+			sx={[
+				{
+					backgroundColor: "secondary.light",
+				},
+				...(Array.isArray(sx) ? sx : [sx]),
+			]}
+		>
+			{title && title.length > 0 && (
+				<ListItem
+					className="flex items-center justify-center py-4 text-center"
+					sx={{
+						backgroundColor: "primary.main",
+						color: "secondary.light",
+					}}
+				>
+					<ListItemText
+						slotProps={{
+							primary: {
+								className: "title title_large",
+							},
+						}}
+					>
+						{title.toUpperCase()}
+					</ListItemText>
+				</ListItem>
+			)}
+			{items?.map((item) => (
+				<SideBarItem
+					key={item.key ?? item.text}
+					item={item}
+					isSelected={selectedItem === item}
+					onSelect={setSelectedItem}
+				/>
+			))}
+		</List>
+	)
 }
 
 export default Sidebar

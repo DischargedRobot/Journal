@@ -20,24 +20,24 @@ const averageStudentsPerLesson =
 const sidebarItems = [
     {
         text: "Сегодня",
-        href: "/personal/my-lessons/today",
+        key: "/personal/my-lessons/today",
     },
     {
         text: "Завтра",
-        href: "/personal/my-lessons/tomorrow",
+        key: "/personal/my-lessons/tomorrow",
     },
     {
         text: "Неделя",
-        href: "/personal/my-lessons/week",
+        key: "/personal/my-lessons/week",
     },
 ]
 
 const groupItems = mockPersonalGroups.map((group) => ({
     text: group.name,
-    href: `/personal/my-lessons/group/${group.uuid}`,
+    key: `/personal/my-lessons/group/${group.uuid}`,
     items: mockLessons.map((lesson) => ({
         text: lesson.name ?? lesson.shortName ?? `Занятие ${lesson.code}`,
-        href: `/personal/my-lessons/group/${group.uuid}/${lesson.uuid}`,
+        key: `/personal/my-lessons/group/${group.uuid}/${lesson.uuid}`,
     })),
 }))
 

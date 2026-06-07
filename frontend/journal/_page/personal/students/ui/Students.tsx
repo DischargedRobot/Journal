@@ -7,14 +7,21 @@ import PersonalStudentTable from "@/widgets/personla-student-table/ui/PersonalSt
 const Students = () => {
 	return (
 		<>
-			<div className="h-full flex-1 shrink-0">
-				<Sidebar open={true} onClose={() => { }} title="Группы" items={mockPersonalGroups.map((group, index) => ({
+			<Sidebar
+				open={true}
+				onClose={() => {}}
+				title="Группы"
+				sx={{
+					height: "100%",
+					flex: 1,
+					flexShrink: 0,
+				}}
+				items={mockPersonalGroups.map((group) => ({
 					text: group.name,
-					href: `/personal/groups/${group.uuid}`,
-					onClick: () => { },
-					selected: index === 0,
-				}))} />
-			</div>
+					key: `/personal/groups/${group.uuid}`,
+					onClick: () => {},
+				}))}
+			/>
 			<PersonalStudentTable students={mockPersonalStudents} />
 		</>
 	)
