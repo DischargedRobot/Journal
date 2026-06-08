@@ -19,18 +19,18 @@ namespace AuthService.Controller
 
         private readonly ILogger<AuthController> _logger;
         private readonly AuthServiceContext _context;
-        private readonly RedisRefreshTokenBlackList _refreshTokenBlackList;
-        private readonly RedisAccessTokenList _accessTokenList;
-        private readonly RedisAccessTokenBlackList _accessTokenBlackList;
+        private readonly IRefreshTokenBlackListStore _refreshTokenBlackList;
+        private readonly ITokenStore _accessTokenList;
+        private readonly IAccessTokenBlackListStore _accessTokenBlackList;
         private readonly TokenService _tokenService;
         private readonly ActivitySource _activitySource;
 
         public AuthController(
             ILogger<AuthController> logger,
             AuthServiceContext context,
-            RedisRefreshTokenBlackList refreshTokenBlackList,
-            RedisAccessTokenList accessTokenList,
-            RedisAccessTokenBlackList accessTokenBlackList,
+            IRefreshTokenBlackListStore refreshTokenBlackList,
+            ITokenStore accessTokenList,
+            IAccessTokenBlackListStore accessTokenBlackList,
             TokenService tokenService,
             ActivitySource activitySource)
         {

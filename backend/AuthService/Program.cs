@@ -69,9 +69,9 @@ string? redisConnectionString = $"{dbRedisHost}:{dbRedisPort},abortConnect={dbRe
 
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-builder.Services.AddScoped<RedisRefreshTokenBlackList>();
-builder.Services.AddScoped<RedisAccessTokenBlackList>();
-builder.Services.AddScoped<RedisAccessTokenList>();
+builder.Services.AddScoped<IRefreshTokenBlackListStore, RedisRefreshTokenBlackList>();
+builder.Services.AddScoped<IAccessTokenBlackListStore, RedisAccessTokenBlackList>();
+builder.Services.AddScoped<ITokenStore, RedisAccessTokenList>();
 
 string? jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 if (string.IsNullOrEmpty(jwtKey))
