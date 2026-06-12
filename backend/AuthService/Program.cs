@@ -72,6 +72,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 builder.Services.AddScoped<IRefreshTokenBlackListStore, RedisRefreshTokenBlackList>();
 builder.Services.AddScoped<IAccessTokenBlackListStore, RedisAccessTokenBlackList>();
 builder.Services.AddScoped<ITokenStore, RedisAccessTokenList>();
+builder.Services.AddScoped<IRegistrationCodeStore, RedisRegistrationCode>();
 
 string? jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
 if (string.IsNullOrEmpty(jwtKey))
@@ -110,6 +111,11 @@ builder.Services.AddDbContext<AuthServiceContext>(options =>
 
 // Регистрируем контроллеры и OpenAPI
 builder.Services.AddControllers()
+// игнорирует лишние запятые в JSON
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.AllowTrailingCommas = true;
+    })
     .ConfigureApiBehaviorOptions(options =>
     {
         options.SuppressModelStateInvalidFilter = true; // отключаем автоматическую 400 ошибку от ASP.NET Core при невалидной модели, чтобы возвращать кастомную структуру ошибки

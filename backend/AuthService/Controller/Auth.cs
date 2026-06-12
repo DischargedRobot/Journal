@@ -23,6 +23,7 @@ namespace AuthService.Controller
         private readonly ITokenStore _accessTokenList;
         private readonly IAccessTokenBlackListStore _accessTokenBlackList;
         private readonly TokenService _tokenService;
+        private readonly IRegistrationCodeStore _registrationCodeStore;
         private readonly ActivitySource _activitySource;
 
         public AuthController(
@@ -32,6 +33,7 @@ namespace AuthService.Controller
             ITokenStore accessTokenList,
             IAccessTokenBlackListStore accessTokenBlackList,
             TokenService tokenService,
+            IRegistrationCodeStore registrationCodeStore,
             ActivitySource activitySource)
         {
             _logger = logger;
@@ -40,6 +42,7 @@ namespace AuthService.Controller
             _accessTokenList = accessTokenList;
             _accessTokenBlackList = accessTokenBlackList;
             _tokenService = tokenService;
+            _registrationCodeStore = registrationCodeStore;
             _activitySource = activitySource;
         }
 
@@ -588,6 +591,129 @@ namespace AuthService.Controller
 
                 _logger.LogInformation("{Function}: пользователь создан {UserUuid}", functionName, user.Uuid);
                 return Created(string.Empty, new UsersResponseDto(user));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Function}: непредвиденная ошибка", functionName);
+                return StatusCode(500, new ApiError
+                {
+                    StatusCode = "1.0.0",
+                    Title = "Внутренняя ошибка сервера",
+                    Message = "Произошла ошибка на сервере"
+                });
+            }
+        }
+
+        [HttpPost("download-registration-code")]
+        [SwaggerOperation(Summary = "Сгенерировать код регистрации")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Код регистрации сгенерирован")]
+        [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
+        [ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
+        public async Task<IActionResult> GenerateRegistrationCode(
+            [FromBody] GenerateRegistrationCodeRequest? request
+        )
+        {
+            string functionName = ControllerContext.ActionDescriptor.ActionName;
+            try
+            {
+                using Activity? activity = _activitySource.StartAndLog(_logger, this);
+                if (request == null)
+                {
+                    _logger.LogWarning("{Function}: тело запроса не может быть пустым при генерации кода регистрации", functionName);
+                    return BadRequest(
+                        new ApiError { 
+                            StatusCode = "0.1.0", 
+                            Title = "Неверный запрос", 
+                            Message = "Тело запроса не может быть пустым", 
+                            Field = "BODY" 
+                    });
+                }
+
+                if (request.Roles == null || request.Roles.Length == 0)
+                {
+                    _logger.LogWarning("{Function}: роли не могут быть пустыми при генерации кода регистрации", functionName);
+                    return BadRequest(
+                        new ApiError { 
+                            StatusCode = "0.2.0", 
+                            Title = "Неверный запрос",
+                            Message = "Роли не могут быть пустыми", 
+                            Field = "Roles" 
+                        });
+                }
+
+                Guid[] roleUuids = request.Roles.Distinct().ToArray();
+                List<Roles> foundRoles = await _context.Roles
+                    .AsNoTracking()
+                    .Where(r => roleUuids.Contains(r.Uuid))
+                    .ToListAsync();
+
+                if (foundRoles.Count != roleUuids.Length)
+                {
+                    string missing = string.Join(", ", roleUuids.Except(foundRoles.Select(r => r.Uuid)));
+                    _logger.LogWarning(
+                        "{Function}: указаны несуществующие роли {Missing}",
+                        functionName,
+                        missing
+                    );
+                    return BadRequest(new ApiError
+                    {
+                        StatusCode = "0.2.1",
+                        Title = "Неверный запрос",
+                        Message = "Одна или несколько ролей не найдены",
+                        Field = "Roles",
+                        Details = missing
+                    });
+                }
+
+
+                Guid groupUuid = Guid.Empty;
+                if (!string.IsNullOrWhiteSpace(request.GroupUuid) 
+                    && (!Guid.TryParse(request.GroupUuid, out groupUuid) || groupUuid == Guid.Empty))
+                    {
+                        _logger.LogWarning("{Function}: некорректный GUID группы при генерации кода регистрации", functionName);
+                        return BadRequest(
+                            new ApiError { 
+                                StatusCode = "0.2.2", 
+                                Title = "Неверный запрос", 
+                                Message = "Некорректный GUID группы",
+                                Field = "GroupUuid" 
+                            });
+                    }
+
+                Guid departmentUuid = Guid.Empty;
+                if (!string.IsNullOrWhiteSpace(request.DepartmentUuid)
+                    && (!Guid.TryParse(request.DepartmentUuid, out departmentUuid) || departmentUuid == Guid.Empty))
+                    {
+                        _logger.LogWarning("{Function}: некорректный GUID отдела при генерации кода регистрации", functionName);
+                        return BadRequest(
+                            new ApiError { 
+                                StatusCode = "0.2.2", 
+                                Title = "Неверный запрос", 
+                                Message = "Некорректный GUID отдела", 
+                                Field = "DepartmentUuid" 
+                            });
+                    }
+
+                if (groupUuid == Guid.Empty && departmentUuid == Guid.Empty)
+                {
+                    _logger.LogWarning("{Function}: хотябы группа или отдел должны быть указаны при генерации кода регистрации", functionName);
+                    return BadRequest(new ApiError { 
+                        StatusCode = "0.2.0", 
+                        Title = "Неверный запрос", 
+                        Message = "Хотябы группа или отдел должны быть указаны", 
+                        Field = "GroupUuid/DepartmentUuid",
+                    });
+                }
+
+                Guid codeUuid = Guid.NewGuid();
+                await _registrationCodeStore.SaveAsync(
+                    codeUuid,
+                    new RegistrationCodeData { Roles = request.Roles.Select(r => new Roles { Uuid = r }).ToArray(), 
+                    GroupUuid = groupUuid, DepartmentUuid = departmentUuid }, 
+                    TimeSpan.FromDays(3)
+                );
+
+                return Ok(new { registrationCode = codeUuid });
             }
             catch (Exception ex)
             {

@@ -37,6 +37,16 @@ const AuthApi = {
 		})
 	},
 
+	downloadRegistrationCode: async () => {
+		const result = await ApiJsonRequest<{ registrationCode: string }>(
+			`${AUTH_URL}/registration-code`,
+			{
+				method: "POST",
+			},
+		)
+		return result.registrationCode
+	},
+
 	refresh: async () => {
 		return ApiJsonRequest(`${AUTH_URL}/refresh`, {
 			method: "POST",

@@ -1,5 +1,4 @@
-import { useState } from "react"
-import type { Dispatch, SetStateAction, ReactNode } from "react"
+import { useRef, useState } from "react"
 import { QRCode } from "@/shared/ui/qr-code"
 import { CopyField } from "@/shared/ui/copy-field"
 import Box from "@mui/material/Box"
@@ -8,28 +7,31 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Radio from "@mui/material/Radio"
 import RoleGroup from "@/shared/ui/role/RoleGroup"
 import CachedIcon from "@mui/icons-material/Cached"
+import AuthApi from "@/shared/api/AuthApi"
 
 interface Props {
-	addButton: (setIsOpen: Dispatch<SetStateAction<boolean>>) => ReactNode
+	isOpen: boolean
 }
 
 export const AddStudentForm = (props: Props) => {
-	const { addButton } = props
+	const { isOpen } = props
 
-	const [isOpen, setIsOpen] = useState(false)
 	const [isRefreshing, setIsRefreshing] = useState(false)
 
-	const handleRefresh = () => {
+	const handleRefreshCode = async () => {
 		setIsRefreshing(true)
 		// TODO: запросить новый код регистрации
-		setTimeout(() => {
-			setIsRefreshing(false)
-		}, 1000)
+		const newCode = await AuthApi.downloadRegistrationCode()
+		if (newCode) {
+			setRegisterCode(newCode)
+		}
+		setIsRefreshing(false)
 	}
 
+	const [registerCode, setRegisterCode] = useState<string>("")
+
 	return (
-		<Box className="flex flex-col gap-4">
-			{addButton(setIsOpen)}
+		<Box className="flex flex-col gap-4 ">
 			{isOpen && (
 				<Box
 					className="flex gap-4 p-4 rounded-[20px] w-fit"
@@ -37,12 +39,12 @@ export const AddStudentForm = (props: Props) => {
 						backgroundColor: "white",
 					}}
 				>
-					<QRCode value="1234567890" />
+					<QRCode value={registerCode} />
 					<Box className="flex flex-col gap-2">
 						<Box className="flex items-center gap-2">
-							<CopyField value="1234567890" />
+							<CopyField value={registerCode} />
 							<CachedIcon
-								onClick={handleRefresh}
+								onClick={handleRefreshCode}
 								onAnimationEnd={() => setIsRefreshing(false)}
 								sx={{
 									cursor: "pointer",

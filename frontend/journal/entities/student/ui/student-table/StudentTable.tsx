@@ -1,184 +1,262 @@
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import { TStudent } from '@/shared/model/student';
-import { TBrigade } from '@/shared/model/brigade';
-import { MoreToolsButton, type TMenuItemConfig } from '@/shared/ui/more-tools-button';
-import { RoleGroup } from '@/shared/ui/role';
+import Table from "@mui/material/Table"
+import TableBody from "@mui/material/TableBody"
+import TableCell from "@mui/material/TableCell"
+import TableContainer from "@mui/material/TableContainer"
+import TableHead from "@mui/material/TableHead"
+import TableRow from "@mui/material/TableRow"
+import { TStudent } from "@/shared/model/student"
+import { TBrigade } from "@/shared/model/brigade"
+import {
+	MoreToolsButton,
+	type TMenuItemConfig,
+} from "@/shared/ui/more-tools-button"
+import { RoleGroup } from "@/shared/ui/role"
+import TableFooter from "@mui/material/TableFooter"
 
 type BrigadeColor = { bg: string; text: string }
 
 const BRIGADE_COLOR_POOL: BrigadeColor[] = [
-    { bg: "#D4ED9A", text: "#000000" },
-    { bg: "#B8D9F5", text: "#000000" },
-    { bg: "#FFD700", text: "#000000" },
-    { bg: "#FFA500", text: "#FFFFFF" },
-    { bg: "#FF6B6B", text: "#FFFFFF" },
-    { bg: "#800080", text: "#FFFFFF" },
+	{ bg: "#D4ED9A", text: "#000000" },
+	{ bg: "#B8D9F5", text: "#000000" },
+	{ bg: "#FFD700", text: "#000000" },
+	{ bg: "#FFA500", text: "#FFFFFF" },
+	{ bg: "#FF6B6B", text: "#FFFFFF" },
+	{ bg: "#800080", text: "#FFFFFF" },
 ]
 
 const getBrigade = (student: TStudent): TBrigade | null =>
-    student.brigades[0] ?? null
+	student.brigades[0] ?? null
 
-const buildBrigadeColorMap = (students: TStudent[]): Map<string, BrigadeColor> => {
-    // Собираем все бригады из студентов и сортируем их по uuid
-    const brigadeUuids = [
-        ...new Set(
-            students.flatMap((student) =>
-                student.brigades.map((brigade) => brigade.uuid),
-            ),
-        ),
-    ].sort()
+const buildBrigadeColorMap = (
+	students: TStudent[],
+): Map<string, BrigadeColor> => {
+	// Собираем все бригады из студентов и сортируем их по uuid
+	const brigadeUuids = [
+		...new Set(
+			students.flatMap((student) =>
+				student.brigades.map((brigade) => brigade.uuid),
+			),
+		),
+	].sort()
 
-    // Создаем мапу с цветами для каждой бригады
-    return new Map(
-        brigadeUuids.map((uuid, index) => [
-            uuid,
-            BRIGADE_COLOR_POOL[index % BRIGADE_COLOR_POOL.length],
-        ]),
-    )
+	// Создаем мапу с цветами для каждой бригады
+	return new Map(
+		brigadeUuids.map((uuid, index) => [
+			uuid,
+			BRIGADE_COLOR_POOL[index % BRIGADE_COLOR_POOL.length],
+		]),
+	)
 }
 
 const moreToolsButtonItems: TMenuItemConfig[] = [
-    {
-        key: "download",
-        label: "Скачать список",
-        onClick: () => { },
-
-    },
-    {
-        key: "print",
-        label: "Расчптать список",
-        onClick: () => { },
-    },
-    {
-        key: "create-brigade-template",
-        label: "Создать шаблон бригады",
-        onClick: () => { },
-    },
-    {
-        key: "delete",
-        label: "Удалить",
-        onClick: () => { },
-        sx: {
-            color: "warning.main",
-        },
-    },
+	{
+		key: "download",
+		label: "Скачать список",
+		onClick: () => {},
+	},
+	{
+		key: "print",
+		label: "Расчптать список",
+		onClick: () => {},
+	},
+	{
+		key: "create-brigade-template",
+		label: "Создать шаблон бригады",
+		onClick: () => {},
+	},
+	{
+		key: "delete",
+		label: "Удалить",
+		onClick: () => {},
+		sx: {
+			color: "warning.main",
+		},
+	},
 ]
 
-const flexCell = { display: "block", boxSizing: "border-box", borderBottom: "none" } as const
+const flexCell = {
+	display: "block",
+	boxSizing: "border-box",
+	borderBottom: "none",
+} as const
 const columnSx = {
-    brigade: { ...flexCell, width: 100, flexShrink: 0 },
-    name: { ...flexCell, flex: 1, minWidth: 160 },
-    studentCode: { ...flexCell, width: 180, flexShrink: 0 },
-    group: { ...flexCell, width: 80, flexShrink: 0 },
-    roles: { ...flexCell, width: 280, flexShrink: 0 },
-    actions: { ...flexCell, width: 50, flexShrink: 0 },
+	brigade: { ...flexCell, width: 100, flexShrink: 0 },
+	name: { ...flexCell, flex: 1, minWidth: 160 },
+	studentCode: { ...flexCell, width: 180, flexShrink: 0 },
+	group: { ...flexCell, width: 80, flexShrink: 0 },
+	roles: { ...flexCell, width: 280, flexShrink: 0 },
+	actions: { ...flexCell, width: 50, flexShrink: 0 },
 } as const
 
 interface Props {
-    students: TStudent[]
+	students: TStudent[]
+	footer?: React.ReactNode
 }
 
-const StudentTable = ({ students }: Props) => {
-    const brigadeColorByUuid = buildBrigadeColorMap(students)
-    const hasBrigade = students.some((student) => getBrigade(student))
+const StudentTable = ({ students, footer }: Props) => {
+	const brigadeColorByUuid = buildBrigadeColorMap(students)
+	const hasBrigade = students.some((student) => getBrigade(student))
 
-    return (
-        <TableContainer className="h-fit overflow-hidden rounded-t-[20px]">
-            <Table>
-                <TableHead
-                    sx={{
-                        position: "sticky",
-                        top: 0,
-                        backgroundColor: "primary.main",
-                        borderTopLeftRadius: "20px",
-                        borderTopRightRadius: "20px",
+	return (
+		<TableContainer className="h-fit overflow-hidden rounded-t-[20px]">
+			<Table>
+				<TableHead
+					sx={{
+						position: "sticky",
+						top: 0,
+						backgroundColor: "primary.main",
+						borderTopLeftRadius: "20px",
+						borderTopRightRadius: "20px",
 
-                        "& .MuiTableCell-head": {
-                            color: "primary.contrastText",
-                            textAlign: "center",
-                            fontWeight: "normal",
-                        },
-                    }}
+						"& .MuiTableCell-head": {
+							color: "primary.contrastText",
+							textAlign: "center",
+							fontWeight: "normal",
+						},
+					}}
+				>
+					<TableRow className="flex gap-[15px] px-1.25">
+						{hasBrigade && (
+							<TableCell
+								sx={columnSx.brigade}
+								className="py-2.5 text-start text content-end"
+							>
+								Бригада
+							</TableCell>
+						)}
+						<TableCell
+							sx={columnSx.name}
+							className="py-2.5 text-center text content-end"
+						>
+							Фамилия И.О.
+						</TableCell>
+						<TableCell
+							sx={columnSx.studentCode}
+							className="py-2.5 text-center text content-end"
+						>
+							Студ. билет
+						</TableCell>
+						<TableCell
+							sx={columnSx.group}
+							className="py-2.5 text-center text content-end"
+						>
+							Группа
+						</TableCell>
+						<TableCell
+							sx={columnSx.roles}
+							className="py-2.5 text-center text content-end"
+						>
+							Роли
+						</TableCell>
+						<TableCell
+							sx={columnSx.actions}
+							className="py-2.5 text-center text content-end"
+						>
+							<MoreToolsButton
+								items={moreToolsButtonItems}
+								sx={{ color: "inherit" }}
+							/>
+						</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody sx={{ backgroundColor: "secondary.light" }}>
+					{students.map((student) => {
+						const brigade = getBrigade(student)
+						const brigadeColor = brigade
+							? brigadeColorByUuid.get(brigade.uuid)
+							: undefined
 
-                >
-                    <TableRow className="flex gap-[15px] px-1.25">
-                        {hasBrigade && <TableCell sx={columnSx.brigade} className="py-2.5 text-start text content-end">Бригада</TableCell>}
-                        <TableCell sx={columnSx.name} className="py-2.5 text-center text content-end">Фамилия И.О.</TableCell>
-                        <TableCell sx={columnSx.studentCode} className="py-2.5 text-center text content-end">Студ. билет</TableCell>
-                        <TableCell sx={columnSx.group} className="py-2.5 text-center text content-end">Группа</TableCell>
-                        <TableCell sx={columnSx.roles} className="py-2.5 text-center text content-end">Роли</TableCell>
-                        <TableCell sx={columnSx.actions} className="py-2.5 text-center text content-end">
-                            <MoreToolsButton items={moreToolsButtonItems} sx={{ color: "inherit" }} />
-                        </TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody sx={{ backgroundColor: "secondary.light" }}>
-                    {students.map((student) => {
-                        const brigade = getBrigade(student)
-                        const brigadeColor = brigade
-                            ? brigadeColorByUuid.get(brigade.uuid)
-                            : undefined
-
-                        return (
-                            <TableRow
-                                key={student.uuid}
-                                className="flex gap-[15px] px-1.25"
-                                sx={{
-                                    borderBottom: "1px solid ",
-                                    borderColor: "secondary.dark"
-                                }}
-                            >
-                                {hasBrigade && (brigade
-                                    ? <TableCell
-                                        className="flex items-center justify-center rounded-full h-10 text-center text"
-                                        sx={
-                                            brigadeColor
-                                                ? {
-                                                    backgroundColor: brigadeColor.bg,
-                                                    color: brigadeColor.text,
-                                                }
-                                                : undefined
-                                        }
-                                    >
-                                        {brigade.name}
-                                    </TableCell>
-                                    : <TableCell />)}
-                                <TableCell sx={columnSx.name} className="text-start content-center text">
-                                    {student.lastName} {student.firstName} {student.patronymic}
-                                </TableCell>
-                                <TableCell sx={columnSx.studentCode} className="text-center content-center text">{student.studentCode}</TableCell>
-                                <TableCell sx={columnSx.group} className="text-center content-center text">{student.group.code}</TableCell>
-                                <TableCell sx={columnSx.roles} className="text-center content-center text"><RoleGroup roles={student.roles} /></TableCell>
-                                <TableCell sx={columnSx.actions} className="text-center content-center text">
-                                    <MoreToolsButton items={[
-
-                                        {
-                                            key: "select",
-                                            label: "Выбрать",
-                                            onClick: () => { },
-                                        },
-                                        {
-                                            key: "delete",
-                                            label: "Удалить",
-                                            onClick: () => { },
-                                            sx: {
-                                                color: "warning.main",
-                                            },
-                                        },
-                                    ]} />
-                                </TableCell>
-                            </TableRow>
-                        )
-                    })}
-                </TableBody>
-            </Table>
-        </TableContainer >
-    )
+						return (
+							<TableRow
+								key={student.uuid}
+								className="flex gap-[15px] px-1.25"
+								sx={{
+									borderBottom: "1px solid ",
+									borderColor: "secondary.dark",
+								}}
+							>
+								{hasBrigade &&
+									(brigade ? (
+										<TableCell
+											className="flex items-center justify-center rounded-full h-10 text-center text"
+											sx={
+												brigadeColor
+													? {
+															backgroundColor:
+																brigadeColor.bg,
+															color: brigadeColor.text,
+														}
+													: undefined
+											}
+										>
+											{brigade.name}
+										</TableCell>
+									) : (
+										<TableCell />
+									))}
+								<TableCell
+									sx={columnSx.name}
+									className="text-start content-center text"
+								>
+									{student.lastName} {student.firstName}{" "}
+									{student.patronymic}
+								</TableCell>
+								<TableCell
+									sx={columnSx.studentCode}
+									className="text-center content-center text"
+								>
+									{student.studentCode}
+								</TableCell>
+								<TableCell
+									sx={columnSx.group}
+									className="text-center content-center text"
+								>
+									{student.group.code}
+								</TableCell>
+								<TableCell
+									sx={columnSx.roles}
+									className="text-center content-center text"
+								>
+									<RoleGroup roles={student.roles} />
+								</TableCell>
+								<TableCell
+									sx={columnSx.actions}
+									className="text-center content-center text"
+								>
+									<MoreToolsButton
+										items={[
+											{
+												key: "select",
+												label: "Выбрать",
+												onClick: () => {},
+											},
+											{
+												key: "delete",
+												label: "Удалить",
+												onClick: () => {},
+												sx: {
+													color: "warning.main",
+												},
+											},
+										]}
+									/>
+								</TableCell>
+							</TableRow>
+						)
+					})}
+				</TableBody>
+				{footer && (
+					<TableFooter>
+						<TableRow>
+							<TableCell colSpan={6} className="p-0">
+								{footer}
+							</TableCell>
+						</TableRow>
+					</TableFooter>
+				)}
+			</Table>
+		</TableContainer>
+	)
 }
 
 export default StudentTable
