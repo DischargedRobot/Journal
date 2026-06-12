@@ -15,15 +15,15 @@ namespace AuthService.Controller
 	[ApiController]
 	[Route("api/auth-service/v1/[controller]")]
 	[Produces("application/json")]
-	public class RolesTypesController : ControllerBase
+	public class RoleRightsController : ControllerBase
 	{
-		private readonly ILogger<RolesTypesController> _logger;
+		private readonly ILogger<RoleRightsController> _logger;
 		private readonly AuthServiceContext _context;
 		private readonly ActivitySource _activitySource;
 
-		public RolesTypesController(
+		public RoleRightsController(
 			AuthServiceContext context,
-			ILogger<RolesTypesController> logger,
+			ILogger<RoleRightsController> logger,
 			ActivitySource activitySource)
 		{
 			_context = context;
@@ -32,15 +32,15 @@ namespace AuthService.Controller
 		}
 
 		[HttpGet]
-		[SwaggerResponse(StatusCodes.Status200OK, "Типы ролей найдены", typeof(PagedResult<RolesTypesResponseDto>))]
-		[ResponseExample(StatusCodes.Status200OK, typeof(PagedResult<RolesTypesResponseDto>))]
+		[SwaggerResponse(StatusCodes.Status200OK, "Права ролей найдены", typeof(PagedResult<RoleRightsResponseDto>))]
+		[ResponseExample(StatusCodes.Status200OK, typeof(PagedResult<RoleRightsResponseDto>))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр offset не может быть отрицательным", nameof(offset))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Параметр size не может быть отрицательным", nameof(size))]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.0.3", "Типы ролей не найдены", "В системе не найдено ни одного типа роли", "")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.1.3", "Типы ролей не найдены", "В системе не найдено ни одного типа роли для указанных параметров запроса", "BODY")]
-		[SwaggerOperation(Summary = "Получить список типов ролей")]
-		public async Task<ActionResult<PagedResult<RolesTypesResponseDto>>> GetRolesTypes(
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.0.3", "Права ролей не найдены", "В системе не найдено ни одного права роли", "")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.1.3", "Права ролей не найдены", "В системе не найдено ни одного права роли для указанных параметров запроса", "BODY")]
+		[SwaggerOperation(Summary = "Получить список прав ролей")]
+		public async Task<ActionResult<PagedResult<RoleRightsResponseDto>>> GetRoleRights(
 			[FromQuery, SwaggerParameter("Количество записей")]
 			int size = 100,
 			[FromQuery, SwaggerParameter("Сдвиг от начала")]
@@ -79,43 +79,43 @@ namespace AuthService.Controller
 						nameof(size)));
 				}
 
-				IQueryable<RolesTypes> baseQuery = _context
-					.RolesTypes.Where(rt => filterName == null || rt.Name.Contains(filterName))
+				IQueryable<RoleRights> baseQuery = _context
+					.RoleRights.Where(rr => filterName == null || rr.Name.Contains(filterName))
 					.AsNoTracking();
 
-				List<RolesTypesResponseDto> items = await baseQuery
-					.SortByKey(rt => rt.Name, sortOrder)
-					.TakeWithOffset(offset, size)
-					.Select(rt => new RolesTypesResponseDto(rt))
-					.ToListAsync();
-
 				int total = await baseQuery.CountAsync();
+
+				List<RoleRightsResponseDto> items = await baseQuery
+					.SortByKey(rr => rr.Name, sortOrder)
+					.TakeWithOffset(offset, size)
+					.Select(rr => new RoleRightsResponseDto(rr))
+					.ToListAsync();
 
 				_logger.LogInformation("{Function}: найдено записей = {Total}", functionName, total);
 
 				if (total == 0)
 				{
-					_logger.LogInformation("{Function}: типы ролей не найдены (total=0)", functionName);
+					_logger.LogInformation("{Function}: права ролей не найдены (total=0)", functionName);
 					return NotFound(new ApiError(
 						"1.0.3",
-						"Типы ролей не найдены",
-						"В системе не найдено ни одного типа роли",
+						"Права ролей не найдены",
+						"В системе не найдено ни одного права роли",
 						string.Empty));
 				}
 
 				if (items.Count == 0)
 				{
 					_logger.LogInformation(
-						"{Function}: нет типов ролей по фильтру (total={Total}, offset={Offset})",
+						"{Function}: нет прав ролей по фильтру (total={Total}, offset={Offset})",
 						functionName, total, offset);
 					return NotFound(new ApiError(
 						"1.1.3",
-						"Типы ролей не найдены",
-						"В системе не найдено ни одного типа роли для указанных параметров запроса",
+						"Права ролей не найдены",
+						"В системе не найдено ни одного права роли для указанных параметров запроса",
 						"BODY"));
 				}
 
-				PagedResult<RolesTypesResponseDto> result = new(
+				PagedResult<RoleRightsResponseDto> result = new(
 					Total: total,
 					Offset: offset,
 					Size: items.Count,
@@ -140,13 +140,13 @@ namespace AuthService.Controller
 		}
 
 		[HttpGet("{uuid}")]
-		[SwaggerResponse(StatusCodes.Status200OK, "Тип роли найден", typeof(RolesTypesResponseDto))]
-		[ResponseExample(StatusCodes.Status200OK, typeof(RolesTypesResponseDto))]
-		[SwaggerResponse(StatusCodes.Status404NotFound, "Тип роли не найден", typeof(ApiError))]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Тип роли не найден", "Тип роли с указанным UUID не найден", nameof(uuid))]
-		[SwaggerOperation(Summary = "Получить тип роли по UUID")]
-		public async Task<IActionResult> GetRoleType(
-			[SwaggerParameter("UUID типа роли")]
+		[SwaggerResponse(StatusCodes.Status200OK, "Право роли найдено", typeof(RoleRightsResponseDto))]
+		[ResponseExample(StatusCodes.Status200OK, typeof(RoleRightsResponseDto))]
+		[SwaggerResponse(StatusCodes.Status404NotFound, "Право роли не найдено", typeof(ApiError))]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Право роли не найдено", "Право роли с указанным UUID не найдено", nameof(uuid))]
+		[SwaggerOperation(Summary = "Получить право роли по UUID")]
+		public async Task<IActionResult> GetRoleRight(
+			[SwaggerParameter("UUID права роли")]
 			Guid uuid)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
@@ -155,27 +155,27 @@ namespace AuthService.Controller
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
-				RolesTypesResponseDto? roleType = await _context.RolesTypes
-					.Where(rt => rt.Uuid == uuid)
-					.Select(rt => new RolesTypesResponseDto(rt))
+				RoleRightsResponseDto? roleRight = await _context.RoleRights
+					.Where(rr => rr.Uuid == uuid)
+					.Select(rr => new RoleRightsResponseDto(rr))
 					.FirstOrDefaultAsync();
 
-				if (roleType == null)
+				if (roleRight == null)
 				{
-					_logger.LogInformation("{Function}: тип роли uuid={Uuid} не найден", functionName, uuid);
+					_logger.LogInformation("{Function}: право роли uuid={Uuid} не найдено", functionName, uuid);
 					return NotFound(new ApiError(
 						"1.2.3",
-						"Тип роли не найден",
-						"Тип роли с указанным UUID не найден",
+						"Право роли не найдено",
+						"Право роли с указанным UUID не найдено",
 						nameof(uuid)));
 				}
 
-				_logger.LogInformation("{Function}: возвращён тип роли uuid={Uuid}", functionName, uuid);
-				return Ok(roleType);
+				_logger.LogInformation("{Function}: возвращено право роли uuid={Uuid}", functionName, uuid);
+				return Ok(roleRight);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{Function}: неожиданная ошибка при получении типа роли", functionName);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при получении права роли", functionName);
 				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
 				{
 					StatusCode = "1.0.0",
@@ -186,17 +186,17 @@ namespace AuthService.Controller
 		}
 
 		[HttpPost]
-		[SwaggerResponse(StatusCodes.Status201Created, "Тип роли создан", typeof(RolesTypesResponseDto))]
-		[ResponseExample(StatusCodes.Status201Created, typeof(RolesTypesResponseDto))]
+		[SwaggerResponse(StatusCodes.Status201Created, "Право роли создано", typeof(RoleRightsResponseDto))]
+		[ResponseExample(StatusCodes.Status201Created, typeof(RoleRightsResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Некорректные данные", typeof(ApiError))]
-		[SwaggerResponse(StatusCodes.Status409Conflict, "Тип роли уже существует", typeof(ApiError))]
+		[SwaggerResponse(StatusCodes.Status409Conflict, "Право роли уже существует", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Поле Name обязательно для создания типа роли", "Name")]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Тип роли с таким Name уже существует", nameof(RolesTypesCreateDto.Name))]
-		[SwaggerOperation(Summary = "Создать новый тип роли")]
-		public async Task<IActionResult> CreateRoleType(
-			[FromBody, SwaggerParameter("Тело запроса: данные для создания типа роли")]
-			RolesTypesCreateDto? createDto)
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Поле Name обязательно для создания права роли", "Name")]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Право роли с таким Name уже существует", nameof(RoleRightsCreateDto.Name))]
+		[SwaggerOperation(Summary = "Создать новое право роли")]
+		public async Task<IActionResult> CreateRoleRight(
+			[FromBody, SwaggerParameter("Тело запроса: данные для создания права роли")]
+			RoleRightsCreateDto? createDto)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
 			try
@@ -220,39 +220,39 @@ namespace AuthService.Controller
 					return BadRequest(new ApiError(
 						"0.2.0",
 						"Неверный запрос",
-						"Поле Name обязательно для создания типа роли",
+						"Поле Name обязательно для создания права роли",
 						nameof(createDto.Name)));
 				}
 
-				bool exists = await _context.RolesTypes.AnyAsync(rt => rt.Name == createDto.Name);
+				bool exists = await _context.RoleRights.AnyAsync(rr => rr.Name == createDto.Name);
 				if (exists)
 				{
-					_logger.LogWarning("{Function}: тип роли с Name={Name} уже существует", functionName, createDto.Name);
+					_logger.LogWarning("{Function}: право роли с Name={Name} уже существует", functionName, createDto.Name);
 					return Conflict(new ApiError(
 						"1.2.1",
 						"Конфликт",
-						"Тип роли с таким Name уже существует",
-						nameof(RolesTypesCreateDto.Name)));
+						"Право роли с таким Name уже существует",
+						nameof(RoleRightsCreateDto.Name)));
 				}
 
-				RolesTypes roleType = new()
+				RoleRights roleRight = new()
 				{
 					Uuid = Guid.NewGuid(),
 					Name = createDto.Name.Trim(),
 				};
 
-				_context.RolesTypes.Add(roleType);
+				_context.RoleRights.Add(roleRight);
 				await _context.SaveChangesAsync();
 
-				_logger.LogInformation("{Function}: создан тип роли uuid={Uuid}", functionName, roleType.Uuid);
+				_logger.LogInformation("{Function}: создано право роли uuid={Uuid}", functionName, roleRight.Uuid);
 				return CreatedAtAction(
-					nameof(GetRoleType),
-					new { uuid = roleType.Uuid },
-					new RolesTypesResponseDto(roleType));
+					nameof(GetRoleRight),
+					new { uuid = roleRight.Uuid },
+					new RoleRightsResponseDto(roleRight));
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{Function}: неожиданная ошибка при создании типа роли", functionName);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при создании права роли", functionName);
 				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
 				{
 					StatusCode = "1.0.0",
@@ -263,20 +263,20 @@ namespace AuthService.Controller
 		}
 
 		[HttpPatch("{uuid}")]
-		[SwaggerResponse(StatusCodes.Status200OK, "Тип роли обновлён", typeof(RolesTypesResponseDto))]
-		[ResponseExample(StatusCodes.Status200OK, typeof(RolesTypesResponseDto))]
+		[SwaggerResponse(StatusCodes.Status200OK, "Право роли обновлено", typeof(RoleRightsResponseDto))]
+		[ResponseExample(StatusCodes.Status200OK, typeof(RoleRightsResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-		[SwaggerResponse(StatusCodes.Status404NotFound, "Тип роли не найден", typeof(ApiError))]
-		[SwaggerResponse(StatusCodes.Status409Conflict, "Имя типа роли уже используется", typeof(ApiError))]
+		[SwaggerResponse(StatusCodes.Status404NotFound, "Право роли не найдено", typeof(ApiError))]
+		[SwaggerResponse(StatusCodes.Status409Conflict, "Имя права роли уже используется", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Тип роли не найден", "Тип роли с указанным UUID не найден", nameof(uuid))]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesTypesUpdateDto.Name))]
-		[SwaggerOperation(Summary = "Частично обновить тип роли по UUID")]
-		public async Task<IActionResult> UpdateRoleType(
-			[SwaggerParameter("UUID типа роли")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Право роли не найдено", "Право роли с указанным UUID не найдено", nameof(uuid))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RoleRightsUpdateDto.Name))]
+		[SwaggerOperation(Summary = "Частично обновить право роли по UUID")]
+		public async Task<IActionResult> UpdateRoleRight(
+			[SwaggerParameter("UUID права роли")]
 			Guid uuid,
-			[FromBody, SwaggerParameter("Тело запроса: частичные данные для обновления типа роли")]
-			RolesTypesUpdateDto? request)
+			[FromBody, SwaggerParameter("Тело запроса: частичные данные для обновления права роли")]
+			RoleRightsUpdateDto? request)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
 			try
@@ -294,14 +294,14 @@ namespace AuthService.Controller
 						"BODY"));
 				}
 
-				RolesTypes? roleType = await _context.RolesTypes.FirstOrDefaultAsync(rt => rt.Uuid == uuid);
-				if (roleType == null)
+				RoleRights? roleRight = await _context.RoleRights.FirstOrDefaultAsync(rr => rr.Uuid == uuid);
+				if (roleRight == null)
 				{
-					_logger.LogInformation("{Function}: тип роли uuid={Uuid} не найден", functionName, uuid);
+					_logger.LogInformation("{Function}: право роли uuid={Uuid} не найдено", functionName, uuid);
 					return NotFound(new ApiError(
 						"1.2.3",
-						"Тип роли не найден",
-						"Тип роли с указанным UUID не найден",
+						"Право роли не найдено",
+						"Право роли с указанным UUID не найдено",
 						nameof(uuid)));
 				}
 
@@ -317,8 +317,8 @@ namespace AuthService.Controller
 							nameof(request.Name)));
 					}
 
-					bool exists = await _context.RolesTypes.AnyAsync(rt =>
-						rt.Name == request.Name && rt.Uuid != uuid);
+					bool exists = await _context.RoleRights.AnyAsync(rr =>
+						rr.Name == request.Name && rr.Uuid != uuid);
 					if (exists)
 					{
 						_logger.LogWarning("{Function}: Name={Name} уже используется", functionName, request.Name);
@@ -326,20 +326,20 @@ namespace AuthService.Controller
 							"1.2.1",
 							"Конфликт",
 							"Name уже используется",
-							nameof(RolesTypesUpdateDto.Name)));
+							nameof(RoleRightsUpdateDto.Name)));
 					}
 
-					roleType.Name = request.Name.Trim();
+					roleRight.Name = request.Name.Trim();
 				}
 
 				await _context.SaveChangesAsync();
 
-				_logger.LogInformation("{Function}: тип роли uuid={Uuid} обновлён", functionName, uuid);
-				return Ok(new RolesTypesResponseDto(roleType));
+				_logger.LogInformation("{Function}: право роли uuid={Uuid} обновлено", functionName, uuid);
+				return Ok(new RoleRightsResponseDto(roleRight));
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{Function}: неожиданная ошибка при обновлении типа роли", functionName);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при обновлении права роли", functionName);
 				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
 				{
 					StatusCode = "1.0.0",
@@ -350,21 +350,21 @@ namespace AuthService.Controller
 		}
 
 		[HttpPut("{uuid}")]
-		[SwaggerResponse(StatusCodes.Status200OK, "Тип роли заменён", typeof(RolesTypesResponseDto))]
-		[ResponseExample(StatusCodes.Status200OK, typeof(RolesTypesResponseDto))]
+		[SwaggerResponse(StatusCodes.Status200OK, "Право роли заменено", typeof(RoleRightsResponseDto))]
+		[ResponseExample(StatusCodes.Status200OK, typeof(RoleRightsResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-		[SwaggerResponse(StatusCodes.Status404NotFound, "Тип роли не найден", typeof(ApiError))]
-		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: имя типа роли уже используется", typeof(ApiError))]
+		[SwaggerResponse(StatusCodes.Status404NotFound, "Право роли не найдено", typeof(ApiError))]
+		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: имя права роли уже используется", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Неверный формат данных", "BODY")]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name обязательна", "Name")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Тип роли не найден", "Тип роли с указанным UUID не найден", nameof(uuid))]
-		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesTypesCreateDto.Name))]
-		[SwaggerOperation(Summary = "Полная замена типа роли по UUID")]
-		public async Task<IActionResult> ReplaceRoleType(
-			[SwaggerParameter("UUID типа роли")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Право роли не найдено", "Право роли с указанным UUID не найдено", nameof(uuid))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RoleRightsCreateDto.Name))]
+		[SwaggerOperation(Summary = "Полная замена права роли по UUID")]
+		public async Task<IActionResult> ReplaceRoleRight(
+			[SwaggerParameter("UUID права роли")]
 			Guid uuid,
-			[FromBody, SwaggerParameter("Тело запроса: данные для полной замены типа роли")]
-			RolesTypesCreateDto? replaceDto)
+			[FromBody, SwaggerParameter("Тело запроса: данные для полной замены права роли")]
+			RoleRightsCreateDto? replaceDto)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
 			try
@@ -392,19 +392,19 @@ namespace AuthService.Controller
 						nameof(replaceDto.Name)));
 				}
 
-				RolesTypes? roleType = await _context.RolesTypes.FirstOrDefaultAsync(rt => rt.Uuid == uuid);
-				if (roleType == null)
+				RoleRights? roleRight = await _context.RoleRights.FirstOrDefaultAsync(rr => rr.Uuid == uuid);
+				if (roleRight == null)
 				{
-					_logger.LogInformation("{Function}: тип роли uuid={Uuid} не найден", functionName, uuid);
+					_logger.LogInformation("{Function}: право роли uuid={Uuid} не найдено", functionName, uuid);
 					return NotFound(new ApiError(
 						"1.2.3",
-						"Тип роли не найден",
-						"Тип роли с указанным UUID не найден",
+						"Право роли не найдено",
+						"Право роли с указанным UUID не найдено",
 						nameof(uuid)));
 				}
 
-				bool exists = await _context.RolesTypes.AnyAsync(rt =>
-					rt.Name == replaceDto.Name && rt.Uuid != uuid);
+				bool exists = await _context.RoleRights.AnyAsync(rr =>
+					rr.Name == replaceDto.Name && rr.Uuid != uuid);
 				if (exists)
 				{
 					_logger.LogWarning("{Function}: Name={Name} уже используется", functionName, replaceDto.Name);
@@ -412,18 +412,18 @@ namespace AuthService.Controller
 						"1.2.1",
 						"Конфликт",
 						"Name уже используется",
-						nameof(RolesTypesCreateDto.Name)));
+						nameof(RoleRightsCreateDto.Name)));
 				}
 
-				roleType.Name = replaceDto.Name.Trim();
+				roleRight.Name = replaceDto.Name.Trim();
 				await _context.SaveChangesAsync();
 
-				_logger.LogInformation("{Function}: тип роли uuid={Uuid} заменён", functionName, uuid);
-				return Ok(new RolesTypesResponseDto(roleType));
+				_logger.LogInformation("{Function}: право роли uuid={Uuid} заменено", functionName, uuid);
+				return Ok(new RoleRightsResponseDto(roleRight));
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{Function}: неожиданная ошибка при замене типа роли", functionName);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при замене права роли", functionName);
 				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
 				{
 					StatusCode = "1.0.0",
@@ -434,11 +434,11 @@ namespace AuthService.Controller
 		}
 
 		[HttpDelete("{uuid}")]
-		[SwaggerResponse(StatusCodes.Status204NoContent, "Тип роли удалён")]
-		[SwaggerOperation(Summary = "Удалить тип роли по UUID")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Тип роли не найден", "Тип роли с указанным UUID не найден", nameof(uuid))]
-		public async Task<IActionResult> DeleteRoleType(
-			[SwaggerParameter("UUID типа роли")]
+		[SwaggerResponse(StatusCodes.Status204NoContent, "Право роли удалено")]
+		[SwaggerOperation(Summary = "Удалить право роли по UUID")]
+		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Право роли не найдено", "Право роли с указанным UUID не найдено", nameof(uuid))]
+		public async Task<IActionResult> DeleteRoleRight(
+			[SwaggerParameter("UUID права роли")]
 			Guid uuid)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
@@ -447,26 +447,26 @@ namespace AuthService.Controller
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
-				RolesTypes? roleType = await _context.RolesTypes.FirstOrDefaultAsync(rt => rt.Uuid == uuid);
-				if (roleType == null)
+				RoleRights? roleRight = await _context.RoleRights.FirstOrDefaultAsync(rr => rr.Uuid == uuid);
+				if (roleRight == null)
 				{
-					_logger.LogInformation("{Function}: тип роли uuid={Uuid} не найден", functionName, uuid);
+					_logger.LogInformation("{Function}: право роли uuid={Uuid} не найдено", functionName, uuid);
 					return NotFound(new ApiError(
 						"1.2.3",
-						"Тип роли не найден",
-						"Тип роли с указанным UUID не найден",
+						"Право роли не найдено",
+						"Право роли с указанным UUID не найдено",
 						nameof(uuid)));
 				}
 
-				_context.RolesTypes.Remove(roleType);
+				_context.RoleRights.Remove(roleRight);
 				await _context.SaveChangesAsync();
 
-				_logger.LogInformation("{Function}: тип роли uuid={Uuid} удалён", functionName, uuid);
+				_logger.LogInformation("{Function}: право роли uuid={Uuid} удалено", functionName, uuid);
 				return NoContent();
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "{Function}: неожиданная ошибка при удалении типа роли", functionName);
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при удалении права роли", functionName);
 				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
 				{
 					StatusCode = "1.0.0",

@@ -14,6 +14,8 @@ namespace AuthService.Controller
 {
     [ApiController]
     [Route("api/auth-service/v1/[controller]")]
+    [Produces("application/json")]
+    [Consumes("application/json")]
     public class AuthController : ControllerBase
     {
 
