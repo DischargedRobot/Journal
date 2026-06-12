@@ -87,6 +87,7 @@ namespace AuthService.Controller
 
                 Users? user = await _context.Users
                     .Include(u => u.Roles)
+                        .ThenInclude(r => r.RoleRights)
                     .FirstOrDefaultAsync(u => u.Login == request.Login);
 
                 if (user == null || !HashingPassword.VerifyPassword(request.Password, user.PasswordHash))
@@ -111,7 +112,7 @@ namespace AuthService.Controller
                 string accessToken = _tokenService.GenerateAccessToken(
                     tokenUuid,
                     user.Uuid,
-                    user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
+                    GetUserRights(user)
                 );
                 string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
                 Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
@@ -531,7 +532,10 @@ namespace AuthService.Controller
                 if (request.RolesUuid != null)
                 {
                     Guid[] roleUuids = request.RolesUuid.Distinct().ToArray();
-                    List<Roles> foundRoles = await _context.Roles.Where(r => roleUuids.Contains(r.Uuid)).ToListAsync();
+                    List<Roles> foundRoles = await _context.Roles
+                        .Include(r => r.RoleRights)
+                        .Where(r => roleUuids.Contains(r.Uuid))
+                        .ToListAsync();
                     if (foundRoles.Count != roleUuids.Length)
                     {
                         Guid[] missing = roleUuids.Except(foundRoles.Select(r => r.Uuid)).ToArray();
@@ -565,7 +569,7 @@ namespace AuthService.Controller
                 string accessToken = _tokenService.GenerateAccessToken(
                     tokenUuid,
                     user.Uuid,
-                    user.Roles?.Select(r => r.Name) ?? Enumerable.Empty<string>()
+                    GetUserRights(user)
                 );
                 string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
                 _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
@@ -664,13 +668,17 @@ namespace AuthService.Controller
                 }
 
                 Guid userUuid = result.Payload.UserUuid;
-                IEnumerable<string> roles = result.Payload.Roles;
+                Users? user = await _context.Users
+                    .Include(u => u.Roles)
+                        .ThenInclude(r => r.RoleRights)
+                    .FirstOrDefaultAsync(u => u.Uuid == userUuid);
+                IEnumerable<string> rights = user != null ? GetUserRights(user) : [];
                 // Генерируем новый access token и новый refresh token (ротация)
                 Guid tokenUuid = Guid.NewGuid();
                 string accessToken = _tokenService.GenerateAccessToken(
                     tokenUuid,
                     userUuid,
-                    roles
+                    rights
                 );
                 string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
                 _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
@@ -700,5 +708,13 @@ namespace AuthService.Controller
                 });
             }
         }
+
+        private static IEnumerable<string> GetUserRights(Users user) =>
+            user.Roles?
+                .Where(r => r.RoleRights != null)
+                .SelectMany(r => r.RoleRights!)
+                .Select(rr => rr.Name)
+                .Distinct()
+            ?? [];
     }
 }

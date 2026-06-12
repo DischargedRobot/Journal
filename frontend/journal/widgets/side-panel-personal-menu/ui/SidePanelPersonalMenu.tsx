@@ -4,7 +4,7 @@ import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
-import ArrowBack from "@mui/icons-material/ArrowBack"
+import { DisciplineIcon } from "@/shared/ui/discipline-icon"
 import { StudentsIcon } from "@/shared/ui/students-icon"
 import { DepartmentsIcon } from "@/shared/ui/departments-icon"
 import BookOpenIcon from "@/shared/ui/book-open-icon/BookOpenIcon"
@@ -30,7 +30,7 @@ const menuItems = [
 		href: "/personal/structure",
 	},
 	{
-		icon: <ArrowBack fontSize="small" />,
+		icon: <DisciplineIcon fontSize="small" />,
 		text: "ДИСЦИПЛИНЫ",
 		href: "/personal/disciplines",
 	},

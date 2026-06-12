@@ -16,6 +16,8 @@ copilot-instructions*
 .vs/
 .vscode/
 
+temp_doc*
+temp_blocks.txt
 /docs
 /scripts
 

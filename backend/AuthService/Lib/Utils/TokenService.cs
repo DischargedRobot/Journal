@@ -68,7 +68,7 @@ namespace AuthService.Lib.Utils
             };
         }
 
-        public string GenerateAccessToken(Guid tokenUuid, Guid userUUID, IEnumerable<string> roles)
+        public string GenerateAccessToken(Guid tokenUuid, Guid userUUID, IEnumerable<string> rights)
         {
             SymmetricSecurityKey key = AuthOptions.GetSymmetricSecurityKey(_secutiryKey);
             JwtHeader header = new(new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
@@ -77,7 +77,7 @@ namespace AuthService.Lib.Utils
                 { "iss", AuthOptions.ISSUER },
                 { "aud", AuthOptions.AUDIENCE },
                 { "sub", userUUID.ToString() },
-                { "roles", roles.ToArray() },
+                { "rights", rights.ToArray() },
                 { "jti", tokenUuid.ToString() },
                 { "exp", DateTimeOffset.UtcNow.AddMinutes(30).ToUnixTimeSeconds() }
             };
@@ -119,7 +119,7 @@ namespace AuthService.Lib.Utils
         {
             public Guid TokenUuid { get; set; }
             public Guid UserUuid { get; set; }
-            public IEnumerable<string> Roles { get; set; } = [];
+            public IEnumerable<string> Rights { get; set; } = [];
         }
 
         public async Task<TokenValidationResult> ValidateAccessTokenAsync(
@@ -146,7 +146,7 @@ namespace AuthService.Lib.Utils
                 JwtSecurityToken jwtToken = (JwtSecurityToken)validatedToken;
                 Guid tokenUuid = Guid.Parse(jwtToken.Claims.First(c => c.Type == "jti").Value);
                 Guid userUUID = Guid.Parse(jwtToken.Claims.First(c => c.Type == "sub").Value);
-                string[] roles = jwtToken.Claims.Where(c => c.Type == "roles").Select(c => c.Value).ToArray();
+                string[] rights = jwtToken.Claims.Where(c => c.Type == "rights").Select(c => c.Value).ToArray();
 
                 if (blacklist != null && await blacklist.GetAsync(tokenUuid) != null)
                 {
@@ -157,7 +157,7 @@ namespace AuthService.Lib.Utils
                         {
                             TokenUuid = tokenUuid,
                             UserUuid = userUUID,
-                            Roles = roles
+                            Rights = rights
                         }
                     };
                 }
@@ -169,7 +169,7 @@ namespace AuthService.Lib.Utils
                     {
                         TokenUuid = tokenUuid,
                         UserUuid = userUUID,
-                        Roles = roles
+                        Rights = rights
                     }
                 };
             }

@@ -11,7 +11,7 @@ export interface Item {
 	key?: string
 	icon?: React.ReactNode
 	onClick?: () => void
-	items?: Omit<Item, "items" | "icon">[]
+	items?: Omit<Item, "items">[]
 }
 
 interface Props {
@@ -86,11 +86,11 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
 								selectedSubItem?.key === item.key
 									? {
 											backgroundColor: "secondary.light",
-											color: "contrastingSecondary.main",
+											color: "secondary.contrastText",
 										}
 									: {
 											backgroundColor: "secondary.main",
-											color: "secondary.contrastText",
+											color: "contrastingSecondary.main",
 										}
 							}
 							onClick={() => setSelectedSubItem(item)}
@@ -114,6 +114,9 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
 								</ListItemIcon>
 							)}
 							<ListItemText>{item.text}</ListItemText>
+							{item.icon && (
+								<ListItemIcon>{item.icon}</ListItemIcon>
+							)}
 						</ListItem>
 					</Fragment>
 				))}

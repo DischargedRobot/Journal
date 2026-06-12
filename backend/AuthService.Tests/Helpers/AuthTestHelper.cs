@@ -14,10 +14,10 @@ public static class AuthTestHelper
         TokenService tokenService,
         ITokenStore store,
         Guid userUuid,
-        IEnumerable<string>? roles = null)
+        IEnumerable<string>? rights = null)
     {
         Guid tokenUuid = Guid.NewGuid();
-        string accessToken = tokenService.GenerateAccessToken(tokenUuid, userUuid, roles ?? []);
+        string accessToken = tokenService.GenerateAccessToken(tokenUuid, userUuid, rights ?? []);
         string opaqueToken = tokenService.GenerateOpaqueToken(tokenUuid);
         await store.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30));
         return opaqueToken;

@@ -88,13 +88,15 @@ const StudentTable = ({ students }: Props) => {
     const hasBrigade = students.some((student) => getBrigade(student))
 
     return (
-        <TableContainer className="rounded-t-[20px] h-fit" >
+        <TableContainer className="h-fit overflow-hidden rounded-t-[20px]">
             <Table>
                 <TableHead
                     sx={{
                         position: "sticky",
                         top: 0,
                         backgroundColor: "primary.main",
+                        borderTopLeftRadius: "20px",
+                        borderTopRightRadius: "20px",
 
                         "& .MuiTableCell-head": {
                             color: "primary.contrastText",
