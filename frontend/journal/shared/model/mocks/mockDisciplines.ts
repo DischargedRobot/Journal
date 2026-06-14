@@ -1,4 +1,6 @@
 import { TDiscipline } from "@/shared/model/discipline"
+import { mockProfessors } from "./mockProfessors"
+import { mockGroups } from "./mockGroups"
 
 export const mockDisciplines: TDiscipline[] = [
 	{
@@ -7,9 +9,9 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "Мат.",
 		type: "Лекция",
 		isArchived: false,
-		professorUuid: "1",
-		groupUuid: "1",
-		DisciplinesSet: "1",
+		professors: [mockProfessors[0]],
+		groups: [mockGroups[0]],
+		disciplinesSetUuid: "1",
 	},
 	{
 		uuid: "2",
@@ -17,9 +19,9 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "Физ.",
 		type: "Упражнение",
 		isArchived: false,
-		professorUuid: "2",
-		groupUuid: "1",
-		DisciplinesSet: "1",
+		professors: [mockProfessors[1]],
+		groups: [mockGroups[1]],
+		disciplinesSetUuid: "1",
 	},
 	{
 		uuid: "3",
@@ -27,9 +29,9 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "Ист.",
 		type: "Семинар",
 		isArchived: false,
-		professorUuid: "3",
-		groupUuid: "2",
-		DisciplinesSet: "1",
+		professors: [mockProfessors[2]],
+		groups: [mockGroups[2]],
+		disciplinesSetUuid: "1",
 	},
 	{
 		uuid: "4",
@@ -37,9 +39,9 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "Прог.",
 		type: "Лабораторная",
 		isArchived: false,
-		professorUuid: "4",
-		groupUuid: "2",
-		DisciplinesSet: "2",
+		professors: [mockProfessors[3]],
+		groups: [mockGroups[0]],
+		disciplinesSetUuid: "2",
 	},
 	{
 		uuid: "7",
@@ -47,9 +49,9 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "Прог.",
 		type: "Упражнение",
 		isArchived: false,
-		professorUuid: "4",
-		groupUuid: "2",
-		DisciplinesSet: "2",
+		professors: [mockProfessors[4]],
+		groups: [mockGroups[1]],
+		disciplinesSetUuid: "2",
 	},
 	{
 		uuid: "5",
@@ -57,8 +59,8 @@ export const mockDisciplines: TDiscipline[] = [
 		shortName: "АЯ",
 		type: "Лекция",
 		isArchived: true,
-		professorUuid: "5",
-		groupUuid: "3",
-		DisciplinesSet: "2",
+		professors: [mockProfessors[5]],
+		groups: [mockGroups[2]],
+		disciplinesSetUuid: "2",
 	},
 ]

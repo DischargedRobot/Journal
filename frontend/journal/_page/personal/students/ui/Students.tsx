@@ -1,6 +1,6 @@
 "use client"
 
-import { mockPersonalGroups, mockPersonalStudents } from "@/shared/model/mocks"
+import { mockGroups, mockPersonalStudents } from "@/shared/model/mocks"
 import Sidebar from "@/shared/ui/sidebar/Sidebar"
 import PersonalStudentTable from "@/widgets/personla-student-table/ui/PersonalStudentTable"
 
@@ -16,7 +16,7 @@ const Students = () => {
 					flex: 1,
 					flexShrink: 0,
 				}}
-				items={mockPersonalGroups.map((group) => ({
+				items={mockGroups.map((group) => ({
 					text: group.name,
 					key: `/personal/groups/${group.uuid}`,
 					onClick: () => {},

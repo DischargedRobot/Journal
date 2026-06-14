@@ -1,5 +1,5 @@
 export { mockDisciplines } from "./mockDisciplines"
-export { mockJournalGroups, mockPersonalGroups } from "./mockGroups"
+export { mockGroups } from "./mockGroups"
 export { mockJournalRows } from "./mockJournalRows"
 export { mockLessons } from "./mockLessons"
 export { mockPersonalRoles } from "./mockRoles"

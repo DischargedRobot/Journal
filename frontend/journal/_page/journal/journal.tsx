@@ -6,7 +6,7 @@ import {
 	mockJournalRows,
 	mockLessons,
 } from "@/shared/model/mocks"
-import { DisciplineTable } from "@/widgets/discipline-table"
+import { DisciplineCardTable } from "@/widgets/discipline-card-table"
 import { LessonJournalTable } from "@/widgets/lesson-journal-table"
 import { useCallback, useMemo, useState, type AnimationEvent } from "react"
 import "./journal.css"
@@ -50,16 +50,17 @@ const Journal = () => {
 		() =>
 			selectedDiscipline
 				? mockLessons.filter(
-					(lesson) => lesson.disciplineUuid === selectedDiscipline.uuid,
-				)
+						(lesson) =>
+							lesson.disciplineUuid === selectedDiscipline.uuid,
+					)
 				: [],
 		[selectedDiscipline],
 	)
 
-	const [prevVisiblePanel, setPrevVisiblePanel] = useState<TVisiblePanel | null>(
-		null,
-	)
-	const [visiblePanel, setVisiblePanel] = useState<TVisiblePanel>("discipline")
+	const [prevVisiblePanel, setPrevVisiblePanel] =
+		useState<TVisiblePanel | null>(null)
+	const [visiblePanel, setVisiblePanel] =
+		useState<TVisiblePanel>("discipline")
 
 	const handleSwitchPanel = useCallback(
 		(panel: TVisiblePanel) => {
@@ -99,9 +100,9 @@ const Journal = () => {
 				)}`}
 				onAnimationEnd={handleAnimationEnd}
 			>
-				<DisciplineTable
+				<DisciplineCardTable
 					disciplines={mockDisciplines}
-					onDisciplineClick={(discipline) => {
+					onDisciplineClick={(discipline: TDiscipline) => {
 						setSelectedDiscipline(discipline)
 						handleSwitchPanel("lesson")
 					}}

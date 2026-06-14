@@ -11,17 +11,27 @@ import { ComboboxOption } from "@/shared/ui/combobox/Combobox"
 
 interface Props {
 	disciplines: TDiscipline[]
-	onDisciplineClick?: (discipline: TDiscipline, e: MouseEvent<HTMLDivElement>) => void
+	onDisciplineClick?: (
+		discipline: TDiscipline,
+		e: MouseEvent<HTMLDivElement>,
+	) => void
 	sx?: SxProps<Theme>
 	className?: string
 }
 
-const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Props) => {
+const DisciplineCardTable = ({
+	disciplines,
+	onDisciplineClick,
+	className,
+	sx,
+}: Props) => {
 	// группировка дисциплин по названию
 	const grouped = disciplines.reduce<Record<string, TDiscipline[]>>(
 		(acc, discipline) => {
 			const displayName =
-				discipline.name.length > 12 ? discipline.shortName : discipline.name
+				discipline.name.length > 12
+					? discipline.shortName
+					: discipline.name
 
 			if (!acc[displayName]) {
 				acc[displayName] = []
@@ -42,13 +52,18 @@ const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Prop
 		console.log(semester)
 	}
 
-
 	return (
 		<Box className={`flex flex-col w-fit gap-4 ${className}`} sx={sx}>
-			<SelectJournalPeriod onYearChange={handleYearChange} onSemesterChange={handleSemesterChange} />
+			<SelectJournalPeriod
+				onYearChange={handleYearChange}
+				onSemesterChange={handleSemesterChange}
+			/>
 			<Box className="flex gap-4">
 				{Object.entries(grouped).map(([name, disciplines]) => (
-					<div key={name} className="flex flex-col items-center gap-1 w-[150px]">
+					<div
+						key={name}
+						className="flex flex-col items-center gap-1 w-[150px]"
+					>
 						<Typography
 							className="font-bold w-full"
 							sx={{ color: "primary.dark" }}
@@ -63,7 +78,9 @@ const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Prop
 								<ListItem key={discipline.uuid} disablePadding>
 									<DisciplineCard
 										discipline={discipline}
-										onClick={(discipline, e) => onDisciplineClick?.(discipline, e)}
+										onClick={(discipline, e) =>
+											onDisciplineClick?.(discipline, e)
+										}
 									/>
 								</ListItem>
 							))}
@@ -75,4 +92,4 @@ const DisciplineTable = ({ disciplines, onDisciplineClick, className, sx }: Prop
 	)
 }
 
-export default DisciplineTable
+export default DisciplineCardTable

@@ -1,5 +1,7 @@
 import { IBaseEntity } from "../utility-types/base-entity"
 import { Uuid } from "../utility-types/uuid"
+import { TGroup } from "../group"
+import { TProfessor } from "../professor"
 
 export const DISCIPLINE_TYPE_SHORT_MAP = {
 	Лекция: "Лек.",
@@ -23,7 +25,7 @@ export type TDiscipline = {
 	shortName: string
 	type: DisciplineType
 	isArchived: boolean
-	professorUuid: Uuid
-	groupUuid: Uuid
-	DisciplinesSet: Uuid
+	professors: TProfessor[]
+	groups: TGroup[]
+	disciplinesSetUuid: Uuid
 } & IBaseEntity

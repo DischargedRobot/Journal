@@ -4,7 +4,7 @@ import {
 	mockDisciplines,
 	mockJournalRows,
 	mockLessons,
-	mockPersonalGroups,
+	mockGroups,
 	mockPersonalStudents,
 } from "@/shared/model/mocks"
 import { Sidebar } from "@/shared/ui/sidebar"
@@ -44,7 +44,7 @@ const sidebarItems = [
 	},
 ]
 
-const groupItems = mockPersonalGroups.map((group) => ({
+const groupItems = mockGroups.map((group) => ({
 	text: group.name,
 	key: `/personal/my-lessons/group/${group.uuid}`,
 	items: mockDisciplines.map((discipline) => ({

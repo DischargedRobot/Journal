@@ -7,7 +7,7 @@ const PersonalLayout = ({ children }: { children: React.ReactNode }) => {
             <Header />
             <main className="flex my-0 mx-auto w-full h-full overflow-auto">
                 <SidePanelPersonalMenu />
-                <div className="flex w-full">{children}</div>
+                <div className="flex h-full min-h-0 w-full">{children}</div>
             </main>
         </div>
     )

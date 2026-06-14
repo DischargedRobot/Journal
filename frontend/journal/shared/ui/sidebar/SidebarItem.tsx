@@ -45,6 +45,7 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
 						? {
 								borderLeftWidth: 5,
 								borderColor: "primary.main",
+								boxShadow: "0 0 10px 0 rgba(0, 0, 0, 0.2)",
 							}
 						: {
 								opacity: 0.5,
@@ -80,45 +81,41 @@ const SideBarItem = ({ item, isSelected, onSelect }: Props) => {
 				isOpen &&
 				isSelected &&
 				item.items!.map((item) => (
-					<Fragment key={item.key ?? item.text}>
-						<ListItem
-							sx={
-								selectedSubItem?.key === item.key
-									? {
-											backgroundColor: "secondary.light",
-											color: "secondary.contrastText",
-										}
-									: {
-											backgroundColor: "secondary.main",
-											color: "contrastingSecondary.main",
-										}
-							}
-							onClick={() => setSelectedSubItem(item)}
-						>
-							{selectedSubItem === item && (
-								<ListItemIcon>
-									<ExpandMoreIcon
-										fontSize="large"
-										sx={
-											selectedSubItem === item
-												? {
-														transform:
-															"rotate(270deg)",
-														color: "primary.main",
-													}
-												: {
-														color: "contrastingSecondary.light",
-													}
-										}
-									/>
-								</ListItemIcon>
-							)}
-							<ListItemText>{item.text}</ListItemText>
-							{item.icon && (
-								<ListItemIcon>{item.icon}</ListItemIcon>
-							)}
-						</ListItem>
-					</Fragment>
+					<ListItem
+						key={item.key ?? item.text}
+						sx={
+							selectedSubItem?.key === item.key
+								? {
+										backgroundColor: "secondary.light",
+										color: "secondary.contrastText",
+									}
+								: {
+										backgroundColor: "secondary.main",
+										color: "contrastingSecondary.main",
+									}
+						}
+						onClick={() => setSelectedSubItem(item)}
+					>
+						{selectedSubItem === item && (
+							<ListItemIcon>
+								<ExpandMoreIcon
+									fontSize="large"
+									sx={
+										selectedSubItem === item
+											? {
+													transform: "rotate(270deg)",
+													color: "primary.main",
+												}
+											: {
+													color: "contrastingSecondary.light",
+												}
+									}
+								/>
+							</ListItemIcon>
+						)}
+						<ListItemText>{item.text}</ListItemText>
+						{item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
+					</ListItem>
 				))}
 			<Divider
 				sx={{
