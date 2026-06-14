@@ -10,7 +10,13 @@ import FormControl from "@mui/material/FormControl"
 
 const CopyField = ({ value }: { value: string }) => {
 	const [copied, setCopied] = useState(false)
+	const hasValue = Boolean(value)
+
 	const handleCopy = async () => {
+		if (!hasValue) {
+			return
+		}
+
 		await navigator.clipboard.writeText(value)
 		setCopied(true)
 		setTimeout(() => {
@@ -20,16 +26,17 @@ const CopyField = ({ value }: { value: string }) => {
 
 	return (
 		<FormControl
+			disabled={!hasValue}
 			className="flex flex-col gap-2"
 			sx={{
-				"&:hover .MuiInputLabel-root": {
+				"&:not(.Mui-disabled):hover .MuiInputLabel-root": {
 					color: "secondary.contrastText",
 				},
 			}}
 		>
 			<InputLabel
 				htmlFor="value"
-				shrink={Boolean(value)}
+				shrink={hasValue}
 				sx={{
 					"&:hover": {
 						color: "secondary.contrastText",
@@ -43,13 +50,16 @@ const CopyField = ({ value }: { value: string }) => {
 			</InputLabel>
 			<OutlinedInput
 				label="Код для регистрации"
-				notched={Boolean(value)}
+				notched={hasValue}
+				disabled={!hasValue}
 				sx={{
-					cursor: "pointer",
-					"& input:hover": {
+					"&:not(.Mui-disabled)": {
 						cursor: "pointer",
+						"& input": {
+							cursor: "pointer",
+						},
 					},
-					"&:hover .copy-field-icon": {
+					"&:not(.Mui-disabled):hover .copy-field-icon": {
 						color: "primary.main",
 					},
 					"& .copy-field-icon": {
@@ -58,9 +68,10 @@ const CopyField = ({ value }: { value: string }) => {
 					"& .MuiOutlinedInput-notchedOutline": {
 						borderWidth: 1,
 					},
-					"&:hover .MuiOutlinedInput-notchedOutline": {
-						borderColor: "secondary.contrastText",
-					},
+					"&:not(.Mui-disabled):hover .MuiOutlinedInput-notchedOutline":
+						{
+							borderColor: "secondary.contrastText",
+						},
 					"&.Mui-focused .MuiOutlinedInput-notchedOutline": {
 						borderWidth: 1,
 						borderColor: "secondary.contrastText",
@@ -68,7 +79,7 @@ const CopyField = ({ value }: { value: string }) => {
 				}}
 				id="value"
 				value={value}
-				readOnly={true}
+				readOnly
 				onClick={handleCopy}
 				endAdornment={
 					<InputAdornment position="end">
@@ -76,7 +87,11 @@ const CopyField = ({ value }: { value: string }) => {
 							open={copied}
 							title={copied ? "Скопировано" : "Копировать"}
 						>
-							<IconButton onClick={handleCopy} edge="end">
+							<IconButton
+								onClick={handleCopy}
+								disabled={!hasValue}
+								edge="end"
+							>
 								{copied ? (
 									<CheckIcon
 										sx={{ color: "success.light" }}

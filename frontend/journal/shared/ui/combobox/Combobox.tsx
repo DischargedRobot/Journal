@@ -11,22 +11,24 @@ export type ComboboxOption<T extends string | number = string | number> = {
 }
 
 export type ComboboxProps<T extends string | number = string | number> = {
-	label: string
+	label?: string
 	options: ComboboxOption<T>[]
 	defaultValue?: ComboboxOption<T>
 	onChange?: (value: ComboboxOption<T> | null) => void
 	sx?: SxProps<Theme>
+	placeholder?: string
 }
 
 const Combobox = <T extends string | number>({
-	label,
+	label = "",
 	options,
 	defaultValue,
 	onChange,
 	sx,
+	placeholder = "",
 }: ComboboxProps<T>) => {
-	const [value, setValue] = useState<ComboboxOption<T>>(
-		defaultValue ?? options[0] ?? null,
+	const [value, setValue] = useState<ComboboxOption<T> | null>(
+		defaultValue ?? null,
 	)
 
 	return (
@@ -37,15 +39,18 @@ const Combobox = <T extends string | number>({
 				onChange?.(newValue)
 			}}
 			options={options}
-			disableClearable
 			size="medium"
 			autoComplete
 			sx={{ width: 200, ...sx }}
 			renderInput={(params) => (
 				<TextField
-					{...params}
+					variant="outlined"
+					sx={{
+						backgroundColor: "secondary.light",
+					}}
 					label={label}
-
+					placeholder={placeholder}
+					{...params}
 				/>
 			)}
 		/>

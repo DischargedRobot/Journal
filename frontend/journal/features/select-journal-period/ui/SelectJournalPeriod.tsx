@@ -16,16 +16,14 @@ const SelectJournalPeriod = ({ onYearChange, onSemesterChange }: Props) => {
 	return (
 		<Box className="flex items-start w-full gap-4">
 			<Combobox
-				label="Год"
 				options={yearOptions}
-				defaultValue={yearOptions[0]}
 				onChange={onYearChange}
+				placeholder="Год"
 			/>
 			<Combobox
-				label="Семестр"
 				options={semesterOptions}
-				defaultValue={semesterOptions[0]}
 				onChange={onSemesterChange}
+				placeholder="Семестр"
 			/>
 		</Box>
 	)
