@@ -11,6 +11,8 @@ namespace AuthService.Model
 
         public string Name { get; set; } = null!;
 
+        public bool IsBase { get; set; }
+
         public ICollection<Users>? Users { get; set; }
         public ICollection<RoleRights>? RoleRights { get; set; } = [];
         [Required, MinLength(1)]

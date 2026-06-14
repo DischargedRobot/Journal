@@ -45,6 +45,8 @@ namespace AuthService.Controller
 			int offset = 0,
 			[FromQuery, SwaggerParameter("Фильтр по имени")]
 			string? filterName = null,
+			[FromQuery, SwaggerParameter("Базовая роль")]
+			bool? isBase = null,
 			[FromQuery, SwaggerParameter("Порядок сортировки по имени")]
 			SortOrder sortOrder = SortOrder.Ascending
 		)
@@ -53,7 +55,7 @@ namespace AuthService.Controller
 			try
 			{
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
-				_logger.LogInformation("{Function} вызвано: size={Size}, offset={Offset}, filterName={FilterName}, sortOrder={SortOrder}", functionName, size, offset, filterName, sortOrder);
+				_logger.LogInformation("{Function} вызвано: size={Size}, offset={Offset}, filterName={FilterName}, isBase={IsBase}, sortOrder={SortOrder}", functionName, size, offset, filterName, isBase, sortOrder);
 				if (offset < 0)
 				{
 					_logger.LogWarning("{Function}: неверный offset {Offset}", functionName, offset);
@@ -80,7 +82,9 @@ namespace AuthService.Controller
 				}
 
 				IQueryable<Roles> baseQuery = _context
-					.Roles.Where(r => filterName == null || r.Name.Contains(filterName))
+					.Roles.Where(r =>
+						(filterName == null || r.Name.Contains(filterName)) &&
+						(isBase == null || r.IsBase == isBase))
 					.AsNoTracking();
 
 				Task<int> totalRecord = baseQuery.CountAsync();
@@ -201,6 +205,7 @@ namespace AuthService.Controller
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Поле Name обязательно для создания роли", "Name")]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Роль с таким Name уже существует", nameof(RolesCreateDto.Name))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.2", "Конфликт", "Базовая роль уже существует", nameof(RolesCreateDto.IsBase))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.3", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Создать новую роль")]
 		public async Task<IActionResult> CreateRole(
@@ -275,11 +280,25 @@ namespace AuthService.Controller
 					);
 				}
 
+				if (createDto.IsBase && await BaseRoleExistsAsync())
+				{
+					_logger.LogWarning("{Function}: попытка создать вторую базовую роль", functionName);
+					return Conflict(
+						new ApiError(
+							"1.2.1",
+							"Конфликт",
+							"Базовая роль уже существует",
+							nameof(RolesCreateDto.IsBase)
+						)
+					);
+				}
+
 				_logger.LogInformation("{Function}: добавление роли", functionName);
 				Roles role = new()
 				{
 					Uuid = Guid.NewGuid(),
 					Name = createDto.Name.Trim(),
+					IsBase = createDto.IsBase,
 				};
 
 				// Операция должна быть атомарной: либо роль и привязки прав создаются вместе, либо ничего не сохраняется.
@@ -396,6 +415,7 @@ namespace AuthService.Controller
 					{
 						Uuid = role.Uuid,
 						Name = role.Name,
+						IsBase = role.IsBase,
 					}
 				);
 			}
@@ -420,6 +440,7 @@ namespace AuthService.Controller
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesUpdateDto.Name))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Базовая роль уже существует", nameof(RolesUpdateDto.IsBase))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesUpdateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Частично обновить роль по UUID")]
 		public async Task<IActionResult> UpdateRole(
@@ -479,6 +500,24 @@ namespace AuthService.Controller
 						);
 					}
 					role.Name = request.Name.Trim();
+				}
+
+				if (request.IsBase == true && !role.IsBase && await BaseRoleExistsAsync(uuid))
+				{
+					_logger.LogWarning("{Function}: попытка назначить вторую базовую роль", functionName);
+					return Conflict(
+						new ApiError(
+							"1.2.1",
+							"Конфликт",
+							"Базовая роль уже существует",
+							nameof(RolesUpdateDto.IsBase)
+						)
+					);
+				}
+
+				if (request.IsBase.HasValue)
+				{
+					role.IsBase = request.IsBase.Value;
 				}
 
 				if (request.Name != null)
@@ -604,6 +643,7 @@ namespace AuthService.Controller
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Name обязательна", "Name")]
 		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Name уже используется", nameof(RolesCreateDto.Name))]
+		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Базовая роль уже существует", nameof(RolesCreateDto.IsBase))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "Некоторые права не найдены", nameof(RolesCreateDto.RightsUuids))]
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.2.1", "Конфликт", "Одна или несколько прав уже привязаны к другой роли", nameof(RolesCreateDto.RightsUuids))]
 		[SwaggerOperation(Summary = "Полная замена роли по UUID")]
@@ -685,8 +725,22 @@ namespace AuthService.Controller
 						)
 					);
 				}
-
 				role.Name = replaceDto.Name.Trim();
+
+
+				if (replaceDto.IsBase && !role.IsBase && await BaseRoleExistsAsync(uuid))
+				{
+					_logger.LogWarning("{Function}: попытка назначить вторую базовую роль", functionName);
+					return Conflict(
+						new ApiError(
+							"1.2.1",
+							"Конфликт",
+							"Базовая роль уже существует",
+							nameof(RolesCreateDto.IsBase)
+						)
+					);
+				}
+				role.IsBase = replaceDto.IsBase;
 
 				List<Guid> requestedRights = replaceDto.RightsUuids?.Distinct().ToList() ?? new List<Guid>();
 				List<Guid> requestedRoleTypes = replaceDto.RoleTypesUuids?.Distinct().ToList() ?? [];
@@ -841,6 +895,17 @@ namespace AuthService.Controller
 					Message = "Произошла ошибка на сервере",
 				});
 			}
+		}
+
+		private Task<bool> BaseRoleExistsAsync(Guid? excludeUuid = null)
+		{
+			IQueryable<Roles> query = _context.Roles.Where(r => r.IsBase);
+			if (excludeUuid.HasValue)
+			{
+				query = query.Where(r => r.Uuid != excludeUuid.Value);
+			}
+
+			return query.AnyAsync();
 		}
 	}
 }

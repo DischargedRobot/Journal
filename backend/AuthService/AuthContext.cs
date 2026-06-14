@@ -41,6 +41,10 @@ namespace AuthService
 
             modelBuilder.Entity<Users>().HasAlternateKey(e => e.Uuid);
             modelBuilder.Entity<Roles>().HasAlternateKey(e => e.Uuid);
+            modelBuilder.Entity<Roles>() // только одна базовая роль
+                .HasIndex(r => r.IsBase)
+                .IsUnique()
+                .HasFilter("\"IsBase\" = true");
             modelBuilder.Entity<RoleRights>().HasAlternateKey(e => e.Uuid);
         }
 

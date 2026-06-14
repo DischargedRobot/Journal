@@ -7,6 +7,7 @@ namespace AuthService.Model
 	{
 		public required Guid Uuid { get; set; }
 		public required string Name { get; set; }
+		public bool IsBase { get; set; }
 		public IEnumerable<RoleRightsResponseDto> Rights { get; set; } = [];
 		public IEnumerable<RolesTypesResponseDto> RoleTypes { get; set; } = [];
 		public RolesResponseDto() { }
@@ -15,6 +16,7 @@ namespace AuthService.Model
 		{
 			Uuid = role.Uuid;
 			Name = role.Name;
+			IsBase = role.IsBase;
 			Rights = role.RoleRights?.Select(rr => new RoleRightsResponseDto
 			{
 				Uuid = rr.Uuid,
@@ -31,6 +33,7 @@ namespace AuthService.Model
 		{
 			Uuid = Guid.NewGuid(),
 			Name = "Admin",
+			IsBase = false,
 			Rights = [RoleRightsResponseDto.Example],
 			RoleTypes = [RolesTypesResponseDto.Example]
 		};
