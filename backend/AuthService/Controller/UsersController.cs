@@ -14,7 +14,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace AuthService.Controller
 {
 	[ApiController]
-	[Route("api/auth-service/v1/[controller]")]
+	[Route("auth-service/v1/[controller]")]
 	[Produces("application/json")]
 	public class UsersController : ControllerBase
 	{
@@ -281,7 +281,16 @@ namespace AuthService.Controller
 
 				if (createDto.RolesUuid != null)
 				{
-					Guid[] roleUuids = createDto.RolesUuid.Distinct().ToArray();
+					if (!UuidParser.TryParseDistinct(createDto.RolesUuid, out Guid[] roleUuids, out ApiError? rolesParseError, nameof(createDto.RolesUuid)))
+					{
+						_logger.LogWarning(
+							"{Function}: невалидные UUID ролей {Details}",
+							functionName,
+							rolesParseError!.Details
+						);
+						return BadRequest(rolesParseError);
+					}
+
 					List<Roles> foundRoles = await _context.Roles
 						.Where(r => roleUuids.Contains(r.Uuid))
 						.ToListAsync();

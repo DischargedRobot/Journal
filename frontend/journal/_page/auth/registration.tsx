@@ -1,3 +1,5 @@
+import AuthApi from "@/shared/api/AuthApi"
+import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import {
@@ -60,8 +62,22 @@ const Registration = (props: Props) => {
 		defaultValue: "STUDENT",
 	})
 
-	const onSubmit = handleSubmit((data) => {
-		console.log(data)
+	const handlerError = createApiErrorHandler()
+
+	const onSubmit = handleSubmit(async (data) => {
+		try {
+			await AuthApi.register({
+				login: data.login,
+				password: data.password,
+				email: data.email,
+				firstName: data.firstName,
+				lastName: data.lastName,
+				patronymic: data.patronymic,
+				rolesUuid: [role],
+			})
+		} catch (error) {
+			handlerError(error)
+		}
 	})
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
@@ -74,18 +90,19 @@ const Registration = (props: Props) => {
 				[theme.breakpoints.down("md")]: {
 					left: 0,
 					flex: focused ? "auto" : "none",
-					height: focused ? "900px" : "250px",
+					height: focused ? "100%" : "250px",
 				},
 			})}
 		>
 			<Stack
-				className="absolute z-10 inset-0 flex-1 flex items-center justify-center p-8 text-white self-stretch"
+				className="absolute z-10 inset-0 flex-1 flex items-center  p-8 text-white self-stretch"
 				sx={(theme) => ({
 					transition: "clip-path 1s ease",
 					clipPath: !focused
 						? "circle(150% at center right)"
 						: "circle(0% at center right)",
 					backgroundColor: "primary.main",
+					justifyContent: "center",
 
 					[theme.breakpoints.down("md")]: {
 						borderRadius: "0 0 64px 64px",
@@ -308,7 +325,12 @@ const Registration = (props: Props) => {
 						</FormHelperText>
 					</FormControl>
 
-					<Button variant="contained" color="primary" type="submit">
+					<Button
+						variant="contained"
+						color="primary"
+						type="submit"
+						onClick={onSubmit}
+					>
 						Зарегистрироваться
 					</Button>
 				</form>

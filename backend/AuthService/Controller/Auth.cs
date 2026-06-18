@@ -13,7 +13,7 @@ using AuthService.Model.Auth.Dto;
 namespace AuthService.Controller
 {
     [ApiController]
-    [Route("api/auth-service/v1/[controller]")]
+    [Route("auth-service/v1/[controller]")]
     [Produces("application/json")]
     [Consumes("application/json")]
     public class AuthController : ControllerBase
@@ -445,6 +445,7 @@ namespace AuthService.Controller
         [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.1.0", "Неверный запрос", "Тело запроса не может быть пустым", "BODY")]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
+        [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.2", "Неверный запрос", "Некорректный GUID роли", "RolesUuid")]
         [ApiErrorExample(StatusCodes.Status409Conflict, "1.1.1", "Конфликт", "Пользователь с таким логином уже существует", "Login")]
         [ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
         [SwaggerOperation(Summary = "Регистрация нового пользователя")]
@@ -482,7 +483,7 @@ namespace AuthService.Controller
 
                 if (string.IsNullOrWhiteSpace(request.FirstName))
                 {
-                    _logger.LogWarning("{Function}: FirstName не предоставлено при регистрации Login={Login}", functionName, request.Login);
+                    _logger.LogWarning("{Function}: FirstName не предоставлено при регистрации FirstName={FirstName}", functionName, request.FirstName);
                     return BadRequest(new ApiError
                     {
                         StatusCode = "0.2.1",
@@ -495,9 +496,9 @@ namespace AuthService.Controller
                 if (string.IsNullOrWhiteSpace(request.LastName))
                 {
                     _logger.LogWarning(
-                        "{Function}: LastName не предоставлено при регистрации Login={Login}",
+                        "{Function}: LastName не предоставлено при регистрации LastName={LastName}",
                         functionName,
-                        request.Login
+                        request.LastName
                     );
                     return BadRequest(new ApiError
                     {
@@ -536,8 +537,18 @@ namespace AuthService.Controller
 
                 if (request.RolesUuid != null)
                 {
-                    Guid[] roleUuids = request.RolesUuid.Distinct().ToArray();
+                    if (!UuidParser.TryParseDistinct(request.RolesUuid, out Guid[] roleUuids, out ApiError? rolesParseError, nameof(request.RolesUuid)))
+                    {
+                        _logger.LogWarning(
+                            "{Function}: невалидные UUID ролей {Details}",
+                            functionName,
+                            rolesParseError!.Details
+                        );
+                        return BadRequest(rolesParseError);
+                    }
+
                     List<Roles> foundRoles = await _context.Roles
+                        .AsNoTracking()
                         .Include(r => r.RoleRights)
                         .Where(r => roleUuids.Contains(r.Uuid))
                         .ToListAsync();

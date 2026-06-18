@@ -13,7 +13,7 @@ interface Props {
 	isOpen: boolean
 }
 
-export const AddStudentForm = (props: Props) => {
+const AddStudentForm = (props: Props) => {
 	const { isOpen } = props
 
 	const [isRefreshing, setIsRefreshing] = useState(false)

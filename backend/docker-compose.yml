@@ -1,0 +1,16 @@
+version: "3.8"
+include:
+  - path: AuthService/docker-compose.yml
+    env_file: AuthService/.env
+  - path: MainService/docker-compose.yml
+    env_file: MainService/.env
+
+services:
+  gateway:
+    build: ./Nginx/gateway
+    image: journal/gateway:latest
+    ports:
+      - "9090:9090"
+    depends_on:
+      - auth-service
+      - main-service

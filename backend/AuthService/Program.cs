@@ -167,7 +167,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", policy =>
     {
-        policy.WithOrigins("http://localhost:9000")
+        policy.WithOrigins("http://localhost:3000",  // Next.js dev
+                "http://localhost:9000" )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

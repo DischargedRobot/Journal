@@ -147,6 +147,24 @@ public class AuthControllerTests : IDisposable
         Assert.Equal("FirstName", error.Field);
     }
 
+    [Fact(DisplayName = "Регистрация при невалидном UUID роли")]
+    public async Task Register_WhenRoleUuidInvalid_ReturnsBadRequest()
+    {
+        IActionResult result = await _controller.Register(new UsersCreateDto
+        {
+            Login = "newuser",
+            Password = "password123",
+            FirstName = "Иван",
+            LastName = "Иванов",
+            RolesUuid = ["STUDENT"],
+        });
+
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        ApiError error = Assert.IsType<ApiError>(badRequest.Value);
+        Assert.Equal("0.2.2", error.StatusCode);
+        Assert.Equal("RolesUuid", error.Field);
+    }
+
     [Fact(DisplayName = "Регистрация при дублировании логина")]
     public async Task Register_WhenDuplicateLogin_ReturnsConflict()
     {

@@ -64,7 +64,7 @@ const AddDepartment = ({ onClick }: Props) => {
 						variant="outlined"
 						fullWidth
 						required
-						{...register("name", {
+						{...register("shortName", {
 							required: "Название кафедры обязательно",
 						})}
 						error={!!errors.shortName}

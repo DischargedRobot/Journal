@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import AccordionDetails from "@mui/material/AccordionDetails"
 import { useMemo } from "react"
+import { DisciplineTag } from "@/entities/discipline"
 
 interface Props {
 	disciplines: TDiscipline[]
@@ -50,9 +51,10 @@ const DisciplinesTable = ({ disciplines }: Props) => {
 										<AccordionSummary
 											expandIcon={<ExpandMoreIcon />}
 										>
-											<Typography>
-												{discipline.type}
-											</Typography>
+											<DisciplineTag
+												disciplineType={discipline.type}
+												isFullName
+											/>
 										</AccordionSummary>
 										<AccordionDetails>
 											{discipline.groups.map((group) => (

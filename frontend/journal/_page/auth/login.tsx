@@ -60,13 +60,14 @@ const Login = (props: Props) => {
 			})}
 		>
 			<Stack
-				className="absolute z-10 inset-0 flex items-center justify-center p-8  text-white self-stretch"
+				className="absolute z-10 inset-0 flex items-center  p-8  text-white self-stretch"
 				sx={(theme) => ({
 					transition: "clip-path 1s ease",
 					clipPath: !focused
 						? "circle(150% at center left)"
 						: "circle(0% at center left)",
 					backgroundColor: "primary.main",
+					justifyContent: "center",
 
 					[theme.breakpoints.down("md")]: {
 						borderRadius: "64px 64px 0 0",

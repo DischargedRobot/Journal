@@ -111,17 +111,23 @@
 		display: block;
 	}
 
-	/* заменяет подсветку при автозаполнении */
+	/* заменяет синий фон браузера при автозаполнении */
 	input:-webkit-autofill,
 	input:-webkit-autofill:hover,
-	input:-webkit-autofill:focus input:-webkit-autofill,
+	input:-webkit-autofill:focus,
+	input:-webkit-autofill:active,
 	textarea:-webkit-autofill,
-	textarea:-webkit-autofill:hover textarea:-webkit-autofill:focus,
+	textarea:-webkit-autofill:hover,
+	textarea:-webkit-autofill:focus,
+	textarea:-webkit-autofill:active,
 	select:-webkit-autofill,
 	select:-webkit-autofill:hover,
-	select:-webkit-autofill:focus {
-		border: none !important;
+	select:-webkit-autofill:focus,
+	select:-webkit-autofill:active {
 		-webkit-text-fill-color: inherit !important;
-		-webkit-box-shadow: 0 0 0px 1000px var(--foreground) inset;
+		-webkit-box-shadow: 0 0 0 1000px
+			var(--mui-palette-secondary-main, #f3f3f3) inset !important;
+		box-shadow: 0 0 0 1000px var(--mui-palette-secondary-main, #f3f3f3)
+			inset !important;
 	}
 }

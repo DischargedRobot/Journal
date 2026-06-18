@@ -25,31 +25,32 @@ import QuestionMarkIcon from "@mui/icons-material/QuestionMark"
 import { FunctionIcon } from "@/shared/ui/function-icon"
 import { AtomIcon } from "@/shared/ui/atom-icon"
 import { CertificateIcon } from "@/shared/ui/certificate-icon"
-
+import { DISCIPLINE_TYPE_FULL_MAP } from "@/shared/model/discipline/TDiscipline"
 
 interface Props {
 	disciplineType: DisciplineType | DisciplineTypeShort
+	isFullName?: boolean
 }
 
 const disciplineIcons: Record<
 	DisciplineType | DisciplineTypeShort,
 	React.FC<SvgIconProps>
 > = {
-	"Лекция": AutoStoriesIcon,
+	Лекция: AutoStoriesIcon,
 	"Лек.": AutoStoriesIcon,
-	"Упражнение": FunctionIcon,
+	Упражнение: FunctionIcon,
 	"Упр.": FunctionIcon,
-	"Лабораторная": BiotechIcon,
+	Лабораторная: BiotechIcon,
 	"Лаб.": BiotechIcon,
-	"Семинар": MessageIcon,
+	Семинар: MessageIcon,
 	"Сем.": MessageIcon,
 	"Курсовой проект": DescriptionIcon,
 	"Курс.": DescriptionIcon,
-	"Колоквиум": RecordVoiceOverIcon,
+	Колоквиум: RecordVoiceOverIcon,
 	"Колок.": RecordVoiceOverIcon,
 	"Доп. курсы": CertificateIcon,
-	"НИИР": AtomIcon,
-	"Другое": QuestionMarkIcon,
+	НИИР: AtomIcon,
+	Другое: QuestionMarkIcon,
 }
 
 const selectColor = (type: DisciplineType | DisciplineTypeShort): TagColor => {
@@ -83,12 +84,15 @@ const selectColor = (type: DisciplineType | DisciplineTypeShort): TagColor => {
 	}
 }
 
-const DisciplineTag = ({ disciplineType }: Props) => {
+const DisciplineTag = ({ disciplineType, isFullName = false }: Props) => {
 	const tagColor = selectColor(disciplineType)
 	const Icon = disciplineIcons[disciplineType]
-	const shortType =
-		disciplineType in DISCIPLINE_TYPE_SHORT_MAP
+	const shortType = !isFullName
+		? disciplineType in DISCIPLINE_TYPE_SHORT_MAP
 			? DISCIPLINE_TYPE_SHORT_MAP[disciplineType as DisciplineType]
+			: disciplineType
+		: disciplineType in DISCIPLINE_TYPE_FULL_MAP
+			? DISCIPLINE_TYPE_FULL_MAP[disciplineType]
 			: disciplineType
 
 	return (

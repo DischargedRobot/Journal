@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  postgres:
+  postgres-auth-service:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -19,6 +19,7 @@ services:
     restart: unless-stopped
 
   auth-service:
+    build: .
     image: journal/auth-service:latest
     env_file:
       - .env
@@ -27,7 +28,7 @@ services:
     restart: unless-stopped
     depends_on:
       - redis
-      - postgres
+      - postgres-auth-service
 
   redis:
     image: redis:7.0-alpine

@@ -12,7 +12,7 @@ using System.Diagnostics;
 namespace AuthService.Controller
 {
     [ApiController]
-    [Route("api/auth-service/v1/[controller]")]
+    [Route("auth-service/v1/[controller]")]
     [Produces("application/json")]
     public class SessionsController : ControllerBase
     {
