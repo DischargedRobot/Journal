@@ -1,5 +1,6 @@
 import AuthApi from "@/shared/api/AuthApi"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
+import { TGroup } from "@/shared/model/group"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import {
@@ -17,6 +18,7 @@ import {
 	SvgIcon,
 	OutlinedInput,
 	InputAdornment,
+	MenuItem,
 } from "@mui/material"
 import { useForm, useWatch, Controller } from "react-hook-form"
 interface FormValues {
@@ -29,7 +31,7 @@ interface FormValues {
 	email?: string
 	personRole: "STUDENT" | "TEACHER"
 	department?: Department
-	group?: Department
+	group?: string
 }
 
 interface Department {
@@ -40,10 +42,11 @@ interface Department {
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
 	focused: boolean
+	groups: TGroup[]
 }
 
 const Registration = (props: Props) => {
-	const { focused, onToRegistration } = props
+	const { focused, groups, onToRegistration } = props
 
 	const {
 		register,
@@ -233,6 +236,7 @@ const Registration = (props: Props) => {
 
 					{role === "STUDENT" && (
 						<TextField
+							select
 							variant="outlined"
 							label="Группа"
 							size="small"
@@ -244,7 +248,13 @@ const Registration = (props: Props) => {
 							})}
 							error={!!errors.group}
 							helperText={errors.group?.message ?? " "}
-						/>
+						>
+							{groups.map((group) => (
+								<MenuItem key={group.uuid} value={group.uuid}>
+									{group.code}
+								</MenuItem>
+							))}
+						</TextField>
 					)}
 
 					{role === "TEACHER" && (
@@ -325,12 +335,7 @@ const Registration = (props: Props) => {
 						</FormHelperText>
 					</FormControl>
 
-					<Button
-						variant="contained"
-						color="primary"
-						type="submit"
-						onClick={onSubmit}
-					>
+					<Button variant="contained" color="primary" type="submit">
 						Зарегистрироваться
 					</Button>
 				</form>

@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace MainService.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("main-service/v1/[controller]")]
     public class GroupsController : ControllerBase
     {
         private readonly MainServiceContext _context;

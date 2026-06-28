@@ -10,7 +10,7 @@ export type TUsersCreateDto = {
 	rolesUuid: string[]
 }
 
-const AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL_V1
+const AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL_V1 + "/Auth"
 
 interface loginResponse {
 	accessToken: string

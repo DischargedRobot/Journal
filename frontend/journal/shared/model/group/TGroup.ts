@@ -5,7 +5,6 @@ export type TGroup = {
 	uuid: Uuid
 	admissionDate: string // DateOnly сериализуется как строка (YYYY-MM-DD)
 	code: string
-	name: string
 	trainingDirectionUuid: Uuid
 	facultyUuid: Uuid
 	curatorsUuids: Uuid[]

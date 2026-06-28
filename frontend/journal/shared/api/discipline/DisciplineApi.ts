@@ -1,6 +1,6 @@
 import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
 import { TPagedRequestOptions, TPagedResponse } from "@/shared/api/TPaged"
-
+import { buildQuery } from "@/shared/api/build-query"
 const DISCIPLINE_URL =
 	process.env.NEXT_PUBLIC_API_DISCIPLINE_URL_V1 ??
 	"http://localhost:8080/api/v1/disciplines"
@@ -38,20 +38,6 @@ export type TDisciplinesResponseDto = {
 	groupsUuids: string[]
 	professorsUuids: string[]
 	version: number
-}
-
-// билдер запроса
-function buildQuery(
-	params: Record<string, string | number | boolean | unknown>,
-) {
-	const qs = Object.entries(params)
-		.filter(([, v]) => v !== undefined && v !== null && v !== "")
-		.map(
-			([k, v]) =>
-				`${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
-		)
-		.join("&")
-	return qs.length ? `?${qs}` : ""
 }
 
 export const DisciplineApi = {
