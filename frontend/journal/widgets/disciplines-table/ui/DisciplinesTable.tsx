@@ -59,7 +59,7 @@ const DisciplinesTable = ({ disciplines }: Props) => {
 										<AccordionDetails>
 											{discipline.groups.map((group) => (
 												<Typography key={group.uuid}>
-													{group.name}
+													{group.code}
 												</Typography>
 											))}
 										</AccordionDetails>

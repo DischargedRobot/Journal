@@ -14,8 +14,8 @@ interface CustomErrorHandler {
  * @param navigate - опциональная функция навигации (path, options?) => void, options: NavigateOptions
  */
 export const createApiErrorHandler = (
-	navigate?: (path: string, options?: NavigateOptions) => void,
 	customHandlers: CustomErrorHandler[] = [],
+	navigate?: (path: string, options?: NavigateOptions) => void,
 	defaultHandler?: (error: ApiError) => void,
 ) => {
 	const handleError = (error: ApiError | unknown) => {

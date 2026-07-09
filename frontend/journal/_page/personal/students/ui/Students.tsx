@@ -17,7 +17,7 @@ const Students = () => {
 					flexShrink: 0,
 				}}
 				items={mockGroups.map((group) => ({
-					text: group.name,
+					text: group.code,
 					key: `/personal/groups/${group.uuid}`,
 					onClick: () => {},
 				}))}

@@ -45,7 +45,7 @@ const sidebarItems = [
 ]
 
 const groupItems = mockGroups.map((group) => ({
-	text: group.name,
+	text: group.code,
 	key: `/personal/my-lessons/group/${group.uuid}`,
 	items: mockDisciplines.map((discipline) => ({
 		icon: <DisciplineTag disciplineType={discipline.type} />,

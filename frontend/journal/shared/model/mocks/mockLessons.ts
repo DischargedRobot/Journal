@@ -5,7 +5,7 @@ const lessonTopic = "Преобразование Фурье"
 export const mockLessons: TLesson[] = Array.from({ length: 5 }, (_, index) => ({
 	uuid: `lesson-${index + 1}`,
 	code: 13,
-	startDate: "2024-12-25T10:00:00Z",
+	startDate: "2024-12-25 10:00",
 	name: lessonTopic,
 	shortName: "Преобр. Фурье",
 	lessonTypeUuid: "lesson-type-1",

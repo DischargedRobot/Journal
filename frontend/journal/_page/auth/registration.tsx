@@ -1,4 +1,5 @@
 import AuthApi from "@/shared/api/AuthApi"
+import { GroupApi } from "@/shared/api/group"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { TGroup } from "@/shared/model/group"
 import { Logo } from "@/shared/ui/Logo"
@@ -19,7 +20,9 @@ import {
 	OutlinedInput,
 	InputAdornment,
 	MenuItem,
+	InputLabel,
 } from "@mui/material"
+import { useEffect } from "react"
 import { useForm, useWatch, Controller } from "react-hook-form"
 interface FormValues {
 	login: string
@@ -53,7 +56,9 @@ const Registration = (props: Props) => {
 		handleSubmit,
 		formState: { errors },
 		control,
-	} = useForm<FormValues>({ defaultValues: { personRole: "STUDENT" } })
+	} = useForm<FormValues>({
+		defaultValues: { personRole: "STUDENT", group: "" },
+	})
 	const password = useWatch({
 		control,
 		name: "password",
@@ -82,6 +87,7 @@ const Registration = (props: Props) => {
 			handlerError(error)
 		}
 	})
+
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
 		<Box
@@ -236,9 +242,9 @@ const Registration = (props: Props) => {
 
 					{role === "STUDENT" && (
 						<TextField
-							select
+							select={groups.length > 0}
 							variant="outlined"
-							label="Группа"
+							label={groups.length > 0 ? "Группа" : "Групп нет"}
 							size="small"
 							{...register("group", {
 								required:
@@ -246,14 +252,20 @@ const Registration = (props: Props) => {
 										? "Укажите группу"
 										: false,
 							})}
+							disabled={groups.length === 0}
 							error={!!errors.group}
 							helperText={errors.group?.message ?? " "}
 						>
-							{groups.map((group) => (
-								<MenuItem key={group.uuid} value={group.uuid}>
-									{group.code}
-								</MenuItem>
-							))}
+							{groups.length > 0
+								? groups.map((group) => (
+										<MenuItem
+											key={group.uuid}
+											value={group.uuid}
+										>
+											{group.code}
+										</MenuItem>
+									))
+								: null}
 						</TextField>
 					)}
 
@@ -288,8 +300,12 @@ const Registration = (props: Props) => {
 					/>
 
 					<FormControl error={!!errors.password}>
-						<FormLabel>Пароль</FormLabel>
+						<InputLabel htmlFor="password" size="small">
+							Пароль
+						</InputLabel>
 						<OutlinedInput
+							label="Пароль"
+							id="password"
 							size="small"
 							type="password"
 							{...register("password", {
@@ -312,8 +328,12 @@ const Registration = (props: Props) => {
 					</FormControl>
 
 					<FormControl error={!!errors.passwordConfirm}>
-						<FormLabel>Повторите пароль</FormLabel>
+						<InputLabel htmlFor="passwordConfirm" size="small">
+							Повторите пароль
+						</InputLabel>
 						<OutlinedInput
+							id="passwordConfirm"
+							label="Повторите пароль"
 							size="small"
 							type="password"
 							{...register("passwordConfirm", {
