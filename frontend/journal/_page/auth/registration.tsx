@@ -1,9 +1,9 @@
 import AuthApi from "@/shared/api/AuthApi"
-import { GroupApi } from "@/shared/api/group"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { TGroup } from "@/shared/model/group"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
+import Wizard, { useWizard } from "@/shared/ui/wizard/Wizard"
 import {
 	Box,
 	Button,
@@ -22,8 +22,8 @@ import {
 	MenuItem,
 	InputLabel,
 } from "@mui/material"
-import { useEffect } from "react"
-import { useForm, useWatch, Controller } from "react-hook-form"
+import { useForm, useWatch, Controller, UseFormTrigger } from "react-hook-form"
+
 interface FormValues {
 	login: string
 	password: string
@@ -48,6 +48,39 @@ interface Props {
 	groups: TGroup[]
 }
 
+const PERSONAL_FIELDS: (keyof FormValues)[] = [
+	"firstName",
+	"lastName",
+	"patronymic",
+	"personRole",
+	"group",
+	"department",
+]
+
+const NextStepButton = ({
+	trigger,
+}: {
+	trigger: UseFormTrigger<FormValues>
+}) => {
+	const { setCurrentStep } = useWizard()
+
+	return (
+		<Button
+			variant="contained"
+			color="primary"
+			type="button"
+			onClick={async () => {
+				const isValid = await trigger(PERSONAL_FIELDS)
+				if (isValid) {
+					setCurrentStep(2)
+				}
+			}}
+		>
+			Далее
+		</Button>
+	)
+}
+
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration } = props
 
@@ -56,6 +89,7 @@ const Registration = (props: Props) => {
 		handleSubmit,
 		formState: { errors },
 		control,
+		trigger,
 	} = useForm<FormValues>({
 		defaultValues: { personRole: "STUDENT", group: "" },
 	})
@@ -120,7 +154,6 @@ const Registration = (props: Props) => {
 							? "circle(150% at center top)"
 							: "circle(0% at center top)",
 					},
-					// display: focused ? 'flex' : 'none',
 				})}
 				spacing={4}
 			>
@@ -159,206 +192,255 @@ const Registration = (props: Props) => {
 					</SvgIcon>
 					<Typography variant="h4">Регистрация</Typography>
 				</Box>
-				<form onSubmit={onSubmit} className="flex flex-col">
-					<TextField
-						variant="outlined"
-						label="Имя"
-						size="small"
-						{...register("firstName", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
-						error={!!errors.firstName}
-						helperText={errors.firstName?.message ?? " "}
-					/>
 
-					<TextField
-						variant="outlined"
-						label="Фамилия"
-						size="small"
-						{...register("lastName", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
-						error={!!errors.lastName}
-						helperText={errors.lastName?.message ?? " "}
-					/>
+				<Wizard>
+					<Wizard.Step>
+						<Wizard.StepHeader>
+							Персональные данные
+						</Wizard.StepHeader>
+						<Wizard.StepContent>
+							<form
+								className="flex flex-col"
+								onSubmit={(event) => event.preventDefault()}
+							>
+								<TextField
+									variant="outlined"
+									label="Имя"
+									size="small"
+									{...register("firstName", {
+										required: {
+											value: true,
+											message:
+												"Поле обязательно для заполнения",
+										},
+									})}
+									error={!!errors.firstName}
+									helperText={
+										errors.firstName?.message ?? " "
+									}
+								/>
 
-					<TextField
-						variant="outlined"
-						label="Отчество"
-						size="small"
-						{...register("patronymic")}
-						helperText={" "}
-					/>
+								<TextField
+									variant="outlined"
+									label="Фамилия"
+									size="small"
+									{...register("lastName", {
+										required: {
+											value: true,
+											message:
+												"Поле обязательно для заполнения",
+										},
+									})}
+									error={!!errors.lastName}
+									helperText={errors.lastName?.message ?? " "}
+								/>
 
-					<TextField
-						variant="outlined"
-						label="Email"
-						size="small"
-						type="email"
-						{...register("email", {
-							pattern: {
-								value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-								message: "Неверный email",
-							},
-						})}
-						error={!!errors.email}
-						helperText={errors.email?.message ?? " "}
-					/>
+								<TextField
+									variant="outlined"
+									label="Отчество"
+									size="small"
+									{...register("patronymic")}
+									helperText={" "}
+								/>
 
-					<FormControl
-						component="fieldset"
-						error={!!errors.personRole}
-					>
-						<FormLabel component="legend">Роль</FormLabel>
-						<Controller
-							name="personRole"
-							control={control}
-							rules={{ required: "Выберите роль" }}
-							render={({ field }) => (
-								<RadioGroup row {...field}>
-									<FormControlLabel
-										value="STUDENT"
-										control={<Radio />}
-										label="Студент"
+								<TextField
+									variant="outlined"
+									label="Email"
+									size="small"
+									type="email"
+									{...register("email", {
+										pattern: {
+											value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+											message: "Неверный email",
+										},
+									})}
+									error={!!errors.email}
+									helperText={errors.email?.message ?? " "}
+								/>
+
+								<FormControl
+									component="fieldset"
+									error={!!errors.personRole}
+								>
+									<FormLabel component="legend">
+										Роль
+									</FormLabel>
+									<Controller
+										name="personRole"
+										control={control}
+										rules={{ required: "Выберите роль" }}
+										render={({ field }) => (
+											<RadioGroup row {...field}>
+												<FormControlLabel
+													value="STUDENT"
+													control={<Radio />}
+													label="Студент"
+												/>
+												<FormControlLabel
+													value="TEACHER"
+													control={<Radio />}
+													label="Преподаватель"
+												/>
+											</RadioGroup>
+										)}
 									/>
-									<FormControlLabel
-										value="TEACHER"
-										control={<Radio />}
-										label="Преподаватель"
+									<FormHelperText>
+										{errors.personRole?.message ?? " "}
+									</FormHelperText>
+								</FormControl>
+
+								{role === "STUDENT" && (
+									<TextField
+										select={groups.length > 0}
+										variant="outlined"
+										label={
+											groups.length > 0
+												? "Группа"
+												: "Групп нет"
+										}
+										size="small"
+										{...register("group", {
+											required:
+												role === "STUDENT"
+													? "Укажите группу"
+													: false,
+										})}
+										disabled={groups.length === 0}
+										error={!!errors.group}
+										helperText={
+											errors.group?.message ?? " "
+										}
+									>
+										{groups.length > 0
+											? groups.map((group) => (
+													<MenuItem
+														key={group.uuid}
+														value={group.uuid}
+													>
+														{group.code}
+													</MenuItem>
+												))
+											: null}
+									</TextField>
+								)}
+
+								{role === "TEACHER" && (
+									<TextField
+										variant="outlined"
+										label="Кафедра"
+										size="small"
+										{...register("department", {
+											required:
+												role === "TEACHER"
+													? "Укажите кафедру"
+													: false,
+										})}
+										error={!!errors.department}
+										helperText={
+											errors.department?.message ?? " "
+										}
 									/>
-								</RadioGroup>
-							)}
-						/>
-						<FormHelperText>
-							{errors.personRole?.message ?? " "}
-						</FormHelperText>
-					</FormControl>
+								)}
 
-					{role === "STUDENT" && (
-						<TextField
-							select={groups.length > 0}
-							variant="outlined"
-							label={groups.length > 0 ? "Группа" : "Групп нет"}
-							size="small"
-							{...register("group", {
-								required:
-									role === "STUDENT"
-										? "Укажите группу"
-										: false,
-							})}
-							disabled={groups.length === 0}
-							error={!!errors.group}
-							helperText={errors.group?.message ?? " "}
-						>
-							{groups.length > 0
-								? groups.map((group) => (
-										<MenuItem
-											key={group.uuid}
-											value={group.uuid}
-										>
-											{group.code}
-										</MenuItem>
-									))
-								: null}
-						</TextField>
-					)}
+								<NextStepButton trigger={trigger} />
+							</form>
+						</Wizard.StepContent>
+					</Wizard.Step>
 
-					{role === "TEACHER" && (
-						<TextField
-							variant="outlined"
-							label="Кафедра"
-							size="small"
-							{...register("department", {
-								required:
-									role === "TEACHER"
-										? "Укажите кафедру"
-										: false,
-							})}
-							error={!!errors.department}
-							helperText={errors.department?.message ?? " "}
-						/>
-					)}
+					<Wizard.Step>
+						<Wizard.StepHeader>Данные для входа</Wizard.StepHeader>
+						<Wizard.StepContent>
+							<form onSubmit={onSubmit} className="flex flex-col">
+								<TextField
+									variant="outlined"
+									label="Логин"
+									size="small"
+									{...register("login", {
+										required: {
+											value: true,
+											message:
+												"Поле обязательно для заполнения",
+										},
+									})}
+									error={!!errors.login}
+									helperText={errors.login?.message ?? " "}
+								/>
 
-					<TextField
-						variant="outlined"
-						label="Логин"
-						size="small"
-						{...register("login", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
-						error={!!errors.login}
-						helperText={errors.login?.message ?? " "}
-					/>
+								<FormControl error={!!errors.password}>
+									<InputLabel htmlFor="password" size="small">
+										Пароль
+									</InputLabel>
+									<OutlinedInput
+										label="Пароль"
+										id="password"
+										size="small"
+										type="password"
+										{...register("password", {
+											required: {
+												value: true,
+												message:
+													"Поле обязательно для заполнения",
+											},
+										})}
+										endAdornment={
+											<InputAdornment position="end"></InputAdornment>
+										}
+									/>
+									<FormHelperText className=" mt-1 mb-4">
+										{errors.password ? (
+											errors.password.message
+										) : (
+											<PasswordStregth
+												password={password}
+											/>
+										)}
+									</FormHelperText>
+								</FormControl>
 
-					<FormControl error={!!errors.password}>
-						<InputLabel htmlFor="password" size="small">
-							Пароль
-						</InputLabel>
-						<OutlinedInput
-							label="Пароль"
-							id="password"
-							size="small"
-							type="password"
-							{...register("password", {
-								required: {
-									value: true,
-									message: "Поле обязательно для заполнения",
-								},
-							})}
-							endAdornment={
-								<InputAdornment position="end"></InputAdornment>
-							}
-						/>
-						<FormHelperText className=" mt-1 mb-4">
-							{errors.password ? (
-								errors.password.message
-							) : (
-								<PasswordStregth password={password} />
-							)}
-						</FormHelperText>
-					</FormControl>
+								<FormControl error={!!errors.passwordConfirm}>
+									<InputLabel
+										htmlFor="passwordConfirm"
+										size="small"
+									>
+										Повторите пароль
+									</InputLabel>
+									<OutlinedInput
+										id="passwordConfirm"
+										label="Повторите пароль"
+										size="small"
+										type="password"
+										{...register("passwordConfirm", {
+											required: {
+												value: true,
+												message:
+													"Поле обязательно для заполнения",
+											},
+											validate: (value) =>
+												value === password ||
+												"Пароли не совпадают",
+										})}
+										endAdornment={
+											<InputAdornment position="end"></InputAdornment>
+										}
+									/>
+									<FormHelperText className=" mt-1 mb-4">
+										{errors.passwordConfirm
+											? errors.passwordConfirm.message
+											: " "}
+									</FormHelperText>
+								</FormControl>
 
-					<FormControl error={!!errors.passwordConfirm}>
-						<InputLabel htmlFor="passwordConfirm" size="small">
-							Повторите пароль
-						</InputLabel>
-						<OutlinedInput
-							id="passwordConfirm"
-							label="Повторите пароль"
-							size="small"
-							type="password"
-							{...register("passwordConfirm", {
-								required: {
-									value: true,
-									message: "Поле обязательно для заполнения",
-								},
-								validate: (value) =>
-									value === password || "Пароли не совпадают",
-							})}
-							endAdornment={
-								<InputAdornment position="end"></InputAdornment>
-							}
-						/>
-						<FormHelperText className=" mt-1 mb-4">
-							{errors.passwordConfirm
-								? errors.passwordConfirm.message
-								: " "}
-						</FormHelperText>
-					</FormControl>
-
-					<Button variant="contained" color="primary" type="submit">
-						Зарегистрироваться
-					</Button>
-				</form>
+								<Button
+									variant="contained"
+									color="primary"
+									type="submit"
+								>
+									Зарегистрироваться
+								</Button>
+							</form>
+						</Wizard.StepContent>
+					</Wizard.Step>
+				</Wizard>
 			</Stack>
 		</Box>
 	)

@@ -1,40 +1,106 @@
-import Box from "@mui/material/Box"
 import Stack from "@mui/material/Stack"
-import { Fragment, ReactNode, useState } from "react"
+import {
+	Children,
+	cloneElement,
+	createContext,
+	isValidElement,
+	ReactElement,
+	ReactNode,
+	useContext,
+	useState,
+} from "react"
+import { Label, Step, StepContent, StepHeader } from "./Step"
+import Box from "@mui/material/Box"
 
 interface Props {
-	steps: ReactNode[]
+	children?: ReactNode
 }
 
-const Wizard = (props: Props) => {
-	const { steps } = props
+type WizardContextValue = {
+	currentStep: number | string
+	setCurrentStep: (step: number | string) => void
+}
 
-	const [currentStep, setCurrentStep] = useState(0)
+const WizardContext = createContext<WizardContextValue | null>(null)
+
+export const useWizard = () => {
+	const ctx = useContext(WizardContext)
+	if (!ctx) {
+		throw new Error("useWizard must be used inside <Wizard>")
+	}
+	return ctx
+}
+
+const getStepChildren = (step: ReactElement<{ children?: ReactNode }>) =>
+	Children.toArray(step.props.children).filter(isValidElement)
+
+const Wizard = (props: Props) => {
+	const { children } = props
+
+	const [currentStep, setCurrentStep] = useState<number | string>(1)
+
+	const wizardContextValue: WizardContextValue = {
+		currentStep,
+		setCurrentStep,
+	}
+
+	const steps = Children.toArray(children).filter(
+		(
+			child,
+		): child is ReactElement<{
+			children?: ReactNode
+			stepId?: number | string
+		}> => isValidElement(child) && child.type === Step,
+	)
+
+	const headers: ReactElement[] = []
+
+	const contents: ReactElement[] = []
+
+	steps.forEach((step, index) => {
+		const stepId = index + 1
+		const header = getStepChildren(step).find(
+			(child) => child.type === StepHeader,
+		)
+		const content = getStepChildren(step).find(
+			(child) => child.type === StepContent,
+		)
+
+		// шаблон Step без children — children подставляем через cloneElement
+		const stepShell = <Step stepId={stepId} />
+
+		if (header) {
+			headers.push(
+				cloneElement(stepShell, { key: `header-${stepId}` }, header),
+			)
+		}
+		if (content) {
+			contents.push(
+				cloneElement(stepShell, { key: `content-${stepId}` }, content),
+			)
+		}
+	})
 
 	return (
-		<Box className="flex flex-row gap-4">
-			{steps.map((step, index) => (
-				<Fragment key={index}>
-					<Stack direction="row" spacing={2}>
-						<Box
-							className="rounded-full"
-							sx={{
-								width: "10%",
-								height: "10%",
-								backgroundColor:
-									index === currentStep
-										? "primary.main"
-										: "secondary.main",
-							}}
-						>
-							{index + 1}
-						</Box>
-						{step}
-					</Stack>
-				</Fragment>
-			))}
-		</Box>
+		<WizardContext.Provider value={wizardContextValue}>
+			<Box className="flex flex-col w-full">
+				<Stack
+					direction="row"
+					spacing={2}
+					className="justify-between w-full p-4"
+				>
+					{headers}
+				</Stack>
+				<Box className="grid flex-1">{contents}</Box>
+			</Box>
+		</WizardContext.Provider>
 	)
 }
 
+Wizard.Label = Label
+Wizard.StepHeader = StepHeader
+Wizard.Step = Step
+Wizard.StepContent = StepContent
+
 export default Wizard
+export { Label, Step, StepContent, StepHeader }
