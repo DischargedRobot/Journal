@@ -1,4 +1,5 @@
 import Stack from "@mui/material/Stack"
+import Box from "@mui/material/Box"
 import {
 	Children,
 	cloneElement,
@@ -10,7 +11,6 @@ import {
 	useState,
 } from "react"
 import { Label, Step, StepContent, StepHeader } from "./Step"
-import Box from "@mui/material/Box"
 
 interface Props {
 	children?: ReactNode
@@ -37,13 +37,6 @@ const getStepChildren = (step: ReactElement<{ children?: ReactNode }>) =>
 const Wizard = (props: Props) => {
 	const { children } = props
 
-	const [currentStep, setCurrentStep] = useState<number | string>(1)
-
-	const wizardContextValue: WizardContextValue = {
-		currentStep,
-		setCurrentStep,
-	}
-
 	const steps = Children.toArray(children).filter(
 		(
 			child,
@@ -53,12 +46,21 @@ const Wizard = (props: Props) => {
 		}> => isValidElement(child) && child.type === Step,
 	)
 
-	const headers: ReactElement[] = []
+	const initialStepId = steps[0]?.props.stepId ?? 1
+	const [currentStep, setCurrentStep] = useState<number | string>(
+		initialStepId,
+	)
 
+	const wizardContextValue: WizardContextValue = {
+		currentStep,
+		setCurrentStep,
+	}
+
+	const headers: ReactElement[] = []
 	const contents: ReactElement[] = []
 
 	steps.forEach((step, index) => {
-		const stepId = index + 1
+		const stepId = step.props.stepId ?? index + 1
 		const header = getStepChildren(step).find(
 			(child) => child.type === StepHeader,
 		)
@@ -66,17 +68,18 @@ const Wizard = (props: Props) => {
 			(child) => child.type === StepContent,
 		)
 
-		// шаблон Step без children — children подставляем через cloneElement
-		const stepShell = <Step stepId={stepId} />
-
 		if (header) {
 			headers.push(
-				cloneElement(stepShell, { key: `header-${stepId}` }, header),
+				cloneElement(step, { key: `header-${stepId}`, stepId }, header),
 			)
 		}
 		if (content) {
 			contents.push(
-				cloneElement(stepShell, { key: `content-${stepId}` }, content),
+				cloneElement(
+					step,
+					{ key: `content-${stepId}`, stepId },
+					content,
+				),
 			)
 		}
 	})

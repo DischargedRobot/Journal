@@ -1,0 +1,1 @@
+export { DepartmentApi } from "./DepartmentApi"

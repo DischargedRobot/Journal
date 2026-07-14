@@ -1,6 +1,7 @@
 import AuthApi from "@/shared/api/AuthApi"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { TGroup } from "@/shared/model/group"
+import { TDepartment } from "@/shared/model/t-department"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import Wizard, { useWizard } from "@/shared/ui/wizard/Wizard"
@@ -46,6 +47,7 @@ interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
 	focused: boolean
 	groups: TGroup[]
+	departments: TDepartment[]
 }
 
 const PERSONAL_FIELDS: (keyof FormValues)[] = [
@@ -82,7 +84,7 @@ const NextStepButton = ({
 }
 
 const Registration = (props: Props) => {
-	const { focused, groups, onToRegistration } = props
+	const { focused, groups, onToRegistration, departments } = props
 
 	const {
 		register,
@@ -205,7 +207,7 @@ const Registration = (props: Props) => {
 							>
 								<TextField
 									variant="outlined"
-									label="Имя"
+									label="Имя*"
 									size="small"
 									{...register("firstName", {
 										required: {
@@ -222,7 +224,7 @@ const Registration = (props: Props) => {
 
 								<TextField
 									variant="outlined"
-									label="Фамилия"
+									label="Фамилия*"
 									size="small"
 									{...register("lastName", {
 										required: {
@@ -295,7 +297,7 @@ const Registration = (props: Props) => {
 										variant="outlined"
 										label={
 											groups.length > 0
-												? "Группа"
+												? "Группа*"
 												: "Групп нет"
 										}
 										size="small"
@@ -327,8 +329,13 @@ const Registration = (props: Props) => {
 								{role === "TEACHER" && (
 									<TextField
 										variant="outlined"
-										label="Кафедра"
+										label={
+											departments.length > 0
+												? "Кафедра*"
+												: "Кафедр нет"
+										}
 										size="small"
+										select={departments.length > 0}
 										{...register("department", {
 											required:
 												role === "TEACHER"
@@ -336,10 +343,22 @@ const Registration = (props: Props) => {
 													: false,
 										})}
 										error={!!errors.department}
+										disabled={departments.length === 0}
 										helperText={
 											errors.department?.message ?? " "
 										}
-									/>
+									>
+										{departments.length > 0
+											? departments.map((department) => (
+													<MenuItem
+														key={department.uuid}
+														value={department.uuid}
+													>
+														{department.name}
+													</MenuItem>
+												))
+											: null}
+									</TextField>
 								)}
 
 								<NextStepButton trigger={trigger} />
@@ -353,7 +372,7 @@ const Registration = (props: Props) => {
 							<form onSubmit={onSubmit} className="flex flex-col">
 								<TextField
 									variant="outlined"
-									label="Логин"
+									label="Логин*"
 									size="small"
 									{...register("login", {
 										required: {
@@ -368,10 +387,10 @@ const Registration = (props: Props) => {
 
 								<FormControl error={!!errors.password}>
 									<InputLabel htmlFor="password" size="small">
-										Пароль
+										Пароль*
 									</InputLabel>
 									<OutlinedInput
-										label="Пароль"
+										label="Пароль*"
 										id="password"
 										size="small"
 										type="password"
@@ -402,11 +421,11 @@ const Registration = (props: Props) => {
 										htmlFor="passwordConfirm"
 										size="small"
 									>
-										Повторите пароль
+										Повторите пароль*
 									</InputLabel>
 									<OutlinedInput
 										id="passwordConfirm"
-										label="Повторите пароль"
+										label="Повторите пароль*"
 										size="small"
 										type="password"
 										{...register("passwordConfirm", {

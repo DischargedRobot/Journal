@@ -1,29 +1,42 @@
 import Box from "@mui/material/Box"
 import Stack from "@mui/material/Stack"
-import { createContext, ReactNode, useContext } from "react"
+import {
+	Children,
+	cloneElement,
+	isValidElement,
+	ReactElement,
+	ReactNode,
+} from "react"
 import { useWizard } from "./Wizard"
 
-const StepContext = createContext<{ stepId: number | string } | null>(null)
-
-export const useStep = () => {
-	const ctx = useContext(StepContext)
-	if (!ctx) {
-		throw new Error("useStep must be used inside <Step>")
-	}
-	return ctx
+type StepChildProps = {
+	stepId?: number | string
+	children?: ReactNode
 }
 
 export const Step = ({
 	children,
-	stepId = crypto.randomUUID(),
+	stepId,
 }: {
 	children?: ReactNode
 	stepId?: number | string
 }) => {
 	return (
-		<StepContext.Provider value={{ stepId }}>
-			{children}
-		</StepContext.Provider>
+		<>
+			{Children.map(children, (child) => {
+				if (!isValidElement(child)) {
+					return child
+				}
+
+				if (child.type === StepHeader || child.type === StepContent) {
+					return cloneElement(child as ReactElement<StepChildProps>, {
+						stepId,
+					})
+				}
+
+				return child
+			})}
+		</>
 	)
 }
 
@@ -31,9 +44,15 @@ export const Label = ({ children }: { children: ReactNode }) => {
 	return <span>{children}</span>
 }
 
-export const StepContent = ({ children }: { children: ReactNode }) => {
+export const StepContent = ({
+	children,
+	stepId,
+}: {
+	children: ReactNode
+	stepId?: number | string
+}) => {
 	const { currentStep } = useWizard()
-	const { stepId } = useStep()
+
 	return (
 		<Stack
 			className="flex-1 py-5 px-7"
@@ -48,16 +67,25 @@ export const StepContent = ({ children }: { children: ReactNode }) => {
 	)
 }
 
-export const StepHeader = ({ children }: { children: ReactNode }) => {
+export const StepHeader = ({
+	children,
+	stepId,
+}: {
+	children: ReactNode
+	stepId?: number | string
+}) => {
 	const { currentStep, setCurrentStep } = useWizard()
-	const { stepId } = useStep()
 
 	return (
 		<Stack
 			className="cursor-pointer items-center"
 			direction="row"
 			spacing={2}
-			onClick={() => setCurrentStep(stepId)}
+			onClick={() => {
+				if (stepId !== undefined) {
+					setCurrentStep(stepId)
+				}
+			}}
 		>
 			<Box
 				className="rounded-full p-2"
