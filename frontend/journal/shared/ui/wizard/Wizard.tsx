@@ -86,11 +86,11 @@ const Wizard = (props: Props) => {
 
 	return (
 		<WizardContext.Provider value={wizardContextValue}>
-			<Box className="flex flex-col w-full">
+			<Box className="flex flex-col w-full mt-1">
 				<Stack
 					direction="row"
 					spacing={2}
-					className="justify-between w-full p-4"
+					className="justify-between w-full"
 				>
 					{headers}
 				</Stack>

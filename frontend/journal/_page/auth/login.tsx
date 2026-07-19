@@ -33,7 +33,7 @@ const Login = (props: Props) => {
 
 	const router = useRouter()
 
-	const handlerError = createApiErrorHandler(router.push)
+	const handlerError = createApiErrorHandler([], router.push)
 
 	const onSubmit = handleSubmit(async (data) => {
 		try {

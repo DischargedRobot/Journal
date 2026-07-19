@@ -106,6 +106,9 @@ const Registration = (props: Props) => {
 		defaultValue: "STUDENT",
 	})
 
+	const hasPersonalStepError = PERSONAL_FIELDS.some(
+		(field) => !!errors[field],
+	)
 	const handlerError = createApiErrorHandler()
 
 	const onSubmit = handleSubmit(async (data) => {
@@ -197,7 +200,13 @@ const Registration = (props: Props) => {
 
 				<Wizard>
 					<Wizard.Step>
-						<Wizard.StepHeader>
+						<Wizard.StepHeader
+							errorMessage={
+								hasPersonalStepError
+									? "Пожалуйста, заполните все поля"
+									: null
+							}
+						>
 							Персональные данные
 						</Wizard.StepHeader>
 						<Wizard.StepContent>

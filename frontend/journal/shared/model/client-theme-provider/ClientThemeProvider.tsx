@@ -37,6 +37,10 @@ const theme = createTheme({
 			color: { main: base.palette.grey[900] },
 			name: "black",
 		}),
+
+		error: {
+			main: "#FF0000",
+		},
 		primary: {
 			main,
 			light: "#7AACF9",
