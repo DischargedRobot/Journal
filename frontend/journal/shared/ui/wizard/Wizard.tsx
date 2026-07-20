@@ -10,11 +10,10 @@ import {
 	useContext,
 	useState,
 } from "react"
-import { Label, Step, StepContent, StepHeader } from "./Step"
-
-interface Props {
-	children?: ReactNode
-}
+import { Label } from "./Label"
+import { Step } from "./Step"
+import { StepContent } from "./StepContent"
+import { StepHeader } from "./StepHeader"
 
 type WizardContextValue = {
 	currentStep: number | string
@@ -34,9 +33,14 @@ export const useWizard = () => {
 const getStepChildren = (step: ReactElement<{ children?: ReactNode }>) =>
 	Children.toArray(step.props.children).filter(isValidElement)
 
+interface Props {
+	children?: ReactNode
+}
+
 const Wizard = (props: Props) => {
 	const { children } = props
 
+	// шаг\этапы визарда
 	const steps = Children.toArray(children).filter(
 		(
 			child,
@@ -59,6 +63,7 @@ const Wizard = (props: Props) => {
 	const headers: ReactElement[] = []
 	const contents: ReactElement[] = []
 
+	// Собираем в шаги заголовки и контент чтобы потом отрендарить в блоках отдельных друг от друга
 	steps.forEach((step, index) => {
 		const stepId = step.props.stepId ?? index + 1
 		const header = getStepChildren(step).find(

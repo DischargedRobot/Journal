@@ -1,3 +1,4 @@
+"use client"
 import AuthApi from "@/shared/api/AuthApi"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { TGroup } from "@/shared/model/group"
@@ -59,6 +60,12 @@ const PERSONAL_FIELDS: (keyof FormValues)[] = [
 	"department",
 ]
 
+const LOGIN_FIELDS: (keyof FormValues)[] = [
+	"login",
+	"password",
+	"passwordConfirm",
+]
+
 const NextStepButton = ({
 	trigger,
 }: {
@@ -70,7 +77,7 @@ const NextStepButton = ({
 		<Button
 			variant="contained"
 			color="primary"
-			type="button"
+			type="submit"
 			onClick={async () => {
 				const isValid = await trigger(PERSONAL_FIELDS)
 				if (isValid) {
@@ -106,12 +113,15 @@ const Registration = (props: Props) => {
 		defaultValue: "STUDENT",
 	})
 
-	const hasPersonalStepError = PERSONAL_FIELDS.some(
-		(field) => !!errors[field],
-	)
+	const isPersonalStepError = PERSONAL_FIELDS.some((field) => !!errors[field])
+
+	const isLoginStepError = LOGIN_FIELDS.some((field) => !!errors[field])
 	const handlerError = createApiErrorHandler()
 
 	const onSubmit = handleSubmit(async (data) => {
+		if (isLoginStepError || isPersonalStepError) {
+			return
+		}
 		try {
 			await AuthApi.register({
 				login: data.login,
@@ -202,7 +212,7 @@ const Registration = (props: Props) => {
 					<Wizard.Step>
 						<Wizard.StepHeader
 							errorMessage={
-								hasPersonalStepError
+								isPersonalStepError
 									? "Пожалуйста, заполните все поля"
 									: null
 							}
@@ -376,7 +386,15 @@ const Registration = (props: Props) => {
 					</Wizard.Step>
 
 					<Wizard.Step>
-						<Wizard.StepHeader>Данные для входа</Wizard.StepHeader>
+						<Wizard.StepHeader
+							errorMessage={
+								isLoginStepError
+									? "Пожалуйста, заполните все поля"
+									: null
+							}
+						>
+							Данные для входа
+						</Wizard.StepHeader>
 						<Wizard.StepContent>
 							<form onSubmit={onSubmit} className="flex flex-col">
 								<TextField
