@@ -8,7 +8,6 @@ import {
 	ReactElement,
 	ReactNode,
 	useContext,
-	useState,
 } from "react"
 import { Label } from "./Label"
 import { Step } from "./Step"
@@ -17,7 +16,7 @@ import { StepHeader } from "./StepHeader"
 
 type WizardContextValue = {
 	currentStep: number | string
-	setCurrentStep: (step: number | string) => void
+	onStepChange: (step: number | string) => void
 }
 
 const WizardContext = createContext<WizardContextValue | null>(null)
@@ -35,10 +34,12 @@ const getStepChildren = (step: ReactElement<{ children?: ReactNode }>) =>
 
 interface Props {
 	children?: ReactNode
+	currentStep: number | string
+	onStepChange: (step: number | string) => void
 }
 
 const Wizard = (props: Props) => {
-	const { children } = props
+	const { children, currentStep, onStepChange } = props
 
 	// шаг\этапы визарда
 	const steps = Children.toArray(children).filter(
@@ -50,14 +51,9 @@ const Wizard = (props: Props) => {
 		}> => isValidElement(child) && child.type === Step,
 	)
 
-	const initialStepId = steps[0]?.props.stepId ?? 1
-	const [currentStep, setCurrentStep] = useState<number | string>(
-		initialStepId,
-	)
-
 	const wizardContextValue: WizardContextValue = {
 		currentStep,
-		setCurrentStep,
+		onStepChange,
 	}
 
 	const headers: ReactElement[] = []

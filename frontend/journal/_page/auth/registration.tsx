@@ -24,6 +24,7 @@ import {
 	MenuItem,
 	InputLabel,
 } from "@mui/material"
+import { useState } from "react"
 import { useForm, useWatch, Controller, UseFormTrigger } from "react-hook-form"
 
 interface FormValues {
@@ -65,30 +66,6 @@ const LOGIN_FIELDS: (keyof FormValues)[] = [
 	"password",
 	"passwordConfirm",
 ]
-
-const NextStepButton = ({
-	trigger,
-}: {
-	trigger: UseFormTrigger<FormValues>
-}) => {
-	const { setCurrentStep } = useWizard()
-
-	return (
-		<Button
-			variant="contained"
-			color="primary"
-			type="submit"
-			onClick={async () => {
-				const isValid = await trigger(PERSONAL_FIELDS)
-				if (isValid) {
-					setCurrentStep(2)
-				}
-			}}
-		>
-			Далее
-		</Button>
-	)
-}
 
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration, departments } = props
@@ -137,6 +114,11 @@ const Registration = (props: Props) => {
 		}
 	})
 
+	const [isPersonalStepCompleted, setIsPersonalStepCompleted] =
+		useState(false)
+	const [isLoginStepCompleted, setIsLoginStepCompleted] = useState(false)
+
+	const [currentStep, setCurrentStep] = useState<number | string>(1)
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
 		<Box
@@ -208,9 +190,13 @@ const Registration = (props: Props) => {
 					<Typography variant="h4">Регистрация</Typography>
 				</Box>
 
-				<Wizard>
-					<Wizard.Step>
+				<Wizard
+					currentStep={currentStep}
+					onStepChange={(step) => setCurrentStep(step)}
+				>
+					<Wizard.Step stepId={1}>
 						<Wizard.StepHeader
+							completed={isPersonalStepCompleted}
 							errorMessage={
 								isPersonalStepError
 									? "Пожалуйста, заполните все поля"
@@ -380,13 +366,28 @@ const Registration = (props: Props) => {
 									</TextField>
 								)}
 
-								<NextStepButton trigger={trigger} />
+								<Button
+									variant="contained"
+									color="primary"
+									type="submit"
+									onClick={async () => {
+										const isValid =
+											await trigger(PERSONAL_FIELDS)
+										if (isValid) {
+											setIsPersonalStepCompleted(true)
+											setCurrentStep(2)
+										}
+									}}
+								>
+									Далее
+								</Button>
 							</form>
 						</Wizard.StepContent>
 					</Wizard.Step>
 
 					<Wizard.Step>
 						<Wizard.StepHeader
+							completed={isLoginStepCompleted}
 							errorMessage={
 								isLoginStepError
 									? "Пожалуйста, заполните все поля"
