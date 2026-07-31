@@ -23,8 +23,9 @@ import {
 	InputAdornment,
 	MenuItem,
 	InputLabel,
+	Tooltip,
 } from "@mui/material"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm, useWatch, Controller, UseFormTrigger } from "react-hook-form"
 
 interface FormValues {
@@ -119,6 +120,19 @@ const Registration = (props: Props) => {
 	const [isLoginStepCompleted, setIsLoginStepCompleted] = useState(false)
 
 	const [currentStep, setCurrentStep] = useState<number | string>(1)
+
+	// текст тултипа кнопки "далее" на первом шаге
+	const personalDataButtonTooltip =
+		role === "STUDENT"
+			? groups.length === 0
+				? "Ошибка при связи с сервером. Групп нет"
+				: null
+			: departments.length === 0
+				? "Ошибка при связи с сервером. Кафедр нет"
+				: null
+
+	const loginStepDisabled = personalDataButtonTooltip !== null
+
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
 		<Box
@@ -199,7 +213,7 @@ const Registration = (props: Props) => {
 							completed={isPersonalStepCompleted}
 							errorMessage={
 								isPersonalStepError
-									? "Пожалуйста, заполните все поля"
+									? "Не все поля были корректно заполнены"
 									: null
 							}
 						>
@@ -366,31 +380,49 @@ const Registration = (props: Props) => {
 									</TextField>
 								)}
 
-								<Button
-									variant="contained"
-									color="primary"
-									type="submit"
-									onClick={async () => {
-										const isValid =
-											await trigger(PERSONAL_FIELDS)
-										if (isValid) {
-											setIsPersonalStepCompleted(true)
-											setCurrentStep(2)
+								<Tooltip title={personalDataButtonTooltip}>
+									<span
+										className={
+											!!personalDataButtonTooltip
+												? "cursor-not-allowed"
+												: ""
 										}
-									}}
-								>
-									Далее
-								</Button>
+									>
+										<Button
+											className="w-full"
+											variant="contained"
+											color="primary"
+											type="submit"
+											onClick={async () => {
+												const isValid =
+													await trigger(
+														PERSONAL_FIELDS,
+													)
+												if (isValid) {
+													setIsPersonalStepCompleted(
+														true,
+													)
+													setCurrentStep(2)
+												}
+											}}
+											disabled={
+												!!personalDataButtonTooltip
+											}
+										>
+											Далее
+										</Button>
+									</span>
+								</Tooltip>
 							</form>
 						</Wizard.StepContent>
 					</Wizard.Step>
 
-					<Wizard.Step>
+					<Wizard.Step disabled={loginStepDisabled}>
 						<Wizard.StepHeader
 							completed={isLoginStepCompleted}
 							errorMessage={
 								isLoginStepError
-									? "Пожалуйста, заполните все поля"
+									? "Не все поля были корректно заполнены"
 									: null
 							}
 						>
@@ -477,13 +509,19 @@ const Registration = (props: Props) => {
 									</FormHelperText>
 								</FormControl>
 
-								<Button
-									variant="contained"
-									color="primary"
-									type="submit"
-								>
-									Зарегистрироваться
-								</Button>
+								<Tooltip title={"Регистрация не доступна"}>
+									<span>
+										<Button
+											className="w-full"
+											variant="contained"
+											color="primary"
+											type="submit"
+											disabled={true}
+										>
+											Зарегистрироваться
+										</Button>
+									</span>
+								</Tooltip>
 							</form>
 						</Wizard.StepContent>
 					</Wizard.Step>

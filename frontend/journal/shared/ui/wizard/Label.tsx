@@ -1,6 +1,6 @@
-import { ReactNode } from "react"
+import { memo, ReactNode } from "react"
 
-export const Label = ({
+const Label = ({
 	className,
 	children,
 }: {
@@ -9,3 +9,4 @@ export const Label = ({
 }) => {
 	return <span className={className}>{children}</span>
 }
+export default memo(Label)

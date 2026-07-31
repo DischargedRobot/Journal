@@ -2,23 +2,27 @@ import {
 	Children,
 	cloneElement,
 	isValidElement,
+	memo,
 	ReactElement,
 	ReactNode,
 } from "react"
-import { StepContent } from "./StepContent"
-import { StepHeader } from "./StepHeader"
+import StepContent from "./StepContent"
+import StepHeader from "./StepHeader"
 
 type StepChildProps = {
 	stepId?: number | string
 	children?: ReactNode
+	disabled?: boolean
 }
 
-export const Step = ({
+const Step = ({
 	children,
 	stepId,
+	disabled,
 }: {
 	children?: ReactNode
 	stepId?: number | string
+	disabled?: boolean
 }) => {
 	return (
 		<>
@@ -27,9 +31,11 @@ export const Step = ({
 					return child
 				}
 
+				// прокидывает одинаковый stepId и disabled для StepHeader и StepContent, чтобы связать их
 				if (child.type === StepHeader || child.type === StepContent) {
 					return cloneElement(child as ReactElement<StepChildProps>, {
 						stepId,
+						disabled,
 					})
 				}
 
@@ -38,3 +44,4 @@ export const Step = ({
 		</>
 	)
 }
+export default memo(Step)

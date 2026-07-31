@@ -1,8 +1,8 @@
 import Stack from "@mui/material/Stack"
-import { ReactNode } from "react"
+import { memo, ReactNode } from "react"
 import { useWizard } from "./Wizard"
 
-export const StepContent = ({
+const StepContent = ({
 	children,
 	stepId,
 }: {
@@ -24,3 +24,4 @@ export const StepContent = ({
 		</Stack>
 	)
 }
+export default memo(StepContent)

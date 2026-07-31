@@ -5,14 +5,15 @@ import {
 	cloneElement,
 	createContext,
 	isValidElement,
+	memo,
 	ReactElement,
 	ReactNode,
 	useContext,
 } from "react"
-import { Label } from "./Label"
-import { Step } from "./Step"
-import { StepContent } from "./StepContent"
-import { StepHeader } from "./StepHeader"
+import Label from "./Label"
+import Step from "./Step"
+import StepContent from "./StepContent"
+import StepHeader from "./StepHeader"
 
 type WizardContextValue = {
 	currentStep: number | string
@@ -38,7 +39,7 @@ interface Props {
 	onStepChange: (step: number | string) => void
 }
 
-const Wizard = (props: Props) => {
+const WizardBase = (props: Props) => {
 	const { children, currentStep, onStepChange } = props
 
 	// шаг\этапы визарда
@@ -87,24 +88,26 @@ const Wizard = (props: Props) => {
 
 	return (
 		<WizardContext.Provider value={wizardContextValue}>
-			<Box className="flex flex-col w-full mt-1">
-				<Stack
-					direction="row"
-					spacing={2}
-					className="justify-between w-full"
+			<Box className="flex flex-col w-full mt-1 gap-2">
+				<Box
+					className="grid grid-rows-1 justify-between items-start w-full gap-2"
+					sx={{
+						gridTemplateColumns: `repeat(${headers.length}, 1fr)`,
+					}}
 				>
 					{headers}
-				</Stack>
+				</Box>
 				<Box className="grid flex-1">{contents}</Box>
 			</Box>
 		</WizardContext.Provider>
 	)
 }
 
-Wizard.Label = Label
-Wizard.StepHeader = StepHeader
-Wizard.Step = Step
-Wizard.StepContent = StepContent
+const Wizard = Object.assign(memo(WizardBase), {
+	Label,
+	Step,
+	StepContent,
+	StepHeader,
+})
 
 export default Wizard
-export { Label, Step, StepContent, StepHeader }
