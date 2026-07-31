@@ -5,6 +5,7 @@ import { classNamesTwMerge } from "@/shared/lib/classNamesTwMerge"
 import { Label } from "./Label"
 import { useWizard } from "./Wizard"
 import DoneIcon from "@mui/icons-material/Done"
+import PriorityHighRoundedIcon from "@mui/icons-material/PriorityHighRounded"
 
 interface Props {
 	children: ReactNode
@@ -36,7 +37,26 @@ export const StepHeader = (props: Props) => {
 		completed,
 		completedIcon,
 	} = props
+
+	const isError = errorMessage !== null
 	const { currentStep, onStepChange: setCurrentStep } = useWizard()
+
+	// Цвета для номера шага
+	const backgroundColor = isError
+		? "error.main"
+		: stepId === currentStep
+			? "primary.main"
+			: "secondary.main"
+	const borderColor = isError
+		? "error.main"
+		: stepId === currentStep
+			? "primary.main"
+			: "secondary.main"
+	const color = isError
+		? "error.contrastText"
+		: stepId === currentStep
+			? "primary.contrastText"
+			: "primary.main"
 
 	return (
 		<Box
@@ -62,32 +82,34 @@ export const StepHeader = (props: Props) => {
 					sx={{
 						width: "2.5rem",
 						height: "2.5rem",
-						backgroundColor:
-							stepId === currentStep
-								? "primary.main"
-								: "secondary.main",
-						borderColor: "primary.main",
-						color:
-							stepId === currentStep
-								? "primary.contrastText"
-								: "primary.main",
+						backgroundColor: backgroundColor,
+						borderColor: borderColor,
+						color: color,
 					}}
 				>
-					{completed
-						? (completedIcon ?? (
-								<DoneIcon
-									sx={{
-										filter: `
-      drop-shadow(0.6px 0 0 currentColor)
-      drop-shadow(-0.6px 0 0 currentColor)
-      drop-shadow(0 0.6px 0 currentColor)
-      drop-shadow(0 -0.6px 0 currentColor)
-    `,
-										fontSize: "1.5rem",
-									}}
-								/>
-							))
-						: stepId}
+					{completed ? (
+						(completedIcon ?? (
+							<DoneIcon
+								sx={{
+									filter: `
+											drop-shadow(0.6px 0 0 currentColor)
+											drop-shadow(-0.6px 0 0 currentColor)
+											drop-shadow(0 0.6px 0 currentColor)
+											drop-shadow(0 -0.6px 0 currentColor)
+											`,
+									fontSize: "1.5rem",
+								}}
+							/>
+						))
+					) : isError ? (
+						<PriorityHighRoundedIcon
+							sx={{
+								fontSize: "1.5rem",
+							}}
+						/>
+					) : (
+						stepId
+					)}
 				</Box>
 			)}
 			<Label
@@ -111,10 +133,10 @@ export const StepHeader = (props: Props) => {
 				sx={{
 					color: "error.main",
 					fontSize: "0.8rem",
-					visibility: errorMessage ? "visible" : "hidden",
+					visibility: isError ? "visible" : "hidden",
 				}}
 			>
-				{errorMessage ?? "&ZeroWidthSpace"}
+				{isError ? errorMessage : "&ZeroWidthSpace"}
 			</Box>
 		</Box>
 	)
