@@ -2,12 +2,12 @@
 export function buildQuery(
 	params: Record<string, string | number | boolean | unknown>,
 ) {
-	const qs = Object.entries(params)
+	const queryString = Object.entries(params)
 		.filter(([, v]) => v !== undefined && v !== null && v !== "")
 		.map(
 			([k, v]) =>
 				`${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
 		)
 		.join("&")
-	return qs.length ? `?${qs}` : ""
+	return queryString.length ? `?${queryString}` : ""
 }

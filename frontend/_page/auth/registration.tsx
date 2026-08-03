@@ -1,8 +1,8 @@
 "use client"
 import AuthApi from "@/shared/api/AuthApi"
+import { TDepartmentResponseDto } from "@/shared/api/department"
+import { TGroupResponseDto } from "@/shared/api/group"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
-import { TGroup } from "@/shared/model/group"
-import { TDepartment } from "@/shared/model/t-department"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import Wizard, { useWizard } from "@/shared/ui/wizard/Wizard"
@@ -37,20 +37,15 @@ interface FormValues {
 	patronymic?: string | null
 	email?: string
 	personRole: "STUDENT" | "TEACHER"
-	department?: Department
+	department?: string
 	group?: string
-}
-
-interface Department {
-	uuid: string
-	name: string
 }
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
 	focused: boolean
-	groups: TGroup[]
-	departments: TDepartment[]
+	groups: TGroupResponseDto[]
+	departments: TDepartmentResponseDto[]
 }
 
 const PERSONAL_FIELDS: (keyof FormValues)[] = [
@@ -78,7 +73,11 @@ const Registration = (props: Props) => {
 		control,
 		trigger,
 	} = useForm<FormValues>({
-		defaultValues: { personRole: "STUDENT", group: "" },
+		defaultValues: {
+			personRole: "STUDENT",
+			group: "",
+			department: "",
+		  },
 	})
 	const password = useWatch({
 		control,
@@ -311,7 +310,12 @@ const Registration = (props: Props) => {
 								</FormControl>
 
 								{role === "STUDENT" && (
-									<TextField
+									<Controller 
+									name="group"
+									control={control}
+									rules={{ required: role === "STUDENT" ? "Укажите группу" : false }}
+									render={({ field }) => (<TextField
+										{...field}
 										select={groups.length > 0}
 										variant="outlined"
 										label={
@@ -320,12 +324,6 @@ const Registration = (props: Props) => {
 												: "Групп нет"
 										}
 										size="small"
-										{...register("group", {
-											required:
-												role === "STUDENT"
-													? "Укажите группу"
-													: false,
-										})}
 										disabled={groups.length === 0}
 										error={!!errors.group}
 										helperText={
@@ -343,10 +341,18 @@ const Registration = (props: Props) => {
 												))
 											: null}
 									</TextField>
+									)}
+									/>
 								)}
 
 								{role === "TEACHER" && (
-									<TextField
+									<Controller 
+									name="department"
+									control={control}
+									 rules={{ required: role === "TEACHER" ? "Укажите кафедру" : false }}
+									render={({ field }) => (<TextField
+										{...field}
+										select={departments.length > 0}
 										variant="outlined"
 										label={
 											departments.length > 0
@@ -354,13 +360,6 @@ const Registration = (props: Props) => {
 												: "Кафедр нет"
 										}
 										size="small"
-										select={departments.length > 0}
-										{...register("department", {
-											required:
-												role === "TEACHER"
-													? "Укажите кафедру"
-													: false,
-										})}
 										error={!!errors.department}
 										disabled={departments.length === 0}
 										helperText={
@@ -378,6 +377,8 @@ const Registration = (props: Props) => {
 												))
 											: null}
 									</TextField>
+									)}
+									/>
 								)}
 
 								<Tooltip title={personalDataButtonTooltip}>

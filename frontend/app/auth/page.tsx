@@ -1,17 +1,10 @@
-"use client"
-
 import { GroupApi } from "@/shared/api/group/GroupApi"
 import { AuthClient } from "../../_page/auth/auth-client"
-import { useEffect, useState } from "react"
-import { TGroup } from "@/shared/model/group"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { ApiErrors } from "@/shared/ApiError/ApiError"
 import { DepartmentApi } from "@/shared/api/department"
-import { TDepartment } from "@/shared/model/t-department"
 
-const AuthPage = () => {
-	const [groups, setGroups] = useState<TGroup[]>([])
-	const [departments, setDepartments] = useState<TDepartment[]>([])
+const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
 		{
 			error: ApiErrors.BAD_REQUEST,
@@ -20,6 +13,17 @@ const AuthPage = () => {
 			},
 		},
 	])
+
+	try {
+		const response = await GroupApi.getGroupsWithoutEnhance()
+		return response.items
+	} catch (error) {
+		handleGetGroupsError(error)
+		return []
+	}
+}
+
+const getDepartments = async () => {
 	const handleGetDepartmentsError = createApiErrorHandler([
 		{
 			error: ApiErrors.BAD_REQUEST,
@@ -29,28 +33,20 @@ const AuthPage = () => {
 		},
 	])
 
-	useEffect(() => {
-		const loadGroups = async () => {
-			try {
-				const groups = await GroupApi.getGroupsWithoutEnhance()
-				setGroups(groups.items)
-			} catch (error) {
-				handleGetGroupsError(error)
-			}
-		}
-		const loadDepartments = async () => {
-			try {
-				const departments = await DepartmentApi.getDepartments()
-				setDepartments(departments.items)
-			} catch (error) {
-				handleGetDepartmentsError(error)
-			}
-		}
+	try {
+		return DepartmentApi.getDepartmentsWithoutEnhance()
+	} catch (error) {
+		handleGetDepartmentsError(error)
+		return []
+	}
+}
+const AuthPage = async () => {
 
-		loadGroups()
-		loadDepartments()
-	}, [])
+	const groups = await getGroups()
+	const departments = await getDepartments()
 
+
+	console.log(groups)
 	return (
 		<main className="content-center h-screen w-screen overflow-auto">
 			<AuthClient groups={groups} departments={departments} />
