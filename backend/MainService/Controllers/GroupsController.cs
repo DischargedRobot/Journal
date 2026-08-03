@@ -1,3 +1,4 @@
+using MainService.Enums;
 using MainService.Errors;
 
 using Microsoft.AspNetCore.Mvc;
@@ -28,15 +29,42 @@ namespace MainService.Controllers
             Summary = "Получить список всех групп",
             Description = "Возвращает список всех групп в системе"
         )]
-        public async Task<ActionResult<IEnumerable<GroupsResponseDto>>> GetGroups()
+        public async Task<ActionResult<IEnumerable<GroupsResponseDto>>> GetGroups( [FromQuery, SwaggerParameter("Количество записей")]
+            int size = 100,
+            [FromQuery, SwaggerParameter("Смещение от начала")]
+            int offset = 0,
+            [FromQuery, SwaggerParameter("Название")]
+            string? name = null,
+            [FromQuery, SwaggerParameter("Порядок сортировки по названию")]
+            SortOrder sortOrder = SortOrder.Ascending
+            )
         {
-            List<Groups> groups = await _context.Groups
-                .Include(g => g.TrainingDirection)
-                .Include(g => g.Faculty)
-                .Include(g => g.Curators)
-                .ToListAsync();
 
-            if (groups.Count == 0)
+            if (offset < 0)
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр offset не может быть отрицательным",
+                    Field = nameof(offset)
+                });
+            }
+
+            if (size < 0) 
+            {
+                return BadRequest(new ApiError
+                {
+                    StatusCode = "0.2.0",
+                    Title = "Неверный запрос",
+                    Message = "Параметр size не может быть отрицательным",
+                    Field = nameof(size)
+                });
+            }
+
+          
+            int totalCount = await _context.Groups.CountAsync();
+            if (totalCount == 0)
             {
                 return NotFound(new ApiError
                 {
@@ -47,7 +75,27 @@ namespace MainService.Controllers
                 });
             }
 
-            return Ok(groups.Select(g => new GroupsResponseDto(g)));
+            List<GroupsResponseDto> groups = await _context.Groups
+                .Where(g => string.IsNullOrEmpty(name) || g.Code.Contains(name))
+                .SortByKey(g => g.Code, sortOrder)
+                .TakeWithOffset(offset, size)
+                .Select(g => new GroupsResponseDto
+                    {
+                        Uuid = g.Uuid,
+                        AdmissionDate = g.AdmissionDate,
+                        Code = g.Code,
+                        TrainingDirectionUuid = g.TrainingDirection!.Uuid,
+                        FacultyUuid = g.Faculty!.Uuid,
+                        CuratorsUuids = g.Curators!.Select(c => c.Uuid).ToArray(),
+                        Version = g.Version
+                    }).ToListAsync();
+
+            return Ok(new PagedResult<GroupsResponseDto>(
+                Total: totalCount,
+                Offset: offset,
+                Size: size,
+                Items: groups
+            ));
         }
 
 

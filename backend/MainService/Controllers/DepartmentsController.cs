@@ -63,23 +63,9 @@ namespace MainService
                 });
             }
 
-            IQueryable<DepartmentsResponseDto> query = _context.Departments
-                .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
-                .SortByKey(d => d.Name, sortOrder)
-                .TakeWithOffset(offset, size)
-                .Select(d => new DepartmentsResponseDto
-                {
-                    Uuid = d.Uuid,
-                    Name = d.Name,
-                    ShortName = d.ShortName,
-                    Code = d.Code,
-                    FacultyUuid = d.Faculty!.Uuid,
-                    Version = d.Version
-                });
 
-            List<DepartmentsResponseDto> departments = await query.ToListAsync();
+
             int totalCount = await _context.Departments.CountAsync();
-
             if (totalCount == 0)
             {
                 return NotFound(new ApiError
@@ -91,16 +77,20 @@ namespace MainService
                 });
             }
 
-            if (departments.Count == 0)
-            {
-                return NotFound(new ApiError
+            List<DepartmentsResponseDto> departments = await _context.Departments
+                .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
+                .SortByKey(d => d.Name, sortOrder)
+                .TakeWithOffset(offset, size)
+                .Select(d => new DepartmentsResponseDto
                 {
-                    StatusCode = "1.0.3",
-                    Title = "Кафедры не найдены",
-                    Message = "В системе не найдено ни одной кафедры для указанных параметров запроса",
-                    Field = string.Empty
-                });
-            }
+                    Uuid = d.Uuid,
+                    Name = d.Name,
+                    ShortName = d.ShortName,
+                    Code = d.Code,
+                    FacultyUuid = d.Faculty!.Uuid,
+                    Version = d.Version
+                })
+                .ToListAsync();
 
             return Ok(new PagedResult<DepartmentsResponseDto>(
                 Total: totalCount,
