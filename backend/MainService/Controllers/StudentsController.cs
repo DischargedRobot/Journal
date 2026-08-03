@@ -74,7 +74,7 @@ namespace MainService.Controllers
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
             IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -91,7 +91,6 @@ namespace MainService.Controllers
                 });
 
             List<StudentsResponseDto> studentsDtoList = await itemsQuery.ToListAsync();
-            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -240,7 +239,7 @@ namespace MainService.Controllers
                 .Include(s => s.StudentPerson)
                 .AsNoTracking();
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
             IQueryable<StudentsResponseDto> itemsQuery = baseQuery
                 .SortByKey(s => s.StudentId, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -257,7 +256,6 @@ namespace MainService.Controllers
                 });
 
             List<StudentsResponseDto> studentsDtoList = await itemsQuery.ToListAsync();
-            int total = await totalRecord;
 
             if (studentsDtoList.Count == 0)
             {

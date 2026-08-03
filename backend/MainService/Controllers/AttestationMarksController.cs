@@ -82,15 +82,13 @@ namespace MainService.Controllers
                     .Include(am => am.AttestationType)
                     .AsNoTracking();
 
-                Task<int> totalRecord = baseQuery.CountAsync();
+                int total = await baseQuery.CountAsync();
 
-                List<AttestationMarksResponseDto> items = await baseQuery
+                List<AttestationMarksResponseDto> AttestationMarks = await baseQuery
                     .SortByKey(am => am.Mark, sortOrder)
                     .TakeWithOffset(offset, size)
                     .Select(am => new AttestationMarksResponseDto(am))
                     .ToListAsync();
-
-                int total = await totalRecord;
 
                 _logger.LogInformation("{Function}: найдено записей = {Total}", functionName, total);
 
@@ -106,7 +104,7 @@ namespace MainService.Controllers
                     });
                 }
 
-                if (items.Count == 0)
+                if (AttestationMarks.Count == 0)
                 {
                     _logger.LogInformation("{Function}: нет записей по фильтру (total={Total}, offset={Offset})", functionName, total, offset);
                     return NotFound(new ApiError
@@ -118,13 +116,13 @@ namespace MainService.Controllers
                     });
                 }
 
-                _logger.LogInformation("{Function}: возвращает {Count} элементов (offset={Offset}, total={Total})", functionName, items.Count, offset, total);
+                _logger.LogInformation("{Function}: возвращает {Count} элементов (offset={Offset}, total={Total})", functionName, AttestationMarks.Count, offset, total);
 
                 return Ok(new PagedResult<AttestationMarksResponseDto>(
                     Total: total,
                     Offset: offset,
-                    Size: items.Count,
-                    Items: items
+                    Size: AttestationMarks.Count,
+                    Items: AttestationMarks
                 ));
             }
             catch (Exception ex)

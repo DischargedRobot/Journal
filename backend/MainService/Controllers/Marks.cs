@@ -93,7 +93,7 @@ namespace MainService.Controllers
                 .AsNoTracking()
                 .Where(m => (filterValue == null || m.Value.Contains(filterValue))
                     && (markType == null || m.MarkTypeId == markType.MarkTypeId));
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<MarksResponseDto> items = await baseQuery
                 .SortByKey(m => m.Value, sortOrder)
@@ -106,7 +106,6 @@ namespace MainService.Controllers
                     Version = m.Version
                 })
                 .ToListAsync();
-            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -202,7 +201,7 @@ namespace MainService.Controllers
                 .AsNoTracking()
                 .Where(m => m.MarkTypeId == markType.MarkTypeId);
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<MarksResponseDto> items = await baseQuery
                 .SortByKey(m => m.Value, sortOrder)
@@ -215,8 +214,6 @@ namespace MainService.Controllers
                     Version = m.Version
                 })
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

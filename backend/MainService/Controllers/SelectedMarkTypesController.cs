@@ -68,7 +68,7 @@ namespace MainService.Controllers
                             && (disciplineUuid == null || s.Disciplines!.Uuid == disciplineUuid))
                 .AsNoTracking();
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<SelectedMarkTypesResponseDto> items = await baseQuery
                 .SortByKey(s => s.LessonTypeId, sortOrder)
@@ -81,8 +81,6 @@ namespace MainService.Controllers
                     Version = s.Version
                 })
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

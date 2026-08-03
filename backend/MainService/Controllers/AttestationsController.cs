@@ -212,7 +212,7 @@ namespace MainService.Controllers
                     baseQuery = baseQuery.Where(x => x.AttestationMark!.AttestationMarkId == attMark.AttestationMarkId);
                 }
 
-                Task<int> totalRecord = baseQuery.CountAsync();
+                int total = await baseQuery.CountAsync();
 
                 List<AttestationsResponseDto> items = await baseQuery
                     .TakeWithOffset(offset, size)
@@ -227,8 +227,6 @@ namespace MainService.Controllers
                         Version = a.Version
                     })
                     .ToListAsync();
-
-                int total = await totalRecord;
 
                 _logger.LogInformation("{Function}: найдено всего={Total}, возвращается={Count}", functionName, total, items.Count);
 

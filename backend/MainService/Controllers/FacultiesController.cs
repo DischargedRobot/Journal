@@ -11,7 +11,7 @@ using MainService.Enums;
 namespace MainService.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("main-service/v1/[controller]")]
     public class FacultiesController : ControllerBase
     {
 
@@ -74,11 +74,8 @@ namespace MainService.Controllers
                 })
                 .AsNoTracking();
 
-            Task<int> totalRecord = _context.Faculties.CountAsync();
-            Task<List<FacultiesResponseDto>> listTask = query.ToListAsync();
-
-            List<FacultiesResponseDto> faculties = await listTask;
-            int totalCount = await totalRecord;
+            List<FacultiesResponseDto> faculties = await query.ToListAsync();
+            int totalCount = await _context.Faculties.CountAsync();
 
             if (totalCount == 0)
             {

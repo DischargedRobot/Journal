@@ -68,8 +68,8 @@ namespace MainService.Controllers
                     || p.UniversityEmployer!.FirstName.Contains(filterFullName)
                     || p.UniversityEmployer.LastName.Contains(filterFullName));
 
-            Task<int> totalRecord = baseQuery.CountAsync();
-            Task<List<ProfessorsResponseDto>> listTask = baseQuery
+            int total = await baseQuery.CountAsync();
+            List<ProfessorsResponseDto> items = await baseQuery
                 .SortByKey(p => p.UniversityEmployer!.LastName, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(p => new ProfessorsResponseDto
@@ -87,9 +87,6 @@ namespace MainService.Controllers
                     Version = p.Version
                 })
                 .ToListAsync();
-
-            List<ProfessorsResponseDto> items = await listTask;
-            int total = await totalRecord;
 
             if (total == 0)
             {

@@ -130,14 +130,12 @@ namespace MainService.Controllers
                 baseQuery = baseQuery.Where(x => x.Student!.StudentId == student.StudentId);
             }
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<LessonMarksResponseDto> items = await baseQuery
                 .TakeWithOffset(offset, size)
                 .Select(lm => new LessonMarksResponseDto(lm))
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

@@ -113,7 +113,7 @@ namespace MainService.Controllers
                 .AsNoTracking();
             DateTime effectiveStart = startDate ?? DateTime.UtcNow;
             baseQuery = baseQuery.Where(lp => lp.Lesson!.StartDate >= effectiveStart);
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<LessonPresencesResponseDto> items = await baseQuery
                 .SortByKey(lp => lp.Lesson!.StartDate, sortOrder)
@@ -128,7 +128,6 @@ namespace MainService.Controllers
                     Version = lp.Version
                 })
                 .ToListAsync();
-            int total = await totalRecord;
 
             if (total == 0)
             {
@@ -274,7 +273,7 @@ namespace MainService.Controllers
             DateTime start = startDate ?? DateTime.UtcNow;
             baseQuery = baseQuery.Where(lp => lp.Lesson!.StartDate >= start);
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<LessonPresencesResponseDto> items = await baseQuery
                 .SortByKey(lp => lp.Lesson!.StartDate, sortOrder)
@@ -289,8 +288,6 @@ namespace MainService.Controllers
                     Version = lp.Version
                 })
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

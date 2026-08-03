@@ -65,15 +65,13 @@ namespace MainService.Controllers
                 .Where(at => filterName == null || at.Name.Contains(filterName))
                 .AsNoTracking();
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<AttestationTypesResponseDto> items = await baseQuery
                 .SortByKey(at => at.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(at => new AttestationTypesResponseDto(at))
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

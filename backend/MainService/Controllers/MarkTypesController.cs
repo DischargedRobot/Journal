@@ -62,14 +62,13 @@ namespace MainService.Controllers
             IQueryable<MarkTypes> baseQuery = _context.MarkTypes
                 .Where(m => filterName == null || m.Name.Contains(filterName))
                 .AsNoTracking();
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<MarkTypesResponseDto> items = await baseQuery
                 .SortByKey(m => m.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(m => new MarkTypesResponseDto(m))
                 .ToListAsync();
-            int total = await totalRecord;
 
             if (total == 0)
             {

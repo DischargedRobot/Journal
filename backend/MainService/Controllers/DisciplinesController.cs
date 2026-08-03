@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace MainService.Controllers
 {
     [ApiController]
-    [Route("api/v1/")]
+    [Route("main-service/v1/[controller]")]
     public class DisciplinesController : ControllerBase
     {
         private readonly MainServiceContext _context;
@@ -83,11 +83,8 @@ namespace MainService.Controllers
                     DisciplineType = d.DisciplinesTypes!.Uuid
                 });
 
-            Task<int> totalRecord = _context.Disciplines.CountAsync();
-            Task<List<DisciplinesResponseDto>> listTask = query.ToListAsync();
-
-            List<DisciplinesResponseDto> disciplinesList = await listTask;
-            int totalCount = await totalRecord;
+            List<DisciplinesResponseDto> disciplinesList = await query.ToListAsync();
+            int totalCount = await _context.Disciplines.CountAsync();
 
             if (totalCount == 0)
             {
@@ -249,7 +246,7 @@ namespace MainService.Controllers
                 .Include(l => l.Discipline)
                 .Where(l => l.Discipline!.Uuid == uuid);
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
             List<LessonsResponseDto> items = await baseQuery
                 .SortByKey(l => l.StartDate, sortOrder)
                 .TakeWithOffset(offset, size)
@@ -266,7 +263,6 @@ namespace MainService.Controllers
                 })
                 .ToListAsync();
 
-            int total = await totalRecord;
             if (total == 0)
             {
                 return NotFound(new ApiError
@@ -360,8 +356,8 @@ namespace MainService.Controllers
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .Where(d => isArchived == null || d.IsArchived == isArchived);
 
-            Task<int> totalRecord = baseQuery.CountAsync();
-            Task<List<DisciplinesResponseDto>> listTask = baseQuery
+            int totalCount = await baseQuery.CountAsync();
+            List<DisciplinesResponseDto> disciplines = await baseQuery
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(d => new DisciplinesResponseDto
@@ -379,9 +375,6 @@ namespace MainService.Controllers
                     DisciplineType = d.DisciplinesTypes!.Uuid
                 })
                 .ToListAsync();
-
-            List<DisciplinesResponseDto> disciplines = await listTask;
-            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {
@@ -476,8 +469,8 @@ namespace MainService.Controllers
                 .Where(d => string.IsNullOrEmpty(name) || d.Name.Contains(name))
                 .Where(d => isArchived == null || d.IsArchived == isArchived);
 
-            Task<int> totalRecord = baseQuery.CountAsync();
-            Task<List<DisciplinesResponseDto>> listTask = baseQuery
+            int totalCount = await baseQuery.CountAsync();
+            List<DisciplinesResponseDto> disciplines = await baseQuery
                 .SortByKey(d => d.Name, sortOrder)
                 .TakeWithOffset(offset, size)
                 .Select(d => new DisciplinesResponseDto
@@ -495,9 +488,6 @@ namespace MainService.Controllers
                     DisciplineType = d.DisciplinesTypes!.Uuid
                 })
                 .ToListAsync();
-
-            List<DisciplinesResponseDto> disciplines = await listTask;
-            int totalCount = await totalRecord;
 
             if (totalCount == 0)
             {

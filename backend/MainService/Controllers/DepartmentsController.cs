@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Filters;
 namespace MainService
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("main-service/v1/[controller]")]
     public class DepartmentsController : ControllerBase
     {
         private readonly MainServiceContext _context;
@@ -77,11 +77,8 @@ namespace MainService
                     Version = d.Version
                 });
 
-            Task<int> totalRecord = _context.Departments.CountAsync();
-            Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
-
-            List<DepartmentsResponseDto> departments = await departmentsTask;
-            int totalCount = await totalRecord;
+            List<DepartmentsResponseDto> departments = await query.ToListAsync();
+            int totalCount = await _context.Departments.CountAsync();
 
             if (totalCount == 0)
             {
@@ -255,11 +252,8 @@ namespace MainService
                     Version = d.Version
                 });
 
-            Task<int> totalRecord = _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
-            Task<List<DepartmentsResponseDto>> departmentsTask = query.ToListAsync();
-
-            List<DepartmentsResponseDto> departments = await departmentsTask;
-            int totalCount = await totalRecord;
+            List<DepartmentsResponseDto> departments = await query.ToListAsync();
+            int totalCount = await _context.Departments.CountAsync(d => d.FacultyId == faculty.FacultyId);
 
             if (totalCount == 0)
             {

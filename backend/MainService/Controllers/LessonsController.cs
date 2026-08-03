@@ -132,7 +132,7 @@ namespace MainService.Controllers
                 baseQuery = baseQuery.Where(l => l.StartDate <= endDate.Value);
             }
 
-            Task<int> totalRecord = baseQuery.CountAsync();
+            int total = await baseQuery.CountAsync();
 
             List<LessonsResponseDto> items = await baseQuery
                 .SortByKey(l => l.StartDate, sortOrder)
@@ -149,8 +149,6 @@ namespace MainService.Controllers
                     Version = l.Version
                 })
                 .ToListAsync();
-
-            int total = await totalRecord;
 
             if (total == 0)
             {

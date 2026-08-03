@@ -15,6 +15,31 @@ public class TestGenerationController : ControllerBase
         _context = context;
     }
 
+    [HttpPost("trainingDirections")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Тестовые данные направления подготовки сгенерированы успешно")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос")]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера")]
+    public async Task<IActionResult> GenerateTrainingDirections()
+    {
+        try
+        {
+            TrainingDirections[] newTrainingDirection = Enumerable.Range(1, 3).Select(i => new TrainingDirections()
+            {
+                Uuid = Guid.NewGuid(),
+                Name = $"Направление подготовки {i}",
+                Code = $"{1000 + i}"
+            }).ToArray();
+            _context.TrainingDirections.AddRange(newTrainingDirection);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Тестовые данные направления подготовки сгенерированы успешно" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpPost("groups")]
     [SwaggerResponse(StatusCodes.Status200OK, "Данные для теста сгенерированы успешно")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос")]
@@ -23,14 +48,18 @@ public class TestGenerationController : ControllerBase
     {
         try
         {
+            Faculties faculty = _context.Faculties.First(f => f.FacultyId == 1);
+            TrainingDirections trainingDirection = _context.TrainingDirections.First(t => t.TrainingDirectionId == 1);
+
             Groups[] newGroup = Enumerable.Range(1, 3).Select(i => new Groups()
             {
                 Uuid = Guid.NewGuid(),
                 Code = $"{1000 + i}",
                 AdmissionDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                TrainingDirectionId = 1,
-                FacultyId = 1,
-                Faculty = _context.Faculties.First(f => f.FacultyId == 1)
+                FacultyId = faculty.FacultyId,
+                Faculty = faculty,
+                TrainingDirectionId = trainingDirection.TrainingDirectionId,
+                TrainingDirection = trainingDirection,
             }).ToArray();
             _context.Groups.AddRange(newGroup);
             await _context.SaveChangesAsync();
