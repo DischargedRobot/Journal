@@ -25,21 +25,10 @@ import {
 	InputLabel,
 	Tooltip,
 } from "@mui/material"
-import { useEffect, useState } from "react"
-import { useForm, useWatch, Controller, UseFormTrigger } from "react-hook-form"
+import { useState } from "react"
+import { useForm, useWatch, Controller } from "react-hook-form"
+import { FormValues, LOGIN_FIELDS, PERSONAL_FIELDS } from "./fields"
 
-interface FormValues {
-	login: string
-	password: string
-	passwordConfirm?: string
-	firstName: string
-	lastName: string
-	patronymic?: string | null
-	email?: string
-	personRole: "STUDENT" | "TEACHER"
-	department?: string
-	group?: string
-}
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -48,20 +37,9 @@ interface Props {
 	departments: TDepartmentResponseDto[]
 }
 
-const PERSONAL_FIELDS: (keyof FormValues)[] = [
-	"firstName",
-	"lastName",
-	"patronymic",
-	"personRole",
-	"group",
-	"department",
-]
+const REQUIRED_PERSONAL_FIELDS = PERSONAL_FIELDS.filter(value => value != "patronymic")
 
-const LOGIN_FIELDS: (keyof FormValues)[] = [
-	"login",
-	"password",
-	"passwordConfirm",
-]
+type FulfieldValues = {[K in keyof Required<FormValues>]: boolean}
 
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration, departments } = props
@@ -79,11 +57,13 @@ const Registration = (props: Props) => {
 			department: "",
 		  },
 	})
+
 	const password = useWatch({
 		control,
 		name: "password",
 		defaultValue: "",
 	})
+
 	const role = useWatch({
 		control,
 		name: "personRole",
@@ -113,6 +93,31 @@ const Registration = (props: Props) => {
 			handlerError(error)
 		}
 	})
+
+	
+	// const watchedValues = useWatch({ control }) as FormValues | undefined;
+	// const isAllFilled = useMemo(() => {
+	// 	if (!watchedValues) return false;
+	// 	console.log("21")
+	// 	// Проверяем, что все обязательные поля не пустые
+	// 	const allKeys = [...LOGIN_FIELDS, ...REQUIRED_PERSONAL_FIELDS] as const;
+	// 	return allKeys.every((key) => {
+
+	// 		const value = watchedValues[key];
+
+	// 		if (value === null || value === undefined) {
+	// 			return false
+	// 		};
+	// 		if (typeof value === "string") {
+	// 			if (value == "STUDENT") {
+	// 				return watchedValues["group"]?.trim().length
+	// 			} else if (value == "TEACHER") {
+	// 				return watchedValues["department"]?.trim().length
+	// 			}
+	// 			return value.trim().length > 0
+	// 		};
+	// 	});
+	// }, [watchedValues]);
 
 	const [isPersonalStepCompleted, setIsPersonalStepCompleted] =
 		useState(false)
@@ -265,10 +270,11 @@ const Registration = (props: Props) => {
 
 								<TextField
 									variant="outlined"
-									label="Email"
+									label="Email*"
 									size="small"
 									type="email"
 									{...register("email", {
+										required: "Введите email",
 										pattern: {
 											value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
 											message: "Неверный email",
@@ -517,7 +523,7 @@ const Registration = (props: Props) => {
 											variant="contained"
 											color="primary"
 											type="submit"
-											disabled={true}
+											disabled={false}
 										>
 											Зарегистрироваться
 										</Button>

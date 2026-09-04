@@ -1,0 +1,46 @@
+export interface FormValues extends PERSONAL_FORM_FIELDS, LOGIN_FORM_FIELDS{}
+
+export interface PERSONAL_FORM_FIELDS {
+	firstName: string
+	lastName: string
+	patronymic?: string | null
+	email: string
+	personRole: "STUDENT" | "TEACHER"
+	department?: string
+	group?: string
+}
+
+export const REQUIRED_FIELDS: (keyof FormValues)[] = [
+	'firstName',
+	'lastName',
+	'email',
+	'personRole',
+	'login',
+	'password',
+	'passwordConfirm',
+  ];
+  
+
+export const PERSONAL_FIELDS: (keyof PERSONAL_FORM_FIELDS)	[] = [
+	"firstName",
+	"lastName",
+	"patronymic",
+	"personRole",
+	"group",
+	"department",
+	"email"
+]
+
+export interface LOGIN_FORM_FIELDS {
+	login: string
+	password: string
+	passwordConfirm: string
+}
+
+export const LOGIN_FIELDS: (keyof LOGIN_FORM_FIELDS
+	)[] = [
+	"login",
+	"password",
+	"passwordConfirm",
+]
+
