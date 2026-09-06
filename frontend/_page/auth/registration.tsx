@@ -28,7 +28,7 @@ import {
 import { useState } from "react"
 import { useForm, useWatch, Controller } from "react-hook-form"
 import { FormValues, LOGIN_FIELDS, PERSONAL_FIELDS } from "./fields"
-
+import FormTextField from "./FormTextField"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -37,9 +37,11 @@ interface Props {
 	departments: TDepartmentResponseDto[]
 }
 
-const REQUIRED_PERSONAL_FIELDS = PERSONAL_FIELDS.filter(value => value != "patronymic")
+const REQUIRED_PERSONAL_FIELDS = PERSONAL_FIELDS.filter(
+	(value) => value != "patronymic",
+)
 
-type FulfieldValues = {[K in keyof Required<FormValues>]: boolean}
+type FulfieldValues = { [K in keyof Required<FormValues>]: boolean }
 
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration, departments } = props
@@ -55,7 +57,7 @@ const Registration = (props: Props) => {
 			personRole: "STUDENT",
 			group: "",
 			department: "",
-		  },
+		},
 	})
 
 	const password = useWatch({
@@ -94,7 +96,6 @@ const Registration = (props: Props) => {
 		}
 	})
 
-	
 	// const watchedValues = useWatch({ control }) as FormValues | undefined;
 	// const isAllFilled = useMemo(() => {
 	// 	if (!watchedValues) return false;
@@ -228,60 +229,29 @@ const Registration = (props: Props) => {
 								className="flex flex-col"
 								onSubmit={(event) => event.preventDefault()}
 							>
-								<TextField
-									variant="outlined"
-									label="Имя*"
+								<FormTextField
+									label="Имя"
 									size="small"
-									{...register("firstName", {
-										required: {
-											value: true,
-											message:
-												"Поле обязательно для заполнения",
-										},
-									})}
-									error={!!errors.firstName}
-									helperText={
-										errors.firstName?.message ?? " "
-									}
+									fieldName="firstName"
 								/>
 
-								<TextField
-									variant="outlined"
-									label="Фамилия*"
+								<FormTextField
+									label="Фамилия"
 									size="small"
-									{...register("lastName", {
-										required: {
-											value: true,
-											message:
-												"Поле обязательно для заполнения",
-										},
-									})}
-									error={!!errors.lastName}
-									helperText={errors.lastName?.message ?? " "}
+									fieldName="lastName"
 								/>
 
-								<TextField
-									variant="outlined"
+								<FormTextField
 									label="Отчество"
 									size="small"
-									{...register("patronymic")}
-									helperText={" "}
+									fieldName="patronymic"
 								/>
 
-								<TextField
-									variant="outlined"
+								<FormTextField
 									label="Email*"
 									size="small"
 									type="email"
-									{...register("email", {
-										required: "Введите email",
-										pattern: {
-											value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-											message: "Неверный email",
-										},
-									})}
-									error={!!errors.email}
-									helperText={errors.email?.message ?? " "}
+									fieldName="email"
 								/>
 
 								<FormControl
@@ -316,74 +286,99 @@ const Registration = (props: Props) => {
 								</FormControl>
 
 								{role === "STUDENT" && (
-									<Controller 
-									name="group"
-									control={control}
-									rules={{ required: role === "STUDENT" ? "Укажите группу" : false }}
-									render={({ field }) => (<TextField
-										{...field}
-										select={groups.length > 0}
-										variant="outlined"
-										label={
-											groups.length > 0
-												? "Группа*"
-												: "Групп нет"
-										}
-										size="small"
-										disabled={groups.length === 0}
-										error={!!errors.group}
-										helperText={
-											errors.group?.message ?? " "
-										}
-									>
-										{groups.length > 0
-											? groups.map((group) => (
-													<MenuItem
-														key={group.uuid}
-														value={group.uuid}
-													>
-														{group.code}
-													</MenuItem>
-												))
-											: null}
-									</TextField>
-									)}
+									<Controller
+										name="group"
+										control={control}
+										rules={{
+											required:
+												role === "STUDENT"
+													? "Укажите группу"
+													: false,
+										}}
+										render={({ field }) => (
+											<TextField
+												{...field}
+												select={groups.length > 0}
+												variant="outlined"
+												label={
+													groups.length > 0
+														? "Группа*"
+														: "Групп нет"
+												}
+												size="small"
+												disabled={groups.length === 0}
+												error={!!errors.group}
+												helperText={
+													errors.group?.message ?? " "
+												}
+											>
+												{groups.length > 0
+													? groups.map((group) => (
+															<MenuItem
+																key={group.uuid}
+																value={
+																	group.uuid
+																}
+															>
+																{group.code}
+															</MenuItem>
+														))
+													: null}
+											</TextField>
+										)}
 									/>
 								)}
 
 								{role === "TEACHER" && (
-									<Controller 
-									name="department"
-									control={control}
-									 rules={{ required: role === "TEACHER" ? "Укажите кафедру" : false }}
-									render={({ field }) => (<TextField
-										{...field}
-										select={departments.length > 0}
-										variant="outlined"
-										label={
-											departments.length > 0
-												? "Кафедра*"
-												: "Кафедр нет"
-										}
-										size="small"
-										error={!!errors.department}
-										disabled={departments.length === 0}
-										helperText={
-											errors.department?.message ?? " "
-										}
-									>
-										{departments.length > 0
-											? departments.map((department) => (
-													<MenuItem
-														key={department.uuid}
-														value={department.uuid}
-													>
-														{department.name}
-													</MenuItem>
-												))
-											: null}
-									</TextField>
-									)}
+									<Controller
+										name="department"
+										control={control}
+										rules={{
+											required:
+												role === "TEACHER"
+													? "Укажите кафедру"
+													: false,
+										}}
+										render={({ field }) => (
+											<TextField
+												{...field}
+												select={departments.length > 0}
+												variant="outlined"
+												label={
+													departments.length > 0
+														? "Кафедра*"
+														: "Кафедр нет"
+												}
+												size="small"
+												error={!!errors.department}
+												disabled={
+													departments.length === 0
+												}
+												helperText={
+													errors.department
+														?.message ?? " "
+												}
+											>
+												{departments.length > 0
+													? departments.map(
+															(department) => (
+																<MenuItem
+																	key={
+																		department.uuid
+																	}
+																	value={
+																		department.uuid
+																	}
+																>
+																	{
+																		department.name
+																	}
+																</MenuItem>
+															),
+														)
+													: null}
+											</TextField>
+										)}
 									/>
 								)}
 
@@ -437,19 +432,10 @@ const Registration = (props: Props) => {
 						</Wizard.StepHeader>
 						<Wizard.StepContent>
 							<form onSubmit={onSubmit} className="flex flex-col">
-								<TextField
-									variant="outlined"
-									label="Логин*"
+								<FormTextField
+									label="Логин"
 									size="small"
-									{...register("login", {
-										required: {
-											value: true,
-											message:
-												"Поле обязательно для заполнения",
-										},
-									})}
-									error={!!errors.login}
-									helperText={errors.login?.message ?? " "}
+									fieldName="login"
 								/>
 
 								<FormControl error={!!errors.password}>

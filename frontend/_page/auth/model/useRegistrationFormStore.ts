@@ -5,7 +5,6 @@ import {
 	PERSONAL_FIELDS,
 	REQUIRED_FIELDS,
 } from "../fields"
-import { error } from "console"
 
 type TFormField = {
 	value: string
@@ -13,8 +12,8 @@ type TFormField = {
 	required: boolean
 }
 
-type TFormValues = {
-	[name in keyof FormValues]: TFormField
+export type TFormValues = {
+	[name in keyof Required<FormValues>]: TFormField
 }
 
 interface IFormStore {
