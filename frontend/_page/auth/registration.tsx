@@ -256,7 +256,10 @@ const Registration = (props: Props) => {
 									fieldName="email"
 								/>
 
-								<FormRadioGroup />
+								<FormRadioGroup
+									groups={groups}
+									departments={departments}
+								/>
 								<Tooltip title={personalDataButtonTooltip}>
 									<span
 										className={
