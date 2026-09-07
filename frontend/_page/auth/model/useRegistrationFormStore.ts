@@ -48,6 +48,7 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 			personRole: { ...initialFields.personRole, value: "STUDENT" },
 		},
 		updateField: (fieldName, fieldValue) => {
+			console.log("updateField START")
 			const error = get().isValidatedField(fieldName, fieldValue).error
 
 			set((state) => ({
@@ -60,6 +61,7 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 					},
 				},
 			}))
+			console.log("updateField END")
 		},
 
 		isValidatedField(fieldName, fieldValue) {

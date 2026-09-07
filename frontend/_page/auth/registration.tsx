@@ -27,10 +27,16 @@ import {
 } from "@mui/material"
 import { useState } from "react"
 import { useForm, useWatch, Controller } from "react-hook-form"
-import { FormValues, LOGIN_FIELDS, PERSONAL_FIELDS } from "./fields"
+import {
+	FormValues,
+	LOGIN_FIELDS,
+	PERSONAL_FIELDS,
+	REQUIRED_FIELDS,
+} from "./fields"
 import FormTextField from "./RegistrationTextField"
 import FormRadioGroup from "./RegistrationRadioGroup"
 import RegistrationButton from "./RegistrationButton"
+import useRegistrationFormStore from "./model/useRegistrationFormStore"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -98,6 +104,7 @@ const Registration = (props: Props) => {
 		}
 	})
 
+	console.log("reg")
 	// const watchedValues = useWatch({ control }) as FormValues | undefined;
 	// const isAllFilled = useMemo(() => {
 	// 	if (!watchedValues) return false;
@@ -122,9 +129,42 @@ const Registration = (props: Props) => {
 	// 	});
 	// }, [watchedValues]);
 
-	const [isPersonalStepCompleted, setIsPersonalStepCompleted] =
-		useState(false)
 	const [isLoginStepCompleted, setIsLoginStepCompleted] = useState(false)
+
+	const isPersonalStepCompleted = useRegistrationFormStore((state) => {
+		return PERSONAL_FIELDS.filter((item) =>
+			REQUIRED_FIELDS.includes(item),
+		).every((fieldName) => {
+			const field = state.formValues[fieldName]
+			if (fieldName == "personRole") {
+				const personRole = state.formValues.personRole.value
+				if (personRole === "STUDENT") {
+					const group = state.formValues.group
+					console.log(group.value, personRole)
+					return (
+						groups.map((g) => g.code).includes(group.value) &&
+						group.error.length == 0
+					)
+				} else {
+					const department = state.formValues.department
+					console.log(department.value)
+
+					return (
+						departments
+							.map((d) => d.code)
+							.includes(department.value) &&
+						department.error.length == 0
+					)
+				}
+			}
+
+			return (
+				((field.value.trim() !== "" && field.required) ||
+					!field.required) &&
+				field.error === ""
+			)
+		})
+	})
 
 	const [currentStep, setCurrentStep] = useState<number | string>(1)
 
@@ -273,21 +313,8 @@ const Registration = (props: Props) => {
 											variant="contained"
 											color="primary"
 											type="submit"
-											onClick={async () => {
-												const isValid =
-													await trigger(
-														PERSONAL_FIELDS,
-													)
-												if (isValid) {
-													setIsPersonalStepCompleted(
-														true,
-													)
-													setCurrentStep(2)
-												}
-											}}
-											disabled={
-												!!personalDataButtonTooltip
-											}
+											onClick={() => setCurrentStep(2)}
+											disabled={!isPersonalStepCompleted}
 										>
 											Далее
 										</Button>
@@ -306,7 +333,7 @@ const Registration = (props: Props) => {
 									: null
 							}
 						>
-							Данные для входа
+							Учётные данные
 						</Wizard.StepHeader>
 						<Wizard.StepContent>
 							<form onSubmit={onSubmit} className="flex flex-col">

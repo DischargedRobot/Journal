@@ -3,13 +3,11 @@ import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
 import { memo, useState } from "react"
 import { FormValues } from "./fields"
-import FormTextField from "./RegistrationTextField"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
 import FormLabel from "@mui/material/FormLabel"
 import FormControl from "@mui/material/FormControl"
 import FormHelperText from "@mui/material/FormHelperText"
 import TextField from "@mui/material/TextField"
-import MenuItem from "@mui/material/MenuItem"
 import { TGroupResponseDto } from "@/shared/api/group"
 import { TDepartmentResponseDto } from "@/shared/api/department"
 import Autocomplete from "@mui/material/Autocomplete"
@@ -22,14 +20,14 @@ interface Props {
 const RegistrationRadioGroup = (props: Props) => {
 	const { groups, departments } = props
 
-	const [role, setRole] = useState<FormValues["personRole"]>("STUDENT")
+	console.log("RegistrationRadioGroup render")
+
 	const selectedGroup = useRegistrationFormStore(
 		(state) => state.formValues.group,
 	)
 	const selectedDepartment = useRegistrationFormStore(
 		(state) => state.formValues.department,
 	)
-
 	const personRole = useRegistrationFormStore(
 		(state) => state.formValues.personRole,
 	)
@@ -42,18 +40,22 @@ const RegistrationRadioGroup = (props: Props) => {
 				error={personRole.error.length > 0}
 			>
 				<FormLabel component="legend">Роль</FormLabel>
-				<RadioGroup row>
+				<RadioGroup
+					row
+					value={personRole.value}
+					onChange={(_, value) => {
+						updateField("personRole", value)
+					}}
+				>
 					<FormControlLabel
 						value="STUDENT"
 						control={<Radio />}
 						label="Студент"
-						onClick={() => setRole("STUDENT")}
 					/>
 					<FormControlLabel
 						value="TEACHER"
 						control={<Radio />}
 						label="Преподаватель"
-						onClick={() => setRole("TEACHER")}
 					/>
 				</RadioGroup>
 				<FormHelperText>
@@ -61,7 +63,7 @@ const RegistrationRadioGroup = (props: Props) => {
 				</FormHelperText>
 			</FormControl>
 
-			{role === "STUDENT" && (
+			{personRole.value === "STUDENT" && (
 				<Autocomplete
 					freeSolo
 					options={groups
@@ -101,7 +103,7 @@ const RegistrationRadioGroup = (props: Props) => {
 				/>
 			)}
 
-			{role === "TEACHER" && (
+			{personRole.value === "TEACHER" && (
 				<Autocomplete
 					freeSolo
 					options={departments
@@ -113,9 +115,12 @@ const RegistrationRadioGroup = (props: Props) => {
 						)}
 					value={selectedDepartment.value}
 					onChange={(_, newValue) => {
+						console.log(newValue, "sadas")
 						updateField("department", newValue ?? "")
 					}}
 					onInputChange={(_, newInputValue) => {
+						console.log(newInputValue, "sadas2")
+
 						updateField("department", newInputValue)
 					}}
 					disabled={departments.length === 0}
