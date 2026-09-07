@@ -29,6 +29,7 @@ import { useState } from "react"
 import { useForm, useWatch, Controller } from "react-hook-form"
 import { FormValues, LOGIN_FIELDS, PERSONAL_FIELDS } from "./fields"
 import FormTextField from "./FormTextField"
+import FormRadioGroup from "./FormRadioGroup"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -254,134 +255,7 @@ const Registration = (props: Props) => {
 									fieldName="email"
 								/>
 
-								<FormControl
-									component="fieldset"
-									error={!!errors.personRole}
-								>
-									<FormLabel component="legend">
-										Роль
-									</FormLabel>
-									<Controller
-										name="personRole"
-										control={control}
-										rules={{ required: "Выберите роль" }}
-										render={({ field }) => (
-											<RadioGroup row {...field}>
-												<FormControlLabel
-													value="STUDENT"
-													control={<Radio />}
-													label="Студент"
-												/>
-												<FormControlLabel
-													value="TEACHER"
-													control={<Radio />}
-													label="Преподаватель"
-												/>
-											</RadioGroup>
-										)}
-									/>
-									<FormHelperText>
-										{errors.personRole?.message ?? " "}
-									</FormHelperText>
-								</FormControl>
-
-								{role === "STUDENT" && (
-									<Controller
-										name="group"
-										control={control}
-										rules={{
-											required:
-												role === "STUDENT"
-													? "Укажите группу"
-													: false,
-										}}
-										render={({ field }) => (
-											<TextField
-												{...field}
-												select={groups.length > 0}
-												variant="outlined"
-												label={
-													groups.length > 0
-														? "Группа*"
-														: "Групп нет"
-												}
-												size="small"
-												disabled={groups.length === 0}
-												error={!!errors.group}
-												helperText={
-													errors.group?.message ?? " "
-												}
-											>
-												{groups.length > 0
-													? groups.map((group) => (
-															<MenuItem
-																key={group.uuid}
-																value={
-																	group.uuid
-																}
-															>
-																{group.code}
-															</MenuItem>
-														))
-													: null}
-											</TextField>
-										)}
-									/>
-								)}
-
-								{role === "TEACHER" && (
-									<Controller
-										name="department"
-										control={control}
-										rules={{
-											required:
-												role === "TEACHER"
-													? "Укажите кафедру"
-													: false,
-										}}
-										render={({ field }) => (
-											<TextField
-												{...field}
-												select={departments.length > 0}
-												variant="outlined"
-												label={
-													departments.length > 0
-														? "Кафедра*"
-														: "Кафедр нет"
-												}
-												size="small"
-												error={!!errors.department}
-												disabled={
-													departments.length === 0
-												}
-												helperText={
-													errors.department
-														?.message ?? " "
-												}
-											>
-												{departments.length > 0
-													? departments.map(
-															(department) => (
-																<MenuItem
-																	key={
-																		department.uuid
-																	}
-																	value={
-																		department.uuid
-																	}
-																>
-																	{
-																		department.name
-																	}
-																</MenuItem>
-															),
-														)
-													: null}
-											</TextField>
-										)}
-									/>
-								)}
-
+								<FormRadioGroup />
 								<Tooltip title={personalDataButtonTooltip}>
 									<span
 										className={
@@ -438,7 +312,17 @@ const Registration = (props: Props) => {
 									fieldName="login"
 								/>
 
-								<FormControl error={!!errors.password}>
+								<FormTextField
+									label="Пароль"
+									size="small"
+									type="password"
+									fieldName="password"
+									helperText={
+										<PasswordStregth password={password} />
+									}
+								/>
+
+								{/* <FormControl error={!!errors.password}>
 									<InputLabel htmlFor="password" size="small">
 										Пароль*
 									</InputLabel>
@@ -467,9 +351,14 @@ const Registration = (props: Props) => {
 											/>
 										)}
 									</FormHelperText>
-								</FormControl>
-
-								<FormControl error={!!errors.passwordConfirm}>
+								</FormControl> */}
+								<FormTextField
+									label="Повторите пароль"
+									size="small"
+									type="password"
+									fieldName="passwordConfirm"
+								/>
+								{/* <FormControl error={!!errors.passwordConfirm}>
 									<InputLabel
 										htmlFor="passwordConfirm"
 										size="small"
@@ -500,7 +389,7 @@ const Registration = (props: Props) => {
 											? errors.passwordConfirm.message
 											: " "}
 									</FormHelperText>
-								</FormControl>
+								</FormControl> */}
 
 								<Tooltip title={"Регистрация не доступна"}>
 									<span>

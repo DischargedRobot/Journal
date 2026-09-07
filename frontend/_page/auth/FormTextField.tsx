@@ -1,15 +1,16 @@
 import TextField from "@mui/material/TextField"
-import { HTMLInputTypeAttribute, memo } from "react"
+import { HTMLInputTypeAttribute, memo, ReactNode } from "react"
 import useRegistrationFormStore, {
 	TFormValues,
 } from "./model/useRegistrationFormStore"
+import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 
 interface Props {
 	label: string
 	size: "small" | "medium"
 	type?: HTMLInputTypeAttribute
 	errorMessage?: string
-	helperText?: string
+	helperText?: ReactNode
 	required?: boolean
 	fieldName: keyof TFormValues
 }
@@ -23,8 +24,11 @@ const FormTextField = (props: Props) => {
 	)
 	const updateField = useRegistrationFormStore((state) => state.updateField)
 
-	const visibleHelperText =
+	let visibleHelperText: ReactNode =
 		(helperText ?? field?.error.length > 0) ? field.error : " "
+	if (fieldName == "password") {
+		visibleHelperText = <PasswordStregth password={field.value} />
+	}
 	console.log(visibleHelperText)
 
 	return (
