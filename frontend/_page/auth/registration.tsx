@@ -28,8 +28,9 @@ import {
 import { useState } from "react"
 import { useForm, useWatch, Controller } from "react-hook-form"
 import { FormValues, LOGIN_FIELDS, PERSONAL_FIELDS } from "./fields"
-import FormTextField from "./FormTextField"
-import FormRadioGroup from "./FormRadioGroup"
+import FormTextField from "./RegistrationTextField"
+import FormRadioGroup from "./RegistrationRadioGroup"
+import RegistrationButton from "./RegistrationButton"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -322,86 +323,16 @@ const Registration = (props: Props) => {
 									}
 								/>
 
-								{/* <FormControl error={!!errors.password}>
-									<InputLabel htmlFor="password" size="small">
-										Пароль*
-									</InputLabel>
-									<OutlinedInput
-										label="Пароль*"
-										id="password"
-										size="small"
-										type="password"
-										{...register("password", {
-											required: {
-												value: true,
-												message:
-													"Поле обязательно для заполнения",
-											},
-										})}
-										endAdornment={
-											<InputAdornment position="end"></InputAdornment>
-										}
-									/>
-									<FormHelperText className=" mt-1 mb-4">
-										{errors.password ? (
-											errors.password.message
-										) : (
-											<PasswordStregth
-												password={password}
-											/>
-										)}
-									</FormHelperText>
-								</FormControl> */}
 								<FormTextField
 									label="Повторите пароль"
 									size="small"
 									type="password"
 									fieldName="passwordConfirm"
 								/>
-								{/* <FormControl error={!!errors.passwordConfirm}>
-									<InputLabel
-										htmlFor="passwordConfirm"
-										size="small"
-									>
-										Повторите пароль*
-									</InputLabel>
-									<OutlinedInput
-										id="passwordConfirm"
-										label="Повторите пароль*"
-										size="small"
-										type="password"
-										{...register("passwordConfirm", {
-											required: {
-												value: true,
-												message:
-													"Поле обязательно для заполнения",
-											},
-											validate: (value) =>
-												value === password ||
-												"Пароли не совпадают",
-										})}
-										endAdornment={
-											<InputAdornment position="end"></InputAdornment>
-										}
-									/>
-									<FormHelperText className=" mt-1 mb-4">
-										{errors.passwordConfirm
-											? errors.passwordConfirm.message
-											: " "}
-									</FormHelperText>
-								</FormControl> */}
 
 								<Tooltip title={"Регистрация не доступна"}>
 									<span>
-										<Button
-											className="w-full"
-											variant="contained"
-											color="primary"
-											type="submit"
-											disabled={false}
-										>
-											Зарегистрироваться
-										</Button>
+										<RegistrationButton />
 									</span>
 								</Tooltip>
 							</form>

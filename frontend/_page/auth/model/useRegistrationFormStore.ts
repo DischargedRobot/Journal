@@ -22,7 +22,7 @@ interface IFormStore {
 	isValidatedField: <K extends keyof FormValues>(
 		fieldName: K,
 		fieldValue: FormValues[K],
-	) => boolean
+	) => { error: string; isValidated: boolean }
 }
 
 const useRegistrationFormStore = create<IFormStore>((set, get) => {
@@ -43,48 +43,95 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 	}, {} as TFormValues)
 
 	return {
-		formValues: initialFields,
+		formValues: {
+			...initialFields,
+			personRole: { ...initialFields.personRole, value: "STUDENT" },
+		},
 		updateField: (fieldName, fieldValue) => {
-			set((state) => {
-				return {
-					formValues: {
-						...state.formValues,
-						[fieldName]: {
-							...state.formValues[fieldName],
-							value: fieldValue,
-						},
+			const error = get().isValidatedField(fieldName, fieldValue).error
+
+			set((state) => ({
+				formValues: {
+					...state.formValues,
+					[fieldName]: {
+						...state.formValues[fieldName],
+						value: fieldValue,
+						error,
 					},
-				}
-			})
+				},
+			}))
 		},
 
 		isValidatedField(fieldName, fieldValue) {
 			const field = get().formValues[fieldName]
+
 			if (!field) {
-				return false
+				return {
+					error: "Поле отсутствует",
+					isValidated: false,
+				}
 			}
 
 			const isEmpty = fieldValue == null || fieldValue.trim() === ""
-			// TODO: Сделать список с русскими именами полей и подставлять автоматом
+
 			if (isEmpty) {
-				if (field.required) {
-					field.error = `Поле ${fieldName} обязательно для заполенения`
-				}
-				return !field.required
+				return field.required
+					? {
+							error: `Поле ${fieldName} обязательно для заполнения`,
+							isValidated: false,
+						}
+					: {
+							error: "",
+							isValidated: true,
+						}
 			}
 
 			switch (fieldName) {
-				case "email":
-					field.error = "Неверный email"
-					return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fieldValue)
+				case "email": {
+					const isValidated = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+						fieldValue,
+					)
+
+					return {
+						error: isValidated ? "" : "Неверный email",
+						isValidated,
+					}
+				}
 
 				case "firstName":
-				case "lastName":
-					field.error = `${fieldName} должно содержать только русские буквы, пробелы и тире`
-					return /^[а-яА-ЯёЁ -]+$/.test(fieldValue)
+				case "lastName": {
+					const isValidated = /^[а-яА-ЯёЁ -]+$/.test(fieldValue)
+
+					return {
+						error: isValidated
+							? ""
+							: `${fieldName} должно содержать только русские буквы, пробелы и тире`,
+						isValidated,
+					}
+				}
+
+				case "password":
+					const isValidated = !/\s/.test(fieldValue)
+					return {
+						error: isValidated
+							? ""
+							: "Пароль не может содержать пробелы",
+						isValidated,
+					}
+				case "passwordConfirm": {
+					const password = get().formValues.password.value.trim()
+					const isValidated = fieldValue.trim() === password
+					return {
+						error: isValidated ? "" : `Пароли не совпадают`,
+						isValidated,
+					}
+				}
 
 				default:
-					return true
+					return {
+						error: "",
+						isValidated: true,
+					}
 			}
 		},
 	}

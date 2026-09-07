@@ -3,13 +3,13 @@ import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
 import { memo, useState } from "react"
 import { FormValues } from "./fields"
-import FormTextField from "./FormTextField"
+import FormTextField from "./RegistrationTextField"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
 import FormLabel from "@mui/material/FormLabel"
 import FormControl from "@mui/material/FormControl"
 import FormHelperText from "@mui/material/FormHelperText"
 
-const FormRadioGroup = () => {
+const RegistrationRadioGroup = () => {
 	const [role, setRole] = useState<FormValues["personRole"]>("STUDENT")
 	const group = useRegistrationFormStore((state) => state.formValues.group)
 	const department = useRegistrationFormStore(
@@ -46,7 +46,12 @@ const FormRadioGroup = () => {
 			</FormControl>
 
 			{role === "STUDENT" && (
-				<FormTextField label="Группа" size="small" fieldName="group" />
+				<FormTextField
+					label="Группа"
+					size="small"
+					fieldName="group"
+					required
+				/>
 			)}
 
 			{role === "TEACHER" && (
@@ -54,10 +59,11 @@ const FormRadioGroup = () => {
 					label="Кафедра"
 					size="small"
 					fieldName="department"
+					required
 				/>
 			)}
 		</>
 	)
 }
 
-export default memo(FormRadioGroup)
+export default memo(RegistrationRadioGroup)

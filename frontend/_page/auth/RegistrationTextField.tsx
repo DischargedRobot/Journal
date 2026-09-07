@@ -15,7 +15,7 @@ interface Props {
 	fieldName: keyof TFormValues
 }
 
-const FormTextField = (props: Props) => {
+const RegistrationTextField = (props: Props) => {
 	const { label, size, type, errorMessage, helperText, required, fieldName } =
 		props
 
@@ -29,7 +29,7 @@ const FormTextField = (props: Props) => {
 	if (fieldName == "password") {
 		visibleHelperText = <PasswordStregth password={field.value} />
 	}
-	console.log(visibleHelperText)
+	// console.log(visibleHelperText)
 
 	return (
 		<TextField
@@ -46,4 +46,4 @@ const FormTextField = (props: Props) => {
 	)
 }
 
-export default memo(FormTextField)
+export default memo(RegistrationTextField)
