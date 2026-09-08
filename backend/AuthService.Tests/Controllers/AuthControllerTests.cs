@@ -19,6 +19,7 @@ public class AuthControllerTests : IDisposable
     private readonly InMemoryTokenStore _accessTokenList;
     private readonly InMemoryTokenBlackListStore _accessTokenBlackList;
     private readonly InMemoryTokenBlackListStore _refreshTokenBlackList;
+    private readonly IRegistrationCodeStore _registrationCodeStore;
     private readonly TokenService _tokenService;
     private readonly AuthController _controller;
 
@@ -29,6 +30,7 @@ public class AuthControllerTests : IDisposable
         _accessTokenList = new InMemoryTokenStore();
         _accessTokenBlackList = new InMemoryTokenBlackListStore();
         _refreshTokenBlackList = new InMemoryTokenBlackListStore();
+        _registrationCodeStore = new InMemoryRegistrationCodeStore();
         _tokenService = AuthTestHelper.CreateTokenService();
         _controller = new AuthController(
             NullLogger<AuthController>.Instance,
@@ -37,6 +39,7 @@ public class AuthControllerTests : IDisposable
             _accessTokenList,
             _accessTokenBlackList,
             _tokenService,
+            _registrationCodeStore,
             new ActivitySource("AuthService.Tests"));
         TestControllerHelper.SetupContext(_controller, nameof(AuthController));
     }

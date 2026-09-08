@@ -1,4 +1,5 @@
 using AuthService.Redis;
+using AuthService.Model;
 
 namespace AuthService.Tests.Helpers;
 
@@ -39,6 +40,26 @@ public sealed class InMemoryTokenBlackListStore : IAccessTokenBlackListStore, IR
     public Task DeleteAsync(Guid tokenUuid)
     {
         _store.Remove(tokenUuid);
+        return Task.CompletedTask;
+    }
+}
+
+public sealed class InMemoryRegistrationCodeStore : IRegistrationCodeStore
+{
+    private readonly Dictionary<Guid, RegistrationCodeData> _store = [];
+
+    public Task SaveAsync(Guid codeUuid, RegistrationCodeData data, TimeSpan ttl)
+    {
+        _store[codeUuid] = data;
+        return Task.CompletedTask;
+    }
+
+    public Task<RegistrationCodeData?> GetAsync(Guid codeUuid) =>
+        Task.FromResult(_store.TryGetValue(codeUuid, out RegistrationCodeData? value) ? value : null);
+
+    public Task DeleteAsync(Guid codeUuid)
+    {
+        _store.Remove(codeUuid);
         return Task.CompletedTask;
     }
 }
