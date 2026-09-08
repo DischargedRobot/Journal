@@ -17,9 +17,13 @@ export type TDepartmentResponseDto = {
 } & IBaseEntityWithVersion
 
 export const DepartmentApi = {
-	getDepartmentsWithoutEnhance: async (options?: TPagedRequestOptions): Promise<TDepartmentResponseDto[]> => {
+	getDepartmentsWithoutEnhance: async (
+		options?: TPagedRequestOptions,
+	): Promise<TDepartmentResponseDto[]> => {
 		const query = buildQuery(options ?? {})
-		const response = await ApiJsonRequest<TPagedResponse<TDepartmentResponseDto>>(`${DEPARTMENTS_URL}${query}`)
+		const response = await ApiJsonRequest<
+			TPagedResponse<TDepartmentResponseDto>
+		>(`${DEPARTMENTS_URL}${query}`)
 
 		return response.items
 	},

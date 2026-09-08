@@ -3,17 +3,18 @@
 import { Login, Registration } from "@/_page/auth"
 import { TDepartmentResponseDto } from "@/shared/api/department/DepartmentApi"
 import { TGroupResponseDto } from "@/shared/api/group/GroupApi"
+import { TRole } from "@/shared/model/role"
 import { Container } from "@mui/material"
 import { useState } from "react"
-
 
 interface Props {
 	groups: TGroupResponseDto[]
 	departments: TDepartmentResponseDto[]
+	roles: TRole[]
 }
 
 export const AuthClient = (props: Props) => {
-	const { groups, departments } = props
+	const { groups, departments, roles } = props
 	const [registrationOpen, setRegistrationOpen] = useState(false)
 
 	return (

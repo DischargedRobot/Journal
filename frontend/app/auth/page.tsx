@@ -3,6 +3,8 @@ import { AuthClient } from "../../_page/auth/auth-client"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { ApiErrors } from "@/shared/ApiError/ApiError"
 import { DepartmentApi } from "@/shared/api/department"
+import { error } from "console"
+import { RolesApi } from "@/shared/api/roles"
 
 const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
@@ -40,16 +42,38 @@ const getDepartments = async () => {
 		return []
 	}
 }
-const AuthPage = async () => {
 
+const getRoles = async () => {
+	const handleGetRolesError = createApiErrorHandler([
+		{
+			error: ApiErrors.BAD_REQUEST,
+			handler: (error) => {
+				console.log(error)
+			},
+		},
+	])
+
+	try {
+		return RolesApi.getRoles()
+	} catch (error) {
+		handleGetRolesError(error)
+		return []
+	}
+}
+
+const AuthPage = async () => {
 	const groups = await getGroups()
 	const departments = await getDepartments()
-
+	const roles = await getRoles()
 
 	console.log(groups)
 	return (
 		<main className="content-center h-screen w-screen overflow-auto">
-			<AuthClient groups={groups} departments={departments} />
+			<AuthClient
+				groups={groups}
+				departments={departments}
+				roles={roles}
+			/>
 		</main>
 	)
 }
