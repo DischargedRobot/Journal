@@ -5,34 +5,18 @@ import { TGroupResponseDto } from "@/shared/api/group"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
-import Wizard, { useWizard } from "@/shared/ui/wizard/Wizard"
-import {
-	Box,
-	Button,
-	Stack,
-	TextField,
-	Typography,
-	FormControl,
-	FormLabel,
-	RadioGroup,
-	FormControlLabel,
-	Radio,
-	FormHelperText,
-	SvgIcon,
-	OutlinedInput,
-	InputAdornment,
-	MenuItem,
-	InputLabel,
-	Tooltip,
-} from "@mui/material"
+import Wizard from "@/shared/ui/wizard/Wizard"
+import { Box, Button, Stack, Typography, SvgIcon, Tooltip } from "@mui/material"
 import { useState } from "react"
-import { useForm, useWatch, Controller } from "react-hook-form"
+import { useForm, useWatch } from "react-hook-form"
 import {
 	FormValues,
 	LOGIN_FIELDS,
 	PERSONAL_FIELDS,
 	REQUIRED_FIELDS,
 } from "./fields"
+import { useShallow } from "zustand/shallow"
+
 import FormTextField from "./RegistrationTextField"
 import FormRadioGroup from "./RegistrationRadioGroup"
 import RegistrationButton from "./RegistrationButton"
@@ -85,18 +69,21 @@ const Registration = (props: Props) => {
 	const isLoginStepError = LOGIN_FIELDS.some((field) => !!errors[field])
 	const handlerError = createApiErrorHandler()
 
+	const formValues = useRegistrationFormStore(
+		useShallow((state) => state.formValues),
+	)
 	const onSubmit = handleSubmit(async (data) => {
 		if (isLoginStepError || isPersonalStepError) {
 			return
 		}
 		try {
 			await AuthApi.register({
-				login: data.login,
-				password: data.password,
-				email: data.email,
-				firstName: data.firstName,
-				lastName: data.lastName,
-				patronymic: data.patronymic,
+				login: formValues.login.value,
+				password: formValues.password.value,
+				email: formValues.email.value,
+				firstName: formValues.firstName.value,
+				lastName: formValues.lastName.value,
+				patronymic: formValues.patronymic.value,
 				rolesUuid: [role],
 			})
 		} catch (error) {
@@ -129,7 +116,18 @@ const Registration = (props: Props) => {
 	// 	});
 	// }, [watchedValues]);
 
-	const [isLoginStepCompleted, setIsLoginStepCompleted] = useState(false)
+	const isLoginStepCompleted = useRegistrationFormStore((state) => {
+		return LOGIN_FIELDS.filter((item) =>
+			REQUIRED_FIELDS.includes(item),
+		).every((fieldName) => {
+			const field = state.formValues[fieldName]
+			return (
+				((field.value.trim() !== "" && field.required) ||
+					!field.required) &&
+				field.error === ""
+			)
+		})
+	})
 
 	const isPersonalStepCompleted = useRegistrationFormStore((state) => {
 		return PERSONAL_FIELDS.filter((item) =>
@@ -177,8 +175,6 @@ const Registration = (props: Props) => {
 			: departments.length === 0
 				? "Ошибка при связи с сервером. Кафедр нет"
 				: null
-
-	const loginStepDisabled = personalDataButtonTooltip !== null
 
 	return (
 		// left-1 - чтобы не было видно границы между блоками при анимации
@@ -324,7 +320,7 @@ const Registration = (props: Props) => {
 						</Wizard.StepContent>
 					</Wizard.Step>
 
-					<Wizard.Step disabled={loginStepDisabled}>
+					<Wizard.Step disabled={!isPersonalStepCompleted}>
 						<Wizard.StepHeader
 							completed={isLoginStepCompleted}
 							errorMessage={

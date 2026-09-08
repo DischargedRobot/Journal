@@ -1,4 +1,4 @@
-import Stack from "@mui/material/Stack"
+"use client"
 import Box from "@mui/material/Box"
 import {
 	Children,

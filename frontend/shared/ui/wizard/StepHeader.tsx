@@ -1,3 +1,4 @@
+"use client"
 import Box from "@mui/material/Box"
 import { memo, ReactNode } from "react"
 import { type ClassValue } from "clsx"
