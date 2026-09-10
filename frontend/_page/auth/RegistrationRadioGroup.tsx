@@ -11,6 +11,7 @@ import TextField from "@mui/material/TextField"
 import { TGroupResponseDto } from "@/shared/api/group"
 import { TDepartmentResponseDto } from "@/shared/api/department"
 import Autocomplete from "@mui/material/Autocomplete"
+import RegistrationAutocomplete from "./RegistrationAutocomplete"
 
 interface Props {
 	groups: TGroupResponseDto[]
@@ -64,85 +65,18 @@ const RegistrationRadioGroup = (props: Props) => {
 			</FormControl>
 
 			{personRole.value === "STUDENT" && (
-				<Autocomplete
-					freeSolo
-					options={groups
-						.map((g) => g.code)
-						.filter(
-							(g, index, self) =>
-								index ===
-								self.findIndex(
-									(findingGroup) => findingGroup == g,
-								),
-						)}
-					value={selectedGroup.value}
-					onChange={(_, newValue) => {
-						// Выбрали группу из списка
-						updateField("group", newValue ?? "")
-					}}
-					onInputChange={(_, newInputValue) => {
-						// Пользователь вводит своё значение
-						updateField("group", newInputValue)
-					}}
-					disabled={groups.length === 0}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							variant="outlined"
-							required
-							label={groups.length > 0 ? "Группа" : "Групп нет"}
-							size="small"
-							error={!!selectedGroup.error}
-							helperText={
-								selectedGroup.error.length > 0
-									? selectedGroup.error
-									: " "
-							}
-						/>
-					)}
+				<RegistrationAutocomplete
+					items={departments}
+					fieldName="department"
+					label={groups.length > 0 ? "Группа" : "Групп нет"}
 				/>
 			)}
 
 			{personRole.value === "TEACHER" && (
-				<Autocomplete
-					freeSolo
-					options={departments
-						.map((department) => department.code)
-						.filter(
-							(code, index, self) =>
-								index ===
-								self.findIndex((item) => item === code),
-						)}
-					value={selectedDepartment.value}
-					onChange={(_, newValue) => {
-						console.log(newValue, "sadas")
-						updateField("department", newValue ?? "")
-					}}
-					onInputChange={(_, newInputValue) => {
-						console.log(newInputValue, "sadas2")
-
-						updateField("department", newInputValue)
-					}}
-					disabled={departments.length === 0}
-					renderInput={(params) => (
-						<TextField
-							{...params}
-							variant="outlined"
-							required
-							label={
-								departments.length > 0
-									? "Кафедра"
-									: "Кафедр нет"
-							}
-							size="small"
-							error={!!selectedDepartment.error}
-							helperText={
-								selectedDepartment.error.length > 0
-									? selectedDepartment.error
-									: " "
-							}
-						/>
-					)}
+				<RegistrationAutocomplete
+					items={departments}
+					fieldName="department"
+					label={departments.length > 0 ? "Кафедра" : "Кафедр нет"}
 				/>
 			)}
 		</>

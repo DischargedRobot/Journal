@@ -21,12 +21,14 @@ import FormTextField from "./RegistrationTextField"
 import FormRadioGroup from "./RegistrationRadioGroup"
 import RegistrationButton from "./RegistrationButton"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
+import { TRole } from "@/shared/model/role"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
 	focused: boolean
 	groups: TGroupResponseDto[]
 	departments: TDepartmentResponseDto[]
+	roles: TRole[]
 }
 
 const REQUIRED_PERSONAL_FIELDS = PERSONAL_FIELDS.filter(
@@ -36,7 +38,7 @@ const REQUIRED_PERSONAL_FIELDS = PERSONAL_FIELDS.filter(
 type FulfieldValues = { [K in keyof Required<FormValues>]: boolean }
 
 const Registration = (props: Props) => {
-	const { focused, groups, onToRegistration, departments } = props
+	const { focused, groups, onToRegistration, departments, roles } = props
 
 	const {
 		register,

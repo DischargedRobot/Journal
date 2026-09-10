@@ -34,6 +34,7 @@ export const AuthClient = (props: Props) => {
 				focused={registrationOpen}
 				groups={groups}
 				departments={departments}
+				roles={roles}
 				onToRegistration={() => setRegistrationOpen(true)}
 			/>
 			<Login

@@ -5,5 +5,8 @@ import { IBaseEntity } from "../utility-types/base-entity"
 export type TRole = {
 	uuid: Uuid
 	name: string
-	permissions: TPerm[]
+	rights: TPerm[]
+	roleTypes: TRoleType[]
 } & IBaseEntity
+
+export type TRoleType = "STUDENT" | "TEACHER"

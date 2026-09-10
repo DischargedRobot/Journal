@@ -46,7 +46,7 @@ const getDepartments = async () => {
 const getRoles = async () => {
 	const handleGetRolesError = createApiErrorHandler([
 		{
-			error: ApiErrors.BAD_REQUEST,
+			error: ApiErrors.NOT_FOUND,
 			handler: (error) => {
 				console.log(error)
 			},
