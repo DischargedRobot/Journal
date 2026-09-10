@@ -87,15 +87,7 @@ namespace AuthService.Controller
 						(isBase == null || r.IsBase == isBase))
 					.AsNoTracking();
 
-				Task<int> totalRecord = baseQuery.CountAsync();
-
-				List<RolesResponseDto> items = await baseQuery
-					.SortByKey(r => r.Name, sortOrder)
-					.TakeWithOffset(offset, size)
-					.Select(r => new RolesResponseDto(r))
-					.ToListAsync();
-
-				int total = await totalRecord;
+				int total = await baseQuery.CountAsync();
 
 				_logger.LogInformation("{Function}: найдено записей = {Total}", functionName, total);
 
@@ -111,6 +103,12 @@ namespace AuthService.Controller
 						)
 					);
 				}
+
+				List<RolesResponseDto> items = await baseQuery
+					.SortByKey(r => r.Name, sortOrder)
+					.TakeWithOffset(offset, size)
+					.Select(r => new RolesResponseDto(r))
+					.ToListAsync();
 
 				if (items.Count == 0)
 				{
@@ -184,6 +182,75 @@ namespace AuthService.Controller
 
 				_logger.LogInformation("{Function}: возвращена роль uuid={Uuid}", functionName, uuid);
 				return Ok(role);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "{Function}: неожиданная ошибка при получении роли", functionName);
+				return StatusCode(StatusCodes.Status500InternalServerError, new ApiError
+				{
+					StatusCode = "1.0.0",
+					Title = "Внутренняя ошибка сервера",
+					Message = "Произошла ошибка на сервере",
+				});
+			}
+		}
+
+		[HttpGet("{roleTypeUuid}")]
+		public async Task<ActionResult<PagedResult<RolesResponseDto>>> GetRolesByTypes (
+			[SwaggerParameter("Тип роли")]
+			Guid roleTypeUuid,
+			[FromQuery, SwaggerParameter("Количество записей")]
+			int size = 100,
+			[FromQuery, SwaggerParameter("Сдвиг от начала")]
+			int offset = 0,
+			[FromQuery, SwaggerParameter("Фильтр по имени")]
+			string? filterName = null,
+			[FromQuery, SwaggerParameter("Порядок сортировки по имени")]
+			SortOrder sortOrder = SortOrder.Ascending
+			
+		)
+		{
+			string functionName = ControllerContext.ActionDescriptor.ActionName;
+			try
+			{
+				using Activity? activity = _activitySource.StartAndLog(_logger, this);
+				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, roleTypeUuid);
+				
+				IQueryable<Roles> baseQuery = _context.Roles.Where(r => (filterName == null || r.Name.Contains(filterName)) && r.RoleType.Any(rt => rt.Uuid == roleTypeUuid))
+				.AsNoTracking();
+
+int total = baseQuery.Count();
+
+			ICollection<RolesResponseDto> items = await baseQuery
+			.SortByKey(r => r.Name, sortOrder)
+					.TakeWithOffset(offset, size)
+				.Select(r => new RolesResponseDto(r))
+				.ToListAsync();
+
+				if (total == 0)
+				{
+					_logger.LogInformation("{Function}: нет ролей c заданым {roleTypeUuid} по фильтру (total={Total}, offset={Offset})", functionName, roleTypeUuid, total, offset);
+					return NotFound(
+						new ApiError(
+							"1.1.3",
+							"Роли не найдены",
+							"В системе не найдено ни одной роли для указанных параметров запроса",
+							"BODY"
+						)
+					);
+				}
+
+				PagedResult<RolesResponseDto> result = new(
+					Total: total,
+					Offset: offset,
+					Size: items.Count,
+					Items: items
+				);
+
+				_logger.LogInformation("{Function}: возвращает {Count} элементов (offset={Offset}, total={Total})", functionName, items.Count, offset, total);
+
+				return Ok(result);
+
 			}
 			catch (Exception ex)
 			{
