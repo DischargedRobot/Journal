@@ -36,7 +36,7 @@ const getDepartments = async () => {
 	])
 
 	try {
-		return DepartmentApi.getDepartmentsWithoutEnhance()
+		return await DepartmentApi.getDepartmentsWithoutEnhance()
 	} catch (error) {
 		handleGetDepartmentsError(error)
 		return []
@@ -54,7 +54,7 @@ const getRoles = async () => {
 	])
 
 	try {
-		return RolesApi.getRoles()
+		return await RolesApi.getRoles()
 	} catch (error) {
 		handleGetRolesError(error)
 		return []

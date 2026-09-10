@@ -5,7 +5,8 @@ export class ApiError extends Error {
 		public statusCode: string,
 		public title: string,
 		public message: string,
-		public detail?: string | null, // поле для FFAPIError
+		public field?: string,
+		public details?: string | null, // поле для APIError
 	) {
 		super(message || `Error ${ApiError.errorType}`)
 
@@ -13,7 +14,27 @@ export class ApiError extends Error {
 	}
 }
 
+const STATUS_CODE_REGEX = /\d\.\d\.\d/
+
 export function isApiError(error: unknown): error is ApiError {
+	console.log(
+		"error",
+		error,
+		error instanceof ApiError ||
+			(typeof error === "object" &&
+				error !== null &&
+				//
+				"statusCode" in error &&
+				typeof error.statusCode === "string" &&
+				STATUS_CODE_REGEX.test(error.statusCode) &&
+				//
+				"title" in error &&
+				typeof error.title === "string" &&
+				//
+				"message" in error &&
+				typeof error.message === "string"),
+	)
+
 	return (
 		error instanceof ApiError ||
 		(typeof error === "object" &&
@@ -21,7 +42,7 @@ export function isApiError(error: unknown): error is ApiError {
 			//
 			"statusCode" in error &&
 			typeof error.statusCode === "string" &&
-			/d.d.d/.test(error.statusCode) &&
+			STATUS_CODE_REGEX.test(error.statusCode) &&
 			//
 			"title" in error &&
 			typeof error.title === "string" &&

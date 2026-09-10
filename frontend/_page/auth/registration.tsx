@@ -93,7 +93,7 @@ const Registration = (props: Props) => {
 		}
 	})
 
-	console.log("reg")
+	// console.log("reg")
 	// const watchedValues = useWatch({ control }) as FormValues | undefined;
 	// const isAllFilled = useMemo(() => {
 	// 	if (!watchedValues) return false;

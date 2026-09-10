@@ -1,17 +1,15 @@
 import FormControlLabel from "@mui/material/FormControlLabel"
 import Radio from "@mui/material/Radio"
 import RadioGroup from "@mui/material/RadioGroup"
-import { memo, useState } from "react"
-import { FormValues } from "./fields"
+import { memo } from "react"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
 import FormLabel from "@mui/material/FormLabel"
 import FormControl from "@mui/material/FormControl"
 import FormHelperText from "@mui/material/FormHelperText"
-import TextField from "@mui/material/TextField"
 import { TGroupResponseDto } from "@/shared/api/group"
 import { TDepartmentResponseDto } from "@/shared/api/department"
-import Autocomplete from "@mui/material/Autocomplete"
 import RegistrationAutocomplete from "./RegistrationAutocomplete"
+import RegistrationRolesField from "./RegistrationRolesField"
 
 interface Props {
 	groups: TGroupResponseDto[]

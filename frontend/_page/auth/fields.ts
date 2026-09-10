@@ -1,4 +1,14 @@
-export interface FormValues extends PERSONAL_FORM_FIELDS, LOGIN_FORM_FIELDS{}
+import { TRole } from "@/shared/model/role/TRole"
+import { TGroup } from "@/shared/model/group/TGroup"
+import { TDepartment } from "@/shared/model/t-department"
+
+export interface FormValues extends PERSONAL_FORM_FIELDS, LOGIN_FORM_FIELDS {}
+
+// TODO: доделать сразу доавбление ролей
+interface ISelectedRole {
+	role: TRole | null
+	department: TGroup | TDepartment | null
+}
 
 export interface PERSONAL_FORM_FIELDS {
 	firstName: string
@@ -11,24 +21,23 @@ export interface PERSONAL_FORM_FIELDS {
 }
 
 export const REQUIRED_FIELDS: (keyof FormValues)[] = [
-	'firstName',
-	'lastName',
-	'email',
-	'personRole',
-	'login',
-	'password',
-	'passwordConfirm',
-  ];
-  
+	"firstName",
+	"lastName",
+	"email",
+	"personRole",
+	"login",
+	"password",
+	"passwordConfirm",
+]
 
-export const PERSONAL_FIELDS: (keyof PERSONAL_FORM_FIELDS)	[] = [
+export const PERSONAL_FIELDS: (keyof PERSONAL_FORM_FIELDS)[] = [
 	"firstName",
 	"lastName",
 	"patronymic",
 	"personRole",
 	"group",
 	"department",
-	"email"
+	"email",
 ]
 
 export interface LOGIN_FORM_FIELDS {
@@ -37,10 +46,8 @@ export interface LOGIN_FORM_FIELDS {
 	passwordConfirm: string
 }
 
-export const LOGIN_FIELDS: (keyof LOGIN_FORM_FIELDS
-	)[] = [
+export const LOGIN_FIELDS: (keyof LOGIN_FORM_FIELDS)[] = [
 	"login",
 	"password",
 	"passwordConfirm",
 ]
-
