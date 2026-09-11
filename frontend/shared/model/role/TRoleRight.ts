@@ -1,4 +1,6 @@
-const TPerm = {
+import { Uuid } from "../utility-types/uuid"
+
+const TRoleRightName = {
 	CU: "CREATE_USER",
 	RU: "READ_USER",
 	UU: "UPDATE_USER",
@@ -29,6 +31,12 @@ const TPerm = {
 	DDIS: "DELETE_DISCIPLINE",
 } as const
 
-export type TPerm = (typeof TPerm)[keyof typeof TPerm]
+export type TRoleRightName =
+	(typeof TRoleRightName)[keyof typeof TRoleRightName]
 
-export type TPermKey = keyof typeof TPerm
+export type TRoleRightNameKey = keyof typeof TRoleRightName
+
+export type TRoleRight = {
+	uuid: Uuid
+	name: TRoleRightName
+}
