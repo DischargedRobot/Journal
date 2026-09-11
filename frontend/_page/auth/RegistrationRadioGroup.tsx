@@ -47,12 +47,12 @@ const RegistrationRadioGroup = (props: Props) => {
 					}}
 				>
 					<FormControlLabel
-						value="STUDENT"
+						value="СТУДЕНТ"
 						control={<Radio />}
 						label="Студент"
 					/>
 					<FormControlLabel
-						value="TEACHER"
+						value="ПРЕПОДАВАТЕЛЬ"
 						control={<Radio />}
 						label="Преподаватель"
 					/>
@@ -62,7 +62,7 @@ const RegistrationRadioGroup = (props: Props) => {
 				</FormHelperText>
 			</FormControl>
 
-			{personRole.value === "STUDENT" && (
+			{personRole.value === "СТУДЕНТ" && (
 				<RegistrationAutocomplete
 					items={departments}
 					fieldName="department"
@@ -70,7 +70,7 @@ const RegistrationRadioGroup = (props: Props) => {
 				/>
 			)}
 
-			{personRole.value === "TEACHER" && (
+			{personRole.value === "ПРЕПОДАВАТЕЛЬ" && (
 				<RegistrationAutocomplete
 					items={departments}
 					fieldName="department"

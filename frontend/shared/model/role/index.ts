@@ -1,2 +1,2 @@
 export { type TRole } from "./TRole"
-export { type TPerm } from "./TPerm"
+export type { TRoleRightName, TRoleRight } from "./TRoleRight"

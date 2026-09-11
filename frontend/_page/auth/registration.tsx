@@ -48,7 +48,7 @@ const Registration = (props: Props) => {
 		trigger,
 	} = useForm<FormValues>({
 		defaultValues: {
-			personRole: "STUDENT",
+			personRole: "СТУДЕНТ",
 			group: "",
 			department: "",
 		},
@@ -63,7 +63,7 @@ const Registration = (props: Props) => {
 	const role = useWatch({
 		control,
 		name: "personRole",
-		defaultValue: "STUDENT",
+		defaultValue: "СТУДЕНТ",
 	})
 
 	const isPersonalStepError = PERSONAL_FIELDS.some((field) => !!errors[field])
@@ -79,14 +79,18 @@ const Registration = (props: Props) => {
 			return
 		}
 		try {
-			await AuthApi.register({
+			// находим роль STUDENT или TEACHER
+			const selectedRole =
+				roles.find((r) => r.name === role)?.uuid ?? null
+
+			return await AuthApi.register({
 				login: formValues.login.value,
 				password: formValues.password.value,
 				email: formValues.email.value,
 				firstName: formValues.firstName.value,
 				lastName: formValues.lastName.value,
 				patronymic: formValues.patronymic.value,
-				rolesUuid: [role],
+				rolesUuid: selectedRole == null ? [] : [selectedRole],
 			})
 		} catch (error) {
 			handlerError(error)
@@ -108,9 +112,9 @@ const Registration = (props: Props) => {
 	// 			return false
 	// 		};
 	// 		if (typeof value === "string") {
-	// 			if (value == "STUDENT") {
+	// 			if (value == "СТУДЕНТ") {
 	// 				return watchedValues["group"]?.trim().length
-	// 			} else if (value == "TEACHER") {
+	// 			} else if (value == "ПРЕПОДАВАТЕЛЬ") {
 	// 				return watchedValues["department"]?.trim().length
 	// 			}
 	// 			return value.trim().length > 0
@@ -138,7 +142,7 @@ const Registration = (props: Props) => {
 			const field = state.formValues[fieldName]
 			if (fieldName == "personRole") {
 				const personRole = state.formValues.personRole.value
-				if (personRole === "STUDENT") {
+				if (personRole === "СТУДЕНТ") {
 					const group = state.formValues.group
 					console.log(group.value, personRole)
 					return (
@@ -170,7 +174,7 @@ const Registration = (props: Props) => {
 
 	// текст тултипа кнопки "далее" на первом шаге
 	const personalDataButtonTooltip =
-		role === "STUDENT"
+		role === "СТУДЕНТ"
 			? groups.length === 0
 				? "Ошибка при связи с сервером. Групп нет"
 				: null

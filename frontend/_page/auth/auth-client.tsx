@@ -34,7 +34,7 @@ export const AuthClient = (props: Props) => {
 				focused={registrationOpen}
 				groups={groups}
 				departments={departments}
-				roles={roles}
+				roles={roles.filter((r) => r.isBase)}
 				onToRegistration={() => setRegistrationOpen(true)}
 			/>
 			<Login

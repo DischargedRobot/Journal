@@ -3,8 +3,8 @@ import { AuthClient } from "../../_page/auth/auth-client"
 import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
 import { ApiErrors } from "@/shared/ApiError/ApiError"
 import { DepartmentApi } from "@/shared/api/department"
-import { error } from "console"
 import { RolesApi } from "@/shared/api/roles"
+import { RoleRightApi } from "@/shared/api/role-right"
 
 const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
@@ -61,10 +61,31 @@ const getRoles = async () => {
 	}
 }
 
+// const getRoleRight = async () => {
+// 	const handleGetRoleRightError = createApiErrorHandler([
+// 		{
+// 			error: ApiErrors.NOT_FOUND,
+// 			handler(error) {
+// 				console.log(error)
+// 			},
+// 		},
+// 	])
+
+// 	try {
+// 		return await RoleRightApi.getRoleRights()
+
+// 	} catch (error) {
+// 		handleGetRoleRightError(error)
+// 		return []
+// 	}
+// }
+
 const AuthPage = async () => {
 	const groups = await getGroups()
 	const departments = await getDepartments()
 	const roles = await getRoles()
+
+	// const roleRights = await getRoleRight()
 
 	console.log(groups)
 	return (

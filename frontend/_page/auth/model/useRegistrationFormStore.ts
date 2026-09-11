@@ -45,7 +45,7 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 	return {
 		formValues: {
 			...initialFields,
-			personRole: { ...initialFields.personRole, value: "STUDENT" },
+			personRole: { ...initialFields.personRole, value: "СТУДЕНТ" },
 		},
 		updateField: (fieldName, fieldValue) => {
 			console.log("updateField START")

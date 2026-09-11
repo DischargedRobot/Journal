@@ -15,7 +15,7 @@ export interface PERSONAL_FORM_FIELDS {
 	lastName: string
 	patronymic?: string | null
 	email: string
-	personRole: "STUDENT" | "TEACHER"
+	personRole: "СТУДЕНТ" | "ПРЕПОДАВАТЕЛЬ"
 	department?: string
 	group?: string
 }

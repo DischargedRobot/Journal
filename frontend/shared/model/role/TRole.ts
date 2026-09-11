@@ -10,4 +10,4 @@ export type TRole = {
 	isBase: boolean
 } & IBaseEntity
 
-export type TRoleType = "СТУДЕНТ" | "TEACHER"
+export type TRoleType = "СТУДЕНТ" | "ПРЕПОДАВАТЕЛЬ"

@@ -159,7 +159,7 @@ public class AuthControllerTests : IDisposable
             Password = "password123",
             FirstName = "Иван",
             LastName = "Иванов",
-            RolesUuid = ["STUDENT"],
+            RolesUuid = ["СТУДЕНТ"],
         });
 
         BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);

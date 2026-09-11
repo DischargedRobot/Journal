@@ -64,9 +64,9 @@ const AddStudentForm = (props: Props) => {
 								}}
 							/>
 						</Box>
-						<RadioGroup name="role" defaultValue="STUDENT" row>
+						<RadioGroup name="role" defaultValue="СТУДЕНТ" row>
 							<FormControlLabel
-								value="STUDENT"
+								value="СТУДЕНТ"
 								control={<Radio />}
 								label="Студент"
 							/>

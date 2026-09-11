@@ -1146,7 +1146,7 @@ namespace MainService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MainService.Students", "Student")
+                    b.HasOne("MainService.Students", "СТУДЕНТ")
                         .WithMany("Attestations")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1158,7 +1158,7 @@ namespace MainService.Migrations
 
                     b.Navigation("Discipline");
 
-                    b.Navigation("Student");
+                    b.Navigation("СТУДЕНТ");
                 });
 
             modelBuilder.Entity("MainService.Brigades", b =>
@@ -1266,7 +1266,7 @@ namespace MainService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MainService.Students", "Student")
+                    b.HasOne("MainService.Students", "СТУДЕНТ")
                         .WithMany("LessonMarks")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1276,7 +1276,7 @@ namespace MainService.Migrations
 
                     b.Navigation("Mark");
 
-                    b.Navigation("Student");
+                    b.Navigation("СТУДЕНТ");
                 });
 
             modelBuilder.Entity("MainService.LessonPresences", b =>
@@ -1293,7 +1293,7 @@ namespace MainService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MainService.Students", "Student")
+                    b.HasOne("MainService.Students", "СТУДЕНТ")
                         .WithMany("LessonPresences")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1303,7 +1303,7 @@ namespace MainService.Migrations
 
                     b.Navigation("PresenceStatus");
 
-                    b.Navigation("Student");
+                    b.Navigation("СТУДЕНТ");
                 });
 
             modelBuilder.Entity("MainService.Lessons", b =>
@@ -1351,13 +1351,13 @@ namespace MainService.Migrations
                         .WithMany("NotesAboutStudent")
                         .HasForeignKey("DisciplinesDisciplineId");
 
-                    b.HasOne("MainService.Students", "Student")
+                    b.HasOne("MainService.Students", "СТУДЕНТ")
                         .WithMany("NotesAboutStudent")
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Student");
+                    b.Navigation("СТУДЕНТ");
                 });
 
             modelBuilder.Entity("MainService.Professors", b =>

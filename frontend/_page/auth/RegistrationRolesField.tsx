@@ -48,6 +48,7 @@ const RegistrationRolesField = (props: Props) => {
 											name: "Нет должностей",
 											rights: [],
 											roleTypes: [],
+											isBase: false,
 										},
 									]
 						}
