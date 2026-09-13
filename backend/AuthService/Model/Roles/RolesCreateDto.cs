@@ -15,6 +15,6 @@ namespace AuthService.Model
         [SwaggerSchema("UUID прав роли"), Required, ValidateNever]
         public IEnumerable<Guid>? RightsUuids { get; set; }
         [SwaggerSchema("UUID типов роли"), Required, ValidateNever]
-        public required IEnumerable<Guid> RoleTypesUuids { get; set; }
+        public IEnumerable<Guid>? RoleTypesUuids { get; set; }
     }
 }

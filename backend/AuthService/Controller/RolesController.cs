@@ -333,6 +333,19 @@ int total = baseQuery.Count();
 					);
 				}
 
+				if (createDto.IsBase && createDto.RoleTypesUuids.Count() > 1)
+				{
+					_logger.LogWarning("{Function}: попытка создать базовую роль с несколькими типами ролей", functionName);
+					return BadRequest(
+						new ApiError(
+							"0.2.1",
+							"Неверный запрос",
+							"Базовая роль может быть создана только с одним типом роли",
+							nameof(RolesCreateDto.RoleTypesUuids)
+						)
+					);
+				}
+
 				bool exists = await _context.Roles.AnyAsync(r => r.Name == createDto.Name);
 				if (exists)
 				{
@@ -347,7 +360,7 @@ int total = baseQuery.Count();
 					);
 				}
 
-				if (createDto.IsBase && await BaseRoleExistsAsync())
+				if (createDto.IsBase && await BaseRoleWithTypeExistsAsync(createDto.RoleTypesUuids.First()))
 				{
 					_logger.LogWarning("{Function}: попытка создать вторую базовую роль", functionName);
 					return Conflict(
@@ -964,12 +977,24 @@ int total = baseQuery.Count();
 			}
 		}
 
-		private Task<bool> BaseRoleExistsAsync(Guid? excludeUuid = null)
+
+		private async Task<bool> BaseRoleWithTypeExistsAsync( Guid roleTypeUuid, Guid? excludedUuid = null)
+		{
+			IQueryable<Roles> query = _context.Roles.Where(r => r.IsBase && r.RoleType.Any(rt => rt.Uuid == roleTypeUuid));
+			if (excludedUuid.HasValue)
+			{
+				query = query.Where(r => r.Uuid != excludedUuid);
+			}
+
+			return await query.AnyAsync();
+		}
+
+		private Task<bool> BaseRoleExistsAsync(Guid? excludedUuid = null)
 		{
 			IQueryable<Roles> query = _context.Roles.Where(r => r.IsBase);
-			if (excludeUuid.HasValue)
+			if (excludedUuid.HasValue)
 			{
-				query = query.Where(r => r.Uuid != excludeUuid.Value);
+				query = query.Where(r => r.Uuid != excludedUuid);
 			}
 
 			return query.AnyAsync();
