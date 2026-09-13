@@ -22,6 +22,7 @@ import FormRadioGroup from "./RegistrationRadioGroup"
 import RegistrationButton from "./RegistrationButton"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
 import { TRole } from "@/shared/model/role"
+import { useRouter } from "next/navigation"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -39,6 +40,7 @@ type FulfieldValues = { [K in keyof Required<FormValues>]: boolean }
 
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration, departments, roles } = props
+	console.log(roles, "roles Registration")
 
 	const {
 		register,
@@ -74,16 +76,27 @@ const Registration = (props: Props) => {
 	const formValues = useRegistrationFormStore(
 		useShallow((state) => state.formValues),
 	)
+
+	const router = useRouter()
 	const onSubmit = handleSubmit(async (data) => {
 		if (isLoginStepError || isPersonalStepError) {
 			return
 		}
 		try {
-			// находим роль STUDENT или TEACHER
+			// находим роль СТУДЕНТ или ПРЕПОДАВАТЕЛЬ
 			const selectedRole =
-				roles.find((r) => r.name === role)?.uuid ?? null
-
-			return await AuthApi.register({
+				roles.find(
+					(r) =>
+						r.name.toUpperCase().trim() ===
+						formValues.personRole.value.toUpperCase().trim(),
+				)?.uuid ?? null
+			console.log(
+				selectedRole,
+				formValues.personRole.value,
+				roles,
+				"sadas",
+			)
+			await AuthApi.register({
 				login: formValues.login.value,
 				password: formValues.password.value,
 				email: formValues.email.value,
@@ -92,6 +105,8 @@ const Registration = (props: Props) => {
 				patronymic: formValues.patronymic.value,
 				rolesUuid: selectedRole == null ? [] : [selectedRole],
 			})
+
+			router.push("/journal")
 		} catch (error) {
 			handlerError(error)
 		}

@@ -37,7 +37,8 @@ const Login = (props: Props) => {
 
 	const onSubmit = handleSubmit(async (data) => {
 		try {
-			const result = await AuthApi.login(data.login, data.password)
+			await AuthApi.login(data.login, data.password)
+			router.push("/journal")
 		} catch (error) {
 			handlerError(error)
 		}

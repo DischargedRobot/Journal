@@ -1,6 +1,6 @@
 import { Uuid } from "../utility-types/uuid"
 
-const TRoleRightName = {
+const TRoleRightNameEnum = {
 	CU: "CREATE_USER",
 	RU: "READ_USER",
 	UU: "UPDATE_USER",
@@ -31,8 +31,11 @@ const TRoleRightName = {
 	DDIS: "DELETE_DISCIPLINE",
 } as const
 
+export const TRoleRightName = Object.values(
+	TRoleRightNameEnum,
+) as readonly TRoleRightName[]
 export type TRoleRightName =
-	(typeof TRoleRightName)[keyof typeof TRoleRightName]
+	(typeof TRoleRightNameEnum)[keyof typeof TRoleRightNameEnum]
 
 export type TRoleRightNameKey = keyof typeof TRoleRightName
 

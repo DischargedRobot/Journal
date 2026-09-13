@@ -18,7 +18,7 @@ interface loginResponse {
 
 const AuthApi = {
 	login: async (login: string, password: string) => {
-		const result = await ApiJsonRequest(`${AUTH_URL}/log-in`, {
+		return ApiJsonRequest<loginResponse>(`${AUTH_URL}/log-in`, {
 			method: "POST",
 			body: JSON.stringify({ login, password }),
 		})
@@ -31,7 +31,7 @@ const AuthApi = {
 	},
 
 	register: async (data: TUsersCreateDto) => {
-		return ApiJsonRequest(`${AUTH_URL}/register`, {
+		await ApiJsonRequest(`${AUTH_URL}/register`, {
 			method: "POST",
 			body: JSON.stringify(data),
 		})

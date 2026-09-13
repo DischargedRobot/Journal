@@ -87,7 +87,7 @@ const AuthPage = async () => {
 
 	// const roleRights = await getRoleRight()
 
-	console.log(groups)
+	console.log(roles, "roles auth page")
 	return (
 		<main className="content-center h-screen w-screen overflow-auto">
 			<AuthClient
