@@ -333,18 +333,30 @@ int total = baseQuery.Count();
 					);
 				}
 
-				if (createDto.IsBase && createDto.RoleTypesUuids.Count() > 1)
-				{
-					_logger.LogWarning("{Function}: попытка создать базовую роль с несколькими типами ролей", functionName);
+if (createDto.isBase == true) {
+	{
+		_logger.LogWarning("{Function}: попытка создать базовую роль", functionName);
 					return BadRequest(
 						new ApiError(
 							"0.2.1",
 							"Неверный запрос",
-							"Базовая роль может быть создана только с одним типом роли",
+							"Базовая роль не может быть создана",
 							nameof(RolesCreateDto.RoleTypesUuids)
 						)
 					);
-				}
+	// }
+	// 			if (createDto.IsBase && createDto.RoleTypesUuids.Count() > 1)
+	// 			{
+	// 				_logger.LogWarning("{Function}: попытка создать базовую роль с несколькими типами ролей", functionName);
+	// 				return BadRequest(
+	// 					new ApiError(
+	// 						"0.2.1",
+	// 						"Неверный запрос",
+	// 						"Базовая роль может быть создана только с одним типом роли",
+	// 						nameof(RolesCreateDto.RoleTypesUuids)
+	// 					)
+	// 				);
+	// 			}
 
 				bool exists = await _context.Roles.AnyAsync(r => r.Name == createDto.Name);
 				if (exists)
@@ -360,18 +372,18 @@ int total = baseQuery.Count();
 					);
 				}
 
-				if (createDto.IsBase && await BaseRoleWithTypeExistsAsync(createDto.RoleTypesUuids.First()))
-				{
-					_logger.LogWarning("{Function}: попытка создать вторую базовую роль", functionName);
-					return Conflict(
-						new ApiError(
-							"1.2.1",
-							"Конфликт",
-							"Базовая роль уже существует",
-							nameof(RolesCreateDto.IsBase)
-						)
-					);
-				}
+				// if (createDto.IsBase && await BaseRoleWithTypeExistsAsync(createDto.RoleTypesUuids.First()))
+				// {
+				// 	_logger.LogWarning("{Function}: попытка создать вторую базовую роль", functionName);
+				// 	return Conflict(
+				// 		new ApiError(
+				// 			"1.2.1",
+				// 			"Конфликт",
+				// 			"Базовая роль уже существует",
+				// 			nameof(RolesCreateDto.IsBase)
+				// 		)
+				// 	);
+				// }
 
 				_logger.LogInformation("{Function}: добавление роли", functionName);
 				Roles role = new()
