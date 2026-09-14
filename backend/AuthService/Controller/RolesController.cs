@@ -123,7 +123,7 @@ namespace AuthService.Controller
 					);
 				}
 
-				PagedResult<RolesResponseDto> result = new(
+		PagedResult<RolesResponseDto> result = new(
 					Total: total,
 					Offset: offset,
 					Size: items.Count,
@@ -196,7 +196,7 @@ namespace AuthService.Controller
 		}
 
 		[HttpGet("{roleTypeUuid}")]
-		public async Task<ActionResult<PagedResult<RolesResponseDto>>> GetRolesByTypes (
+		public async Task<ActionResult<PagedResult<RolesResponseDto>>> GetRolesByTypes(
 			[SwaggerParameter("Тип роли")]
 			Guid roleTypeUuid,
 			[FromQuery, SwaggerParameter("Количество записей")]
@@ -207,7 +207,7 @@ namespace AuthService.Controller
 			string? filterName = null,
 			[FromQuery, SwaggerParameter("Порядок сортировки по имени")]
 			SortOrder sortOrder = SortOrder.Ascending
-			
+
 		)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
@@ -215,17 +215,17 @@ namespace AuthService.Controller
 			{
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, roleTypeUuid);
-				
+
 				IQueryable<Roles> baseQuery = _context.Roles.Where(r => (filterName == null || r.Name.Contains(filterName)) && r.RoleType.Any(rt => rt.Uuid == roleTypeUuid))
 				.AsNoTracking();
 
-int total = baseQuery.Count();
+				int total = baseQuery.Count();
 
-			ICollection<RolesResponseDto> items = await baseQuery
-			.SortByKey(r => r.Name, sortOrder)
-					.TakeWithOffset(offset, size)
-				.Select(r => new RolesResponseDto(r))
-				.ToListAsync();
+				ICollection<RolesResponseDto> items = await baseQuery
+				.SortByKey(r => r.Name, sortOrder)
+						.TakeWithOffset(offset, size)
+					.Select(r => new RolesResponseDto(r))
+					.ToListAsync();
 
 				if (total == 0)
 				{
@@ -333,9 +333,9 @@ int total = baseQuery.Count();
 					);
 				}
 
-if (createDto.isBase == true) {
-	{
-		_logger.LogWarning("{Function}: попытка создать базовую роль", functionName);
+				if (createDto.IsBase == true)
+				{
+					_logger.LogWarning("{Function}: попытка создать базовую роль", functionName);
 					return BadRequest(
 						new ApiError(
 							"0.2.1",
@@ -344,19 +344,19 @@ if (createDto.isBase == true) {
 							nameof(RolesCreateDto.RoleTypesUuids)
 						)
 					);
-	// }
-	// 			if (createDto.IsBase && createDto.RoleTypesUuids.Count() > 1)
-	// 			{
-	// 				_logger.LogWarning("{Function}: попытка создать базовую роль с несколькими типами ролей", functionName);
-	// 				return BadRequest(
-	// 					new ApiError(
-	// 						"0.2.1",
-	// 						"Неверный запрос",
-	// 						"Базовая роль может быть создана только с одним типом роли",
-	// 						nameof(RolesCreateDto.RoleTypesUuids)
-	// 					)
-	// 				);
-	// 			}
+				}
+				// 			if (createDto.IsBase && createDto.RoleTypesUuids.Count() > 1)
+				// 			{
+				// 				_logger.LogWarning("{Function}: попытка создать базовую роль с несколькими типами ролей", functionName);
+				// 				return BadRequest(
+				// 					new ApiError(
+				// 						"0.2.1",
+				// 						"Неверный запрос",
+				// 						"Базовая роль может быть создана только с одним типом роли",
+				// 						nameof(RolesCreateDto.RoleTypesUuids)
+				// 					)
+				// 				);
+				// 			}
 
 				bool exists = await _context.Roles.AnyAsync(r => r.Name == createDto.Name);
 				if (exists)
@@ -990,7 +990,7 @@ if (createDto.isBase == true) {
 		}
 
 
-		private async Task<bool> BaseRoleWithTypeExistsAsync( Guid roleTypeUuid, Guid? excludedUuid = null)
+		private async Task<bool> BaseRoleWithTypeExistsAsync(Guid roleTypeUuid, Guid? excludedUuid = null)
 		{
 			IQueryable<Roles> query = _context.Roles.Where(r => r.IsBase && r.RoleType.Any(rt => rt.Uuid == roleTypeUuid));
 			if (excludedUuid.HasValue)
