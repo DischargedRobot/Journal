@@ -1,4 +1,4 @@
-import { isApiError, mapApiErrors } from "./ApiError"
+import { isApiError, mapApiErrors } from "../api-error"
 
 const ApiJsonRequest = async <T>(
 	endpoint: string,

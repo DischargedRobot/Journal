@@ -1,8 +1,8 @@
 "use client"
-import AuthApi from "@/shared/api/AuthApi"
+import { AuthApi } from "@/shared/api/auth"
 import { TDepartmentResponseDto } from "@/shared/api/department"
 import { TGroupResponseDto } from "@/shared/api/group"
-import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
+import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import Wizard from "@/shared/ui/wizard/Wizard"
@@ -55,30 +55,34 @@ const Registration = (props: Props) => {
 			department: "",
 		},
 	})
-
 	const password = useWatch({
 		control,
 		name: "password",
 		defaultValue: "",
 	})
 
-	const role = useWatch({
-		control,
-		name: "personRole",
-		defaultValue: "СТУДЕНТ",
-	})
-
 	const isPersonalStepError = PERSONAL_FIELDS.some((field) => !!errors[field])
-
+	const updateField = useRegistrationFormStore((state) => state.updateField)
 	const isLoginStepError = LOGIN_FIELDS.some((field) => !!errors[field])
-	const handlerError = createApiErrorHandler()
+	const handlerRegistrationError = createApiErrorHandler([
+		{
+			error: ApiErrors.CONFLICT,
+			handler: (error) => {
+				if (error.field?.toLowerCase() === "login") {
+					updateField("login", "Логин уже занят")
+				} else if (error.field?.toLowerCase() === "email") {
+					updateField("email", "Email уже занят")
+				}
+			},
+		},
+	])
 
 	const formValues = useRegistrationFormStore(
 		useShallow((state) => state.formValues),
 	)
 
 	const router = useRouter()
-	const onSubmit = handleSubmit(async (data) => {
+	const onSubmit = handleSubmit(async () => {
 		if (isLoginStepError || isPersonalStepError) {
 			return
 		}
@@ -108,7 +112,7 @@ const Registration = (props: Props) => {
 
 			router.push("/journal")
 		} catch (error) {
-			handlerError(error)
+			handlerRegistrationError(error)
 		}
 	})
 
@@ -159,9 +163,9 @@ const Registration = (props: Props) => {
 				const personRole = state.formValues.personRole.value
 				if (personRole === "СТУДЕНТ") {
 					const group = state.formValues.group
-					console.log(group.value, personRole)
+					console.log(group.value, personRole, "СТУДЕНТыыы")
 					return (
-						groups.map((g) => g.code).includes(group.value) &&
+						groups.map((g) => g.code).includes(group.value ?? "") &&
 						group.error.length == 0
 					)
 				} else {
@@ -171,25 +175,31 @@ const Registration = (props: Props) => {
 					return (
 						departments
 							.map((d) => d.code)
-							.includes(department.value) &&
+							.includes(department.value ?? "") &&
 						department.error.length == 0
 					)
 				}
 			}
 
 			return (
-				((field.value.trim() !== "" && field.required) ||
+				((field.value?.trim() !== "" && field.required) ||
 					!field.required) &&
-				field.error === ""
+				field.error.length == 0
 			)
 		})
 	})
+	console.log(
+		groups,
+		isPersonalStepCompleted,
+		"isPersonalStepCompleted",
+		formValues.group,
+	)
 
 	const [currentStep, setCurrentStep] = useState<number | string>(1)
 
 	// текст тултипа кнопки "далее" на первом шаге
 	const personalDataButtonTooltip =
-		role === "СТУДЕНТ"
+		formValues.personRole.value === "СТУДЕНТ"
 			? groups.length === 0
 				? "Ошибка при связи с сервером. Групп нет"
 				: null

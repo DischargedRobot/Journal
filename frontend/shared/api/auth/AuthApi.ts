@@ -1,6 +1,6 @@
-import ApiJsonRequest from "../ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "../api-json-request"
 
-export type TUsersCreateDto = {
+type TUsersCreateDto = {
 	login: string
 	password: string
 	email?: string | null

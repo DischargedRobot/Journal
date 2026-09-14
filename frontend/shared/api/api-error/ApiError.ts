@@ -68,6 +68,12 @@ export const ApiErrors = {
 		"Неавторизован",
 	),
 	NOT_FOUND: new ApiError(404, "NOT_FOUND", "Not found", "Ресурс не найден"),
+	CONFLICT: new ApiError(
+		409,
+		"CONFLICT",
+		"Conflict",
+		"Ресурс с таким парамметром уже существует",
+	),
 	SERVER: new ApiError(500, "SERVER_ERROR", "Server error", "Ошибка сервера"),
 } as const
 

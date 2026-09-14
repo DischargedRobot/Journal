@@ -1,5 +1,5 @@
 import { MAIN_URL } from "@/shared/api/constants"
-import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { TDepartment } from "@/shared/model/t-department"
 import { TPagedRequestOptions } from "../TPaged/TPagedRequestOptions"
 import { buildQuery } from "../build-query"

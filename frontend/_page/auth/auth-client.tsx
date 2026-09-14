@@ -1,8 +1,8 @@
 "use client"
 
 import { Login, Registration } from "@/_page/auth"
-import { TDepartmentResponseDto } from "@/shared/api/department/DepartmentApi"
-import { TGroupResponseDto } from "@/shared/api/group/GroupApi"
+import { TDepartmentResponseDto } from "@/shared/api/department"
+import { TGroupResponseDto } from "@/shared/api/group"
 import { TRole } from "@/shared/model/role"
 import { Container } from "@mui/material"
 import { useState } from "react"

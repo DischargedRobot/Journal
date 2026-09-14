@@ -27,7 +27,7 @@ const RegistrationTextField = (props: Props) => {
 	let visibleHelperText: ReactNode =
 		(helperText ?? field?.error.length > 0) ? field.error : " "
 	if (fieldName == "password") {
-		visibleHelperText = <PasswordStregth password={field.value} />
+		visibleHelperText = <PasswordStregth password={field.value ?? ""} />
 	}
 	// console.log(visibleHelperText)
 

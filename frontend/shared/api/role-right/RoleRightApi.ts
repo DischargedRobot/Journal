@@ -1,4 +1,4 @@
-import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { AUTH_URL } from "../constants"
 import { buildQuery } from "../build-query"
 import { TPagedRequestOptions, TPagedResponse } from "../TPaged"

@@ -7,7 +7,7 @@ import {
 	TRoleRightName,
 	TRoleTypeName,
 } from "@/shared/model/role"
-import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { AUTH_URL } from "../constants"
 
 const ROLES_URL = `${AUTH_URL}/roles`

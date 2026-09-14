@@ -1,5 +1,5 @@
-import AuthApi from "@/shared/api/AuthApi"
-import { createApiErrorHandler } from "@/shared/ApiError/createApiErrorHandler"
+import { AuthApi } from "@/shared/api/auth"
+import { createApiErrorHandler } from "@/shared/api/api-error"
 import { Logo } from "@/shared/ui/Logo"
 import {
 	Stack,

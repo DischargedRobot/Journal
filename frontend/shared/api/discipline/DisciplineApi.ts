@@ -1,4 +1,4 @@
-import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { TPagedRequestOptions, TPagedResponse } from "@/shared/api/TPaged"
 import { buildQuery } from "@/shared/api/build-query"
 const DISCIPLINE_URL =

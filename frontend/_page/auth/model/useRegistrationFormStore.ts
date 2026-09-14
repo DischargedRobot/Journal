@@ -1,24 +1,23 @@
 import { create } from "zustand"
-import {
-	FormValues,
-	LOGIN_FIELDS,
-	PERSONAL_FIELDS,
-	REQUIRED_FIELDS,
-} from "../fields"
+import { FormValues, REQUIRED_FIELDS } from "../fields"
 
-type TFormField = {
-	value: string
+type TFormField<T> = {
+	value: T
 	error: string
 	required: boolean
 }
 
 export type TFormValues = {
-	[name in keyof Required<FormValues>]: TFormField
+	[name in keyof Required<FormValues>]: TFormField<FormValues[name]>
 }
 
 interface IFormStore {
 	formValues: TFormValues
-	updateField: (name: keyof FormValues, value: string) => void
+	updateField: <K extends keyof FormValues>(
+		name: K,
+		value?: FormValues[K],
+		error?: string,
+	) => void
 	isValidatedField: <K extends keyof FormValues>(
 		fieldName: K,
 		fieldValue: FormValues[K],
@@ -30,26 +29,38 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 		return REQUIRED_FIELDS.includes(name)
 	}
 
-	const initialFields: TFormValues = [
-		...PERSONAL_FIELDS,
-		...LOGIN_FIELDS,
-	].reduce((acc, name) => {
-		acc[name] = {
-			value: "",
-			error: "",
-			required: isRequired(name),
-		}
-		return acc
-	}, {} as TFormValues)
+	const createField = <K extends keyof FormValues>(
+		name: K,
+		value: FormValues[K],
+	): TFormField<FormValues[K]> => ({
+		value,
+		error: "",
+		required: isRequired(name),
+	})
+
+	const initialFields: TFormValues = {
+		firstName: createField("firstName", ""),
+		lastName: createField("lastName", ""),
+		patronymic: createField("patronymic", ""),
+		email: createField("email", ""),
+		personRole: createField("personRole", "СТУДЕНТ"),
+		group: createField("group", null),
+		department: createField("department", null),
+		login: createField("login", ""),
+		password: createField("password", ""),
+		passwordConfirm: createField("passwordConfirm", ""),
+	}
 
 	return {
-		formValues: {
-			...initialFields,
-			personRole: { ...initialFields.personRole, value: "СТУДЕНТ" },
-		},
-		updateField: (fieldName, fieldValue) => {
+		formValues: initialFields,
+		updateField: (fieldName, fieldValue, fieldError) => {
 			console.log("updateField START")
-			const error = get().isValidatedField(fieldName, fieldValue).error
+			let error = ""
+			if (fieldError) {
+				error = fieldError
+			} else if (fieldValue) {
+				error = get().isValidatedField(fieldName, fieldValue).error
+			}
 
 			set((state) => ({
 				formValues: {

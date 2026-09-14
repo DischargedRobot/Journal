@@ -43,7 +43,7 @@ const RegistrationRadioGroup = (props: Props) => {
 					row
 					value={personRole.value}
 					onChange={(_, value) => {
-						updateField("personRole", value)
+						updateField("personRole", value as typeof personRole.value)
 					}}
 				>
 					<FormControlLabel
@@ -64,8 +64,8 @@ const RegistrationRadioGroup = (props: Props) => {
 
 			{personRole.value === "СТУДЕНТ" && (
 				<RegistrationAutocomplete
-					items={departments}
-					fieldName="department"
+					items={groups}
+					fieldName="group"
 					label={groups.length > 0 ? "Группа" : "Групп нет"}
 				/>
 			)}

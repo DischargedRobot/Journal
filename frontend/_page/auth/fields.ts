@@ -13,11 +13,11 @@ interface ISelectedRole {
 export interface PERSONAL_FORM_FIELDS {
 	firstName: string
 	lastName: string
-	patronymic?: string | null
+	patronymic?: string
 	email: string
 	personRole: "СТУДЕНТ" | "ПРЕПОДАВАТЕЛЬ"
-	department?: string
-	group?: string
+	department: string | null
+	group: string | null
 }
 
 export const REQUIRED_FIELDS: (keyof FormValues)[] = [

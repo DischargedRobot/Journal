@@ -1,4 +1,4 @@
-import ApiJsonRequest from "@/shared/ApiError/ApiJsonRequest"
+import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { MAIN_URL } from "@/shared/api/constants"
 import { TPagedRequestOptions, TPagedResponse } from "@/shared/api/TPaged"
 import { IBaseEntityWithVersion } from "@/shared/model/utility-types/base-entity"

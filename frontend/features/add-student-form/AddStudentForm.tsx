@@ -7,7 +7,7 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Radio from "@mui/material/Radio"
 import RoleGroup from "@/shared/ui/role/RoleGroup"
 import CachedIcon from "@mui/icons-material/Cached"
-import AuthApi from "@/shared/api/AuthApi"
+import { AuthApi } from "@/shared/api/auth"
 
 interface Props {
 	isOpen: boolean
@@ -78,7 +78,15 @@ const AddStudentForm = (props: Props) => {
 						</RadioGroup>
 						<RoleGroup
 							roles={[
-								{ uuid: "1", name: "Студент", permissions: [] },
+								{
+									uuid: "1",
+									name: "Студент",
+									isBase: false,
+									rights: [
+										{ uuid: "1", name: "CREATE_USER" },
+									],
+									roleTypes: [{ uuid: "1", name: "СТУДЕНТ" }],
+								},
 							]}
 							onAddRole={() => {}}
 							onClickRole={() => {}}
