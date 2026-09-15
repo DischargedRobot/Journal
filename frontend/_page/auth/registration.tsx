@@ -17,7 +17,9 @@ import {
 } from "./fields"
 import { useShallow } from "zustand/shallow"
 
-import FormTextField from "./RegistrationTextField"
+import FormTextField, {
+	PasswordRegistrationTextField,
+} from "./RegistrationTextField"
 import FormRadioGroup from "./RegistrationRadioGroup"
 import RegistrationButton from "./RegistrationButton"
 import useRegistrationFormStore from "./model/useRegistrationFormStore"
@@ -55,11 +57,6 @@ const Registration = (props: Props) => {
 			department: "",
 		},
 	})
-	const password = useWatch({
-		control,
-		name: "password",
-		defaultValue: "",
-	})
 
 	const isPersonalStepError = PERSONAL_FIELDS.some((field) => !!errors[field])
 	const updateField = useRegistrationFormStore((state) => state.updateField)
@@ -68,15 +65,15 @@ const Registration = (props: Props) => {
 		{
 			error: ApiErrors.CONFLICT,
 			handler: (error) => {
-				console.log(error, "error handlerRegistrationError")
+				// console.log(error, "error handlerRegistrationError")
 				switch (error.field?.toLowerCase()) {
 					case "login":
 						console.log("login", error.field)
 						updateField({ name: "login", error: "Логин уже занят" })
 						break
-					case "email":
-						updateField({ name: "email", error: "Email уже занят" })
-						break
+					// case "email":
+					// 	updateField({ name: "email", error: "Email уже занят" })
+					// 	break
 				}
 			},
 		},
@@ -301,7 +298,7 @@ const Registration = (props: Props) => {
 						</Wizard.StepHeader>
 						<Wizard.StepContent>
 							<form
-								className="flex flex-col"
+								className="flex flex-col gap-2"
 								onSubmit={(event) => event.preventDefault()}
 							>
 								<FormTextField
@@ -323,7 +320,7 @@ const Registration = (props: Props) => {
 								/>
 
 								<FormTextField
-									label="Email*"
+									label="Email"
 									size="small"
 									type="email"
 									fieldName="email"
@@ -376,17 +373,19 @@ const Registration = (props: Props) => {
 									fieldName="login"
 								/>
 
-								<FormTextField
+								<PasswordRegistrationTextField
 									label="Пароль"
 									size="small"
 									type="password"
 									fieldName="password"
 									helperText={
-										<PasswordStregth password={password} />
+										<PasswordStregth
+											password={formValues.password.value}
+										/>
 									}
 								/>
 
-								<FormTextField
+								<PasswordRegistrationTextField
 									label="Повторите пароль"
 									size="small"
 									type="password"

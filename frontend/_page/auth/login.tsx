@@ -10,11 +10,14 @@ import {
 	Button,
 	Box,
 	SvgIcon,
+	InputAdornment,
+	IconButton,
 } from "@mui/material"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import LoginButton, { LoginFormValues } from "./LoginButton"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 
 interface Props {
 	onToLogin: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -31,7 +34,7 @@ const Login = (props: Props) => {
 		},
 	})
 	const router = useRouter()
-	const [errorMessageResponse, setErrorMessageResponse] = useState<string>("")
+	const [errorMessageResponse, setErrorMessageResponse] = useState("\u00A0")
 	const handlerError = createApiErrorHandler(
 		[
 			{
@@ -45,14 +48,20 @@ const Login = (props: Props) => {
 	)
 
 	const onSubmit = handleSubmit(async (data) => {
+		setLoading(true)
 		try {
 			await AuthApi.login(data.login, data.password)
 			router.push("/journal")
 		} catch (error) {
 			handlerError(error)
+		} finally {
+			setLoading(false)
 		}
 	})
 
+	const [loading, setLoading] = useState(false)
+
+	const [showPassword, setShowPassword] = useState(false)
 	return (
 		// right-1 - чтобы не было видно границы между блоками при анимации
 		<Box
@@ -131,26 +140,56 @@ const Login = (props: Props) => {
 				</Box>
 				<form onSubmit={onSubmit} className="flex flex-col  gap-4 ">
 					<TextField
-						{...register("login", { required: true })}
+						{...register("login", {
+							required: true,
+							onChange: () => {
+								if (errorMessageResponse !== "\u00A0") {
+									setErrorMessageResponse("\u00A0")
+								}
+							},
+						})}
 						variant="outlined"
 						label="Логин"
-						onChange={() => {
-							if (errorMessageResponse !== "\u00A0") {
-								setErrorMessageResponse("\u00A0")
-							}
-						}}
 						required
+						error={errorMessageResponse !== "\u00A0"}
 					/>
 					<TextField
-						{...register("password", { required: true })}
+						{...register("password", {
+							required: true,
+							onChange: () => {
+								if (errorMessageResponse !== "\u00A0") {
+									setErrorMessageResponse("\u00A0")
+								}
+							},
+						})}
 						variant="outlined"
 						label="Пароль"
 						required
-						type="password"
-						onChange={() => {
-							if (errorMessageResponse !== "\u00A0") {
-								setErrorMessageResponse("\u00A0")
-							}
+						type={showPassword ? "text" : "password"}
+						error={errorMessageResponse !== "\u00A0"}
+						slotProps={{
+							input: {
+								endAdornment: (
+									<InputAdornment position="end">
+										<IconButton
+											onMouseDown={(event) => {
+												event.preventDefault()
+											}}
+											onClick={() =>
+												setShowPassword(
+													(state) => !state,
+												)
+											}
+										>
+											{showPassword ? (
+												<VisibilityOff />
+											) : (
+												<Visibility />
+											)}
+										</IconButton>
+									</InputAdornment>
+								),
+							},
 						}}
 					/>
 					<Typography
@@ -163,6 +202,7 @@ const Login = (props: Props) => {
 						Забыли пароль?
 					</Typography>
 					<LoginButton
+						loading={loading}
 						control={control}
 						responseError={errorMessageResponse !== "\u00A0"}
 					/>

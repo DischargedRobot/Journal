@@ -1,9 +1,12 @@
-import TextField from "@mui/material/TextField"
-import { HTMLInputTypeAttribute, memo, ReactNode } from "react"
+import TextField, { TextFieldProps } from "@mui/material/TextField"
+import { HTMLInputTypeAttribute, memo, ReactNode, useState } from "react"
 import useRegistrationFormStore, {
 	TFormValues,
 } from "./model/useRegistrationFormStore"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
+import { InputAdornment } from "@mui/material"
+import { IconButton } from "@mui/material"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 
 interface Props {
 	label: string
@@ -13,11 +16,20 @@ interface Props {
 	helperText?: ReactNode
 	required?: boolean
 	fieldName: keyof TFormValues
+	slotProps?: TextFieldProps["slotProps"]
 }
 
 const RegistrationTextField = (props: Props) => {
-	const { label, size, type, errorMessage, helperText, required, fieldName } =
-		props
+	const {
+		label,
+		size,
+		type,
+		errorMessage,
+		helperText,
+		required,
+		fieldName,
+		slotProps,
+	} = props
 
 	const field = useRegistrationFormStore(
 		(state) => state.formValues[fieldName],
@@ -26,16 +38,14 @@ const RegistrationTextField = (props: Props) => {
 
 	let visibleHelperText: ReactNode =
 		helperText ?? (field?.error.length > 0 ? field.error : " ")
-	if (fieldName === "password") {
-		visibleHelperText = <PasswordStregth password={field.value ?? ""} />
-	}
-	console.log(
-		visibleHelperText,
-		"visibleHelperText",
-		helperText,
-		field?.error,
-		fieldName,
-	)
+
+	// console.log(
+	// 	visibleHelperText,
+	// 	"visibleHelperText",
+	// 	helperText,
+	// 	field?.error,
+	// 	fieldName,
+	// )
 
 	return (
 		<TextField
@@ -48,8 +58,48 @@ const RegistrationTextField = (props: Props) => {
 			helperText={visibleHelperText}
 			value={field?.value ?? ""}
 			onChange={(event) => updateField(fieldName, event.target.value)}
+			slotProps={slotProps}
 		/>
 	)
 }
+
+export const PasswordRegistrationTextField = memo((props: Props) => {
+	const { fieldName } = props
+	const field = useRegistrationFormStore((state) => state.formValues.password)
+	const [showPassword, setShowPassword] = useState(false)
+	return (
+		<RegistrationTextField
+			{...props}
+			helperText={
+				fieldName === "password" ? (
+					<PasswordStregth password={field?.value ?? ""} />
+				) : (
+					props.helperText
+				)
+			}
+			type={showPassword ? "text" : "password"}
+			slotProps={{
+				input: {
+					endAdornment: (
+						<InputAdornment position="end">
+							<IconButton
+								onClick={() =>
+									setShowPassword((state) => !state)
+								}
+								onMouseDown={(event) => event.preventDefault()}
+							>
+								{showPassword ? (
+									<VisibilityOff />
+								) : (
+									<Visibility />
+								)}
+							</IconButton>
+						</InputAdornment>
+					),
+				},
+			}}
+		/>
+	)
+})
 
 export default memo(RegistrationTextField)

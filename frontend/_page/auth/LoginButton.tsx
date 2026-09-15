@@ -11,10 +11,11 @@ export interface LoginFormValues {
 interface Props {
 	control: Control<LoginFormValues>
 	responseError: boolean
+	loading: boolean
 }
 
 const LoginButton = (props: Props) => {
-	const { control, responseError } = props
+	const { control, responseError, loading } = props
 	const [login, password] = useWatch({
 		control,
 		name: ["login", "password"],
@@ -35,6 +36,7 @@ const LoginButton = (props: Props) => {
 					: responseError
 						? "Неверный логин или пароль"
 						: ""
+	console.log(errorMessage, "errorMessage")
 	return (
 		<Tooltip title={errorMessage}>
 			<span>
@@ -44,6 +46,7 @@ const LoginButton = (props: Props) => {
 					color="primary"
 					type="submit"
 					disabled={!isValid}
+					loading={loading}
 				>
 					Войти
 				</Button>

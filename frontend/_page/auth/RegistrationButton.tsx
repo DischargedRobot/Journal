@@ -8,7 +8,7 @@ const RegistrationButton = () => {
 		return REQUIRED_FIELDS.every((fieldName) => {
 			const field = state.formValues[fieldName]
 
-			return field.value.trim() !== "" && field.error === ""
+			return field?.value?.trim() !== "" && field?.error === ""
 		})
 	})
 

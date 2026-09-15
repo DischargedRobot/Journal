@@ -13,7 +13,7 @@ interface ISelectedRole {
 export interface PERSONAL_FORM_FIELDS {
 	firstName: string
 	lastName: string
-	patronymic?: string
+	patronymic: string
 	email: string
 	personRole: "СТУДЕНТ" | "ПРЕПОДАВАТЕЛЬ"
 	department: string | null

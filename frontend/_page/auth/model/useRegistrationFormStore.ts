@@ -17,6 +17,19 @@ type TUpdateFieldArgs<K extends keyof FormValues> = {
 	error?: string
 }
 
+const FIELDS_LABELS = {
+	firstName: "Имя",
+	lastName: "Фамилия",
+	patronymic: "Отчество",
+	email: "Email",
+	personRole: "Роль",
+	group: "Группа",
+	department: "Отдел",
+	login: "Логин",
+	password: "Пароль",
+	passwordConfirm: "Подтверждение пароля",
+}
+
 interface IFormStore {
 	formValues: TFormValues
 	updateField: {
@@ -78,12 +91,12 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 				error = fieldError
 			}
 			// console.log("updateField START")
-			if (fieldError) {
+
+			if (fieldError !== undefined) {
 				error = fieldError
-			} else if (fieldValue) {
+			} else if (fieldValue !== undefined) {
 				error = get().isValidatedField(fieldName, fieldValue).error
 			}
-
 			set((state) => ({
 				formValues: {
 					...state.formValues,
@@ -112,7 +125,7 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 			if (isEmpty) {
 				return field.required
 					? {
-							error: `Поле ${fieldName} обязательно для заполнения`,
+							error: "Поле обязательно для заполнения",
 							isValidated: false,
 						}
 					: {
@@ -134,13 +147,15 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 				}
 
 				case "firstName":
-				case "lastName": {
-					const isValidated = /^[а-яА-ЯёЁ -]+$/.test(fieldValue)
-
+				case "lastName":
+				case "patronymic": {
+					const isValidated =
+						/^[а-яА-ЯёЁ -]+$/.test(fieldValue) ||
+						fieldValue.trim() === ""
 					return {
 						error: isValidated
 							? ""
-							: `${fieldName} должно содержать только русские буквы, пробелы и тире`,
+							: `${FIELDS_LABELS[fieldName]} должн${fieldName === "lastName" ? "а" : "а"} содержать только русские буквы, пробелы и тире`,
 						isValidated,
 					}
 				}
