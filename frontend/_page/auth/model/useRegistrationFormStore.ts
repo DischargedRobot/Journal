@@ -11,13 +11,22 @@ export type TFormValues = {
 	[name in keyof Required<FormValues>]: TFormField<FormValues[name]>
 }
 
+type TUpdateFieldArgs<K extends keyof FormValues> = {
+	name: K
+	value?: FormValues[K]
+	error?: string
+}
+
 interface IFormStore {
 	formValues: TFormValues
-	updateField: <K extends keyof FormValues>(
-		name: K,
-		value?: FormValues[K],
-		error?: string,
-	) => void
+	updateField: {
+		<K extends keyof FormValues>(
+			name: K,
+			value?: FormValues[K],
+			error?: string,
+		): void
+		<K extends keyof FormValues>(args: TUpdateFieldArgs<K>): void
+	}
 	isValidatedField: <K extends keyof FormValues>(
 		fieldName: K,
 		fieldValue: FormValues[K],
@@ -53,9 +62,22 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 
 	return {
 		formValues: initialFields,
-		updateField: (fieldName, fieldValue, fieldError) => {
-			console.log("updateField START")
-			let error = ""
+		updateField: <K extends keyof FormValues>(
+			fieldNameOrArgs: K | TUpdateFieldArgs<K>,
+			fieldValue?: FormValues[K],
+			fieldError?: string,
+		) => {
+			let fieldName: keyof FormValues
+			let value: FormValues[keyof FormValues] | undefined
+			let error: string | undefined
+			if (typeof fieldNameOrArgs === "object") {
+				;({ name: fieldName, value, error } = fieldNameOrArgs)
+			} else {
+				fieldName = fieldNameOrArgs
+				value = fieldValue
+				error = fieldError
+			}
+			// console.log("updateField START")
 			if (fieldError) {
 				error = fieldError
 			} else if (fieldValue) {
@@ -67,12 +89,12 @@ const useRegistrationFormStore = create<IFormStore>((set, get) => {
 					...state.formValues,
 					[fieldName]: {
 						...state.formValues[fieldName],
-						value: fieldValue,
-						error,
+						...(value !== undefined ? { value } : {}),
+						...(error !== undefined ? { error } : {}),
 					},
 				},
 			}))
-			console.log("updateField END")
+			// console.log("updateField END")
 		},
 
 		isValidatedField(fieldName, fieldValue) {
