@@ -1,5 +1,7 @@
+"use client"
+
 import { AuthApi } from "@/shared/api/auth"
-import { createApiErrorHandler } from "@/shared/api/api-error"
+import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
 import { Logo } from "@/shared/ui/Logo"
 import {
 	Stack,
@@ -11,11 +13,8 @@ import {
 } from "@mui/material"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
-
-interface FormValues {
-	login: string
-	password: string
-}
+import { useState } from "react"
+import LoginButton, { LoginFormValues } from "./LoginButton"
 
 interface Props {
 	onToLogin: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -25,15 +24,25 @@ interface Props {
 const Login = (props: Props) => {
 	const { focused, onToLogin } = props
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm<FormValues>()
-
+	const { register, handleSubmit, control } = useForm<LoginFormValues>({
+		defaultValues: {
+			login: "",
+			password: "",
+		},
+	})
 	const router = useRouter()
-
-	const handlerError = createApiErrorHandler([], router.push)
+	const [errorMessageResponse, setErrorMessageResponse] = useState<string>("")
+	const handlerError = createApiErrorHandler(
+		[
+			{
+				error: ApiErrors.UNAUTHORIZED,
+				handler: () => {
+					setErrorMessageResponse("Неверный логин или пароль")
+				},
+			},
+		],
+		router.push,
+	)
 
 	const onSubmit = handleSubmit(async (data) => {
 		try {
@@ -116,28 +125,33 @@ const Login = (props: Props) => {
 						<Logo />
 					</SvgIcon>
 					<Typography variant="h4">Авторизация</Typography>
+					<Typography variant="body1" color="error">
+						{errorMessageResponse || "\u00A0"}
+					</Typography>
 				</Box>
 				<form onSubmit={onSubmit} className="flex flex-col  gap-4 ">
 					<TextField
+						{...register("login", { required: true })}
 						variant="outlined"
 						label="Логин"
-						{...register("login", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
+						onChange={() => {
+							if (errorMessageResponse !== "\u00A0") {
+								setErrorMessageResponse("\u00A0")
+							}
+						}}
+						required
 					/>
 					<TextField
+						{...register("password", { required: true })}
 						variant="outlined"
 						label="Пароль"
+						required
 						type="password"
-						{...register("password", {
-							required: {
-								value: true,
-								message: "Поле обязательно для заполнения",
-							},
-						})}
+						onChange={() => {
+							if (errorMessageResponse !== "\u00A0") {
+								setErrorMessageResponse("\u00A0")
+							}
+						}}
 					/>
 					<Typography
 						variant="subtitle1"
@@ -148,9 +162,10 @@ const Login = (props: Props) => {
 					>
 						Забыли пароль?
 					</Typography>
-					<Button variant="contained" color="primary" type="submit">
-						Войти
-					</Button>
+					<LoginButton
+						control={control}
+						responseError={errorMessageResponse !== "\u00A0"}
+					/>
 				</form>
 			</Stack>
 		</Box>
