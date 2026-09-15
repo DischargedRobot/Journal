@@ -25,11 +25,17 @@ const RegistrationTextField = (props: Props) => {
 	const updateField = useRegistrationFormStore((state) => state.updateField)
 
 	let visibleHelperText: ReactNode =
-		(helperText ?? field?.error.length > 0) ? field.error : " "
-	if (fieldName == "password") {
+		helperText ?? (field?.error.length > 0 ? field.error : " ")
+	if (fieldName === "password") {
 		visibleHelperText = <PasswordStregth password={field.value ?? ""} />
 	}
-	// console.log(visibleHelperText)
+	console.log(
+		visibleHelperText,
+		"visibleHelperText",
+		helperText,
+		field?.error,
+		fieldName,
+	)
 
 	return (
 		<TextField

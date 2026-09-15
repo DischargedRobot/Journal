@@ -30,7 +30,7 @@ const RegistrationAutocomplete = (props: Props) => {
 				)}
 			value={selectedItem.value}
 			onChange={(_, newValue) => {
-				console.log(newValue, "newValue", fieldName)
+				// console.log(newValue, "newValue", fieldName)
 				// Выбрали группу из списка
 				updateField(fieldName, newValue ?? "")
 			}}

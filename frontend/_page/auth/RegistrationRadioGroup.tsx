@@ -19,7 +19,7 @@ interface Props {
 const RegistrationRadioGroup = (props: Props) => {
 	const { groups, departments } = props
 
-	console.log("RegistrationRadioGroup render")
+	// console.log("RegistrationRadioGroup render")
 
 	const selectedGroup = useRegistrationFormStore(
 		(state) => state.formValues.group,
@@ -43,7 +43,10 @@ const RegistrationRadioGroup = (props: Props) => {
 					row
 					value={personRole.value}
 					onChange={(_, value) => {
-						updateField("personRole", value as typeof personRole.value)
+						updateField(
+							"personRole",
+							value as typeof personRole.value,
+						)
 					}}
 				>
 					<FormControlLabel

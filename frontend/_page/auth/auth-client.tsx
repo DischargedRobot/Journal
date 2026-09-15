@@ -17,7 +17,7 @@ export const AuthClient = (props: Props) => {
 	const { groups, departments, roles } = props
 	const [registrationOpen, setRegistrationOpen] = useState(false)
 
-	console.log(roles, "roles auth client ")
+	// console.log(roles, "roles auth client ")
 	return (
 		<Container
 			className="relative flex items-stretch justify-between p-0! w-full overflow-clip"

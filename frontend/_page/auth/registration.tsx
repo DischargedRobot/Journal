@@ -40,7 +40,7 @@ type FulfieldValues = { [K in keyof Required<FormValues>]: boolean }
 
 const Registration = (props: Props) => {
 	const { focused, groups, onToRegistration, departments, roles } = props
-	console.log(roles, "roles Registration")
+	// console.log(roles, "roles Registration")
 
 	const {
 		register,
@@ -68,10 +68,15 @@ const Registration = (props: Props) => {
 		{
 			error: ApiErrors.CONFLICT,
 			handler: (error) => {
-				if (error.field?.toLowerCase() === "login") {
-					updateField("login", "Логин уже занят")
-				} else if (error.field?.toLowerCase() === "email") {
-					updateField("email", "Email уже занят")
+				console.log(error, "error handlerRegistrationError")
+				switch (error.field?.toLowerCase()) {
+					case "login":
+						console.log("login", error.field)
+						updateField({ name: "login", error: "Логин уже занят" })
+						break
+					case "email":
+						updateField({ name: "email", error: "Email уже занят" })
+						break
 				}
 			},
 		},
@@ -94,12 +99,12 @@ const Registration = (props: Props) => {
 						r.name.toUpperCase().trim() ===
 						formValues.personRole.value.toUpperCase().trim(),
 				)?.uuid ?? null
-			console.log(
-				selectedRole,
-				formValues.personRole.value,
-				roles,
-				"sadas",
-			)
+			// console.log(
+			// 	selectedRole,
+			// 	formValues.personRole.value,
+			// 	roles,
+			// 	"sadas",
+			// )
 			await AuthApi.register({
 				login: formValues.login.value,
 				password: formValues.password.value,
@@ -112,6 +117,7 @@ const Registration = (props: Props) => {
 
 			router.push("/journal")
 		} catch (error) {
+			console.log(error, "error onSubmit")
 			handlerRegistrationError(error)
 		}
 	})
@@ -163,14 +169,14 @@ const Registration = (props: Props) => {
 				const personRole = state.formValues.personRole.value
 				if (personRole === "СТУДЕНТ") {
 					const group = state.formValues.group
-					console.log(group.value, personRole, "СТУДЕНТыыы")
+					// console.log(group.value, personRole, "СТУДЕНТыыы")
 					return (
 						groups.map((g) => g.code).includes(group.value ?? "") &&
 						group.error.length == 0
 					)
 				} else {
 					const department = state.formValues.department
-					console.log(department.value)
+					// console.log(department.value)
 
 					return (
 						departments
@@ -188,12 +194,12 @@ const Registration = (props: Props) => {
 			)
 		})
 	})
-	console.log(
-		groups,
-		isPersonalStepCompleted,
-		"isPersonalStepCompleted",
-		formValues.group,
-	)
+	// console.log(
+	// 	groups,
+	// 	isPersonalStepCompleted,
+	// 	"isPersonalStepCompleted",
+	// 	formValues.group,
+	// )
 
 	const [currentStep, setCurrentStep] = useState<number | string>(1)
 

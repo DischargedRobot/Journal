@@ -21,7 +21,7 @@ export const createApiErrorHandler = (
 	const handleError = (error: ApiError | unknown) => {
 		if (isApiError(error)) {
 			const customHandler = customHandlers.find((handler) => {
-				return handler.error.statusCode === error.statusCode
+				return handler.error.httpCode === error.httpCode
 			})
 
 			if (customHandler) {
@@ -55,11 +55,8 @@ export const createApiErrorHandler = (
 				}
 				break
 			case 404:
-				break
 			case 409:
-				break
 			case 500:
-				break
 			default:
 				break
 		}
