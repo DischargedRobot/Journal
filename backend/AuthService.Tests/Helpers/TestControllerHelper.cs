@@ -25,4 +25,9 @@ public static class TestControllerHelper
     {
         controller.Request.Headers.Authorization = $"Bearer {token}";
     }
+
+    public static void SetAccessTokenCookie(ControllerBase controller, string token)
+    {
+        controller.Request.Headers.Cookie = $"accessToken={token}";
+    }
 }

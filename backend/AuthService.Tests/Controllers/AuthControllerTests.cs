@@ -47,13 +47,13 @@ public class AuthControllerTests : IDisposable
     [Fact(DisplayName = "Вход при пустом логине или пароле")]
     public async Task Login_WhenCredentialsEmpty_ReturnsBadRequest()
     {
-        ActionResult<LoginResponse> result = await _controller.Login(new LoginRequest
+        IActionResult result = await _controller.Login(new LoginRequest
         {
             Login = "   ",
             Password = "password123"
         });
 
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("0.2.0", error.StatusCode);
     }
@@ -63,13 +63,13 @@ public class AuthControllerTests : IDisposable
     {
         await TestDataMock.MockUserAsync(_context);
 
-        ActionResult<LoginResponse> result = await _controller.Login(new LoginRequest
+        IActionResult result = await _controller.Login(new LoginRequest
         {
             Login = "ivanov",
             Password = "wrong-password"
         });
 
-        UnauthorizedObjectResult unauthorized = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+        UnauthorizedObjectResult unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
         ApiError error = Assert.IsType<ApiError>(unauthorized.Value);
         Assert.Equal("1.2.3", error.StatusCode);
     }
@@ -77,13 +77,13 @@ public class AuthControllerTests : IDisposable
     [Fact(DisplayName = "Вход при несуществующем пользователе")]
     public async Task Login_WhenUserNotFound_ReturnsUnauthorized()
     {
-        ActionResult<LoginResponse> result = await _controller.Login(new LoginRequest
+        IActionResult result = await _controller.Login(new LoginRequest
         {
             Login = "unknown",
             Password = "password123"
         });
 
-        UnauthorizedObjectResult unauthorized = Assert.IsType<UnauthorizedObjectResult>(result.Result);
+        UnauthorizedObjectResult unauthorized = Assert.IsType<UnauthorizedObjectResult>(result);
         ApiError error = Assert.IsType<ApiError>(unauthorized.Value);
         Assert.Equal("1.2.3", error.StatusCode);
     }
@@ -93,34 +93,33 @@ public class AuthControllerTests : IDisposable
     {
         await TestDataMock.MockUserAsync(_context);
 
-        ActionResult<LoginResponse> result = await _controller.Login(new LoginRequest
+        IActionResult result = await _controller.Login(new LoginRequest
         {
             Login = "ivanov",
             Password = "password123"
         });
 
-        OkObjectResult ok = Assert.IsType<OkObjectResult>(result.Result);
-        LoginResponse response = Assert.IsType<LoginResponse>(ok.Value);
-        Assert.False(string.IsNullOrWhiteSpace(response.AccessToken));
-        Assert.True(Guid.TryParse(response.AccessToken, out Guid tokenUuid));
+        Assert.IsType<OkResult>(result);
+        string opaqueToken = AssertHasAccessTokenCookie(_controller);
+        Assert.True(Guid.TryParse(opaqueToken, out Guid tokenUuid));
         Assert.NotNull(await _accessTokenList.GetAsync(tokenUuid));
     }
 
     [Fact(DisplayName = "Регистрация при пустом теле запроса")]
-    public async Task Register_WhenRequestNull_ReturnsBadRequest()
+    public async Task Registration_WhenRequestNull_ReturnsBadRequest()
     {
-        IActionResult result = await _controller.Register(null);
+        ActionResult<RegistrationResponse> result = await _controller.Registration(null);
 
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("0.1.0", error.StatusCode);
         Assert.Equal("BODY", error.Field);
     }
 
     [Fact(DisplayName = "Регистрация при пустом логине или пароле")]
-    public async Task Register_WhenLoginOrPasswordEmpty_ReturnsBadRequest()
+    public async Task Registration_WhenLoginOrPasswordEmpty_ReturnsBadRequest()
     {
-        IActionResult result = await _controller.Register(new UsersCreateDto
+        ActionResult<RegistrationResponse> result = await _controller.Registration(new UsersCreateDto
         {
             Login = "   ",
             Password = "password123",
@@ -128,15 +127,15 @@ public class AuthControllerTests : IDisposable
             LastName = "Иванов"
         });
 
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("0.2.0", error.StatusCode);
     }
 
     [Fact(DisplayName = "Регистрация при пустом имени")]
-    public async Task Register_WhenFirstNameEmpty_ReturnsBadRequest()
+    public async Task Registration_WhenFirstNameEmpty_ReturnsBadRequest()
     {
-        IActionResult result = await _controller.Register(new UsersCreateDto
+        ActionResult<RegistrationResponse> result = await _controller.Registration(new UsersCreateDto
         {
             Login = "newuser",
             Password = "password123",
@@ -144,16 +143,16 @@ public class AuthControllerTests : IDisposable
             LastName = "Иванов"
         });
 
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("0.2.1", error.StatusCode);
         Assert.Equal("FirstName", error.Field);
     }
 
     [Fact(DisplayName = "Регистрация при невалидном UUID роли")]
-    public async Task Register_WhenRoleUuidInvalid_ReturnsBadRequest()
+    public async Task Registration_WhenRoleUuidInvalid_ReturnsBadRequest()
     {
-        IActionResult result = await _controller.Register(new UsersCreateDto
+        ActionResult<RegistrationResponse> result = await _controller.Registration(new UsersCreateDto
         {
             Login = "newuser",
             Password = "password123",
@@ -162,18 +161,18 @@ public class AuthControllerTests : IDisposable
             RolesUuid = ["СТУДЕНТ"],
         });
 
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result.Result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("0.2.2", error.StatusCode);
         Assert.Equal("RolesUuid", error.Field);
     }
 
     [Fact(DisplayName = "Регистрация при дублировании логина")]
-    public async Task Register_WhenDuplicateLogin_ReturnsConflict()
+    public async Task Registration_WhenDuplicateLogin_ReturnsConflict()
     {
         await TestDataMock.MockUserAsync(_context);
 
-        IActionResult result = await _controller.Register(new UsersCreateDto
+        ActionResult<RegistrationResponse> result = await _controller.Registration(new UsersCreateDto
         {
             Login = "ivanov",
             Password = "password123",
@@ -181,15 +180,15 @@ public class AuthControllerTests : IDisposable
             LastName = "Иванов"
         });
 
-        ConflictObjectResult conflict = Assert.IsType<ConflictObjectResult>(result);
+        ConflictObjectResult conflict = Assert.IsType<ConflictObjectResult>(result.Result);
         ApiError error = Assert.IsType<ApiError>(conflict.Value);
         Assert.Equal("1.1.1", error.StatusCode);
     }
 
     [Fact(DisplayName = "Регистрация при валидных данных")]
-    public async Task Register_WhenValid_ReturnsCreated()
+    public async Task Registration_WhenValid_ReturnsCreated()
     {
-        IActionResult result = await _controller.Register(new UsersCreateDto
+        ActionResult<RegistrationResponse> result = await _controller.Registration(new UsersCreateDto
         {
             Login = "petrov",
             Password = "password123",
@@ -197,13 +196,15 @@ public class AuthControllerTests : IDisposable
             LastName = "Петров"
         });
 
-        CreatedResult created = Assert.IsType<CreatedResult>(result);
-        UsersResponseDto dto = Assert.IsType<UsersResponseDto>(created.Value);
-        Assert.Equal("petrov", dto.Login);
-        Assert.False(string.IsNullOrWhiteSpace(_controller.Response.Headers.Authorization.ToString()));
+        CreatedResult created = Assert.IsType<CreatedResult>(result.Result);
+        RegistrationResponse response = Assert.IsType<RegistrationResponse>(created.Value);
+        Assert.Equal("petrov", response.User.Login);
+        string opaqueToken = AssertHasAccessTokenCookie(_controller);
+        Assert.True(Guid.TryParse(opaqueToken, out Guid tokenUuid));
+        Assert.NotNull(await _accessTokenList.GetAsync(tokenUuid));
     }
 
-    [Fact(DisplayName = "Проверка токена при отсутствии заголовка Authorization")]
+    [Fact(DisplayName = "Проверка токена при отсутствии cookie и заголовка")]
     public async Task CheckAuthtoken_WhenNoHeader_ReturnsBadRequest()
     {
         IActionResult result = await _controller.CheckAuthtoken();
@@ -211,19 +212,7 @@ public class AuthControllerTests : IDisposable
         BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
         ApiError error = Assert.IsType<ApiError>(badRequest.Value);
         Assert.Equal("2.4.0", error.StatusCode);
-        Assert.Equal("Authorization", error.Field);
-    }
-
-    [Fact(DisplayName = "Проверка токена при неверном формате заголовка")]
-    public async Task CheckAuthtoken_WhenInvalidHeaderFormat_ReturnsBadRequest()
-    {
-        _controller.Request.Headers.Authorization = "Token abc";
-
-        IActionResult result = await _controller.CheckAuthtoken();
-
-        BadRequestObjectResult badRequest = Assert.IsType<BadRequestObjectResult>(result);
-        ApiError error = Assert.IsType<ApiError>(badRequest.Value);
-        Assert.Equal("2.4.2", error.StatusCode);
+        Assert.Equal("accessToken", error.Field);
     }
 
     [Fact(DisplayName = "Проверка токена при недействительном токене")]
@@ -243,7 +232,7 @@ public class AuthControllerTests : IDisposable
     {
         Users user = await TestDataMock.MockUserAsync(_context);
         string opaqueToken = await AuthTestHelper.IssueOpaqueTokenAsync(_tokenService, _accessTokenList, user.Uuid);
-        TestControllerHelper.SetAuthorizationHeader(_controller, opaqueToken);
+        TestControllerHelper.SetAccessTokenCookie(_controller, opaqueToken);
 
         IActionResult result = await _controller.CheckAuthtoken();
 
@@ -260,7 +249,7 @@ public class AuthControllerTests : IDisposable
         string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
         await _accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30));
         await _accessTokenBlackList.SaveAsync(tokenUuid, user.Uuid, TimeSpan.FromMinutes(30));
-        TestControllerHelper.SetAuthorizationHeader(_controller, opaqueToken);
+        TestControllerHelper.SetAccessTokenCookie(_controller, opaqueToken);
 
         IActionResult result = await _controller.CheckAuthtoken();
 
@@ -269,7 +258,7 @@ public class AuthControllerTests : IDisposable
         Assert.Equal("2.2.2", error.StatusCode);
     }
 
-    [Fact(DisplayName = "Выход при отсутствии заголовка Authorization")]
+    [Fact(DisplayName = "Выход при отсутствии access token")]
     public async Task Logout_WhenNoAuthHeader_ReturnsBadRequest()
     {
         IActionResult result = await _controller.Logout();
@@ -292,5 +281,15 @@ public class AuthControllerTests : IDisposable
     public void Dispose()
     {
         _testContext.Dispose();
+    }
+
+    private static string AssertHasAccessTokenCookie(ControllerBase controller)
+    {
+        string? setCookie = controller.Response.Headers.SetCookie
+            .FirstOrDefault(value => value.StartsWith("accessToken=", StringComparison.Ordinal));
+        Assert.False(string.IsNullOrWhiteSpace(setCookie));
+        string opaqueToken = setCookie!.Split(';')[0]["accessToken=".Length..];
+        Assert.False(string.IsNullOrWhiteSpace(opaqueToken));
+        return opaqueToken;
     }
 }

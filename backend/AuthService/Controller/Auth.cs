@@ -50,15 +50,14 @@ namespace AuthService.Controller
 
 		[HttpPost("log-in")]
 		[SwaggerOperation(Summary = "Вход в систему")]
-		[SwaggerResponse(StatusCodes.Status200OK, "Успешная авторизация, возвращает access token")]
-		[ResponseExample(StatusCodes.Status200OK, typeof(LoginResponse))]
+		[SwaggerResponse(StatusCodes.Status200OK, "Успешная авторизация, access token в cookie")]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status401Unauthorized, "Неавторизован", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
 		[ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "Логин или пароль не могут быть пустыми", "Login/Password")]
 		[ApiErrorExample(StatusCodes.Status401Unauthorized, "1.2.3", "Неавторизован", "Пользователь с таким логином не найден или неверный пароль", "Login/Password")]
 		[ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
-		public async Task<ActionResult<LoginResponse>> Login(
+		public async Task<IActionResult> Login(
 			[FromBody]
 			LoginRequest? request
 		)
@@ -120,30 +119,15 @@ namespace AuthService.Controller
 					GetUserRights(user)
 				);
 				string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
-				Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
+				AppendAccessTokenCookie(opaqueToken);
 
 				_logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, user.Uuid);
 				string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
 				_accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
-				Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-				{
-					HttpOnly = true,
-					Secure = false,
-					SameSite = SameSiteMode.Lax,
-					Expires = DateTime.UtcNow.AddDays(7),
-					Path = "/api/auth/v1/Auth"
-				});
-				// Response.Cookies.Append("accessToken", opaqueToken, new CookieOptions
-				// {
-				// 	HttpOnly = false,
-				// 	Secure = false,
-				// 	SameSite = SameSiteMode.Lax,
-				// 	Expires = DateTime.UtcNow.AddMinutes(30),
-				// 	Path = "/api/"
-				// });
+				AppendRefreshTokenCookie(refreshToken);
 
 				_logger.LogInformation("{Function}: успешная авторизация для пользователя {UserUuid}", functionName, user.Uuid);
-				return Ok(new LoginResponse { AccessToken = opaqueToken });
+				return Ok();
 			}
 			catch (Exception ex)
 			{
@@ -170,11 +154,8 @@ namespace AuthService.Controller
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 				_logger.LogInformation("{Function}: начало операции {Path}", functionName, Request.Path);
 
-				string? authHeader = Request.Headers["Authorization"]
-					.FirstOrDefault();
-				if (!string.IsNullOrWhiteSpace(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+				if (TryGetOpaqueToken(out string opaqueToken))
 				{
-					string opaqueToken = authHeader.Substring("Bearer ".Length).Trim();
 					_logger.LogInformation("{Function}: проверка opaque-токена {OpaqueToken}", functionName, opaqueToken);
 					TokenService.TokenOpaqueValidationResult opaqueResult = await _tokenService.ValidateOpaqueTokenAsync(
 						opaqueToken,
@@ -198,7 +179,7 @@ namespace AuthService.Controller
 					}
 					string accessToken = opaqueResult.Token;
 					TokenService.TokenValidationResult resultCheckingAccessToken = await _tokenService.ValidateAccessTokenAsync(accessToken, _accessTokenBlackList);
-
+					// TODO сохранять access refresh окены одновременно после двух првоерок, а не по отдельности
 					if (resultCheckingAccessToken.IsValid)
 					{
 						await _accessTokenBlackList.SaveAsync(resultCheckingAccessToken.Payload.TokenUuid, resultCheckingAccessToken.Payload.UserUuid, TimeSpan.FromMinutes(30));
@@ -263,21 +244,22 @@ namespace AuthService.Controller
 						}
 					}
 
+					DeleteAuthCookies();
 					_logger.LogInformation("{Function}: завершена успешно", functionName);
 					return NoContent();
 				}
 				else
 				{
 					_logger.LogWarning(
-						"{Function}: заголовок Authorization не предоставлен или имеет неверный формат",
+						"{Function}: access token не предоставлен",
 						functionName
 					);
 					return BadRequest(new ApiError
 					{
 						StatusCode = "2.3.0",
 						Title = "Неверный запрос",
-						Message = "Заголовок Authorization не предоставлен или имеет неверный формат",
-						Field = "Authorization"
+						Message = "Access token не предоставлен",
+						Field = "accessToken"
 					});
 				}
 			}
@@ -299,8 +281,7 @@ namespace AuthService.Controller
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status401Unauthorized, "Недействительный токен", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "2.4.0", "Неверный запрос", "Заголовок Authorization не может быть пустым", "Authorization")]
-		[ApiErrorExample(StatusCodes.Status400BadRequest, "2.4.2", "Неверный запрос", "Заголовок Authorization должен быть в формате 'Bearer {token}'", "Authorization")]
+		[ApiErrorExample(StatusCodes.Status400BadRequest, "2.4.0", "Неверный запрос", "Access token не предоставлен", "accessToken")]
 		[ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.2", "Недействительный токен", "Токен не прошёл проверку", "exp")]
 		[ApiErrorExample(StatusCodes.Status401Unauthorized, "2.2.1", "Недействительный токен", "Токен был отозван", "blacklist")]
 		[ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
@@ -311,31 +292,17 @@ namespace AuthService.Controller
 			{
 				using Activity? activity = _activitySource.StartAndLog(_logger, this);
 
-				string? authHeader = Request.Headers.Authorization.FirstOrDefault();
-				if (string.IsNullOrWhiteSpace(authHeader))
+				if (!TryGetOpaqueToken(out string token))
 				{
-					_logger.LogWarning("{Function}: пустой заголовок Authorization", functionName);
+					_logger.LogWarning("{Function}: access token не предоставлен", functionName);
 					return BadRequest(new ApiError
 					{
 						StatusCode = "2.4.0",
 						Title = "Неверный запрос",
-						Message = "Заголовок Authorization не может быть пустым",
-						Field = "Authorization"
+						Message = "Access token не предоставлен",
+						Field = "accessToken"
 					});
 				}
-				if (!authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-				{
-					_logger.LogWarning("{Function}: неверный формат заголовка Authorization", functionName);
-					return BadRequest(new ApiError
-					{
-						StatusCode = "2.4.2",
-						Title = "Неверный запрос",
-						Message = "Заголовок Authorization должен быть в формате 'Bearer {token}'",
-						Field = "Authorization"
-					});
-				}
-
-				string token = authHeader.Substring("Bearer ".Length).Trim();
 				try
 				{
 
@@ -438,8 +405,9 @@ namespace AuthService.Controller
 			}
 		}
 
-		[HttpPost("register")]
-		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан")]
+		[HttpPost("registration")]
+		[SwaggerResponse(StatusCodes.Status201Created, "Пользователь создан", typeof(UsersResponseDto))]
+		[ResponseExample(StatusCodes.Status201Created, typeof(UsersResponseDto))]
 		[SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status409Conflict, "Конфликт: логин занят", typeof(ApiError))]
 		[SwaggerResponse(StatusCodes.Status500InternalServerError, "Внутренняя ошибка сервера", typeof(ApiError))]
@@ -449,7 +417,7 @@ namespace AuthService.Controller
 		[ApiErrorExample(StatusCodes.Status409Conflict, "1.1.1", "Конфликт", "Пользователь с таким логином уже существует", "Login")]
 		[ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
 		[SwaggerOperation(Summary = "Регистрация нового пользователя")]
-		public async Task<IActionResult> Register([FromBody] UsersCreateDto? request)
+		public async Task<ActionResult<UsersResponseDto>> Registration([FromBody] UsersCreateDto? request)
 		{
 			string functionName = ControllerContext.ActionDescriptor.ActionName;
 			try
@@ -589,21 +557,17 @@ namespace AuthService.Controller
 				);
 				string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
 				_accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
-				Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
 
 				_logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, user.Uuid);
 				string refreshToken = _tokenService.GenerateRefreshToken(user.Uuid);
-				Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
-				{
-					HttpOnly = true,
-					Secure = false,
-					SameSite = SameSiteMode.Lax,
-					Expires = DateTime.UtcNow.AddDays(7),
-					Path = "/api/auth/v1/Auth"
-				});
+				AppendAccessTokenCookie(opaqueToken);
+				AppendRefreshTokenCookie(refreshToken);
 
 				_logger.LogInformation("{Function}: пользователь создан {UserUuid}", functionName, user.Uuid);
-				return Created(string.Empty, new UsersResponseDto(user));
+				return Created(string.Empty,
+
+					 new UsersResponseDto(user)
+				);
 			}
 			catch (Exception ex)
 			{
@@ -821,7 +785,7 @@ namespace AuthService.Controller
 						.ThenInclude(r => r.RoleRights)
 					.FirstOrDefaultAsync(u => u.Uuid == userUuid);
 				IEnumerable<string> rights = user != null ? GetUserRights(user) : [];
-				// Генерируем новый access token и новый refresh token (ротация)
+				// Генерируем новый access token и новый refresh token
 				Guid tokenUuid = Guid.NewGuid();
 				string accessToken = _tokenService.GenerateAccessToken(
 					tokenUuid,
@@ -830,20 +794,12 @@ namespace AuthService.Controller
 				);
 				string opaqueToken = _tokenService.GenerateOpaqueToken(tokenUuid);
 				_accessTokenList.SaveAsync(tokenUuid, accessToken, TimeSpan.FromMinutes(30)).Wait();
-				Response.Headers.Append("Authorization", $"Bearer {opaqueToken}");
 
 				_logger.LogInformation("{Function}: создание рефреш токена для пользователя {UserUuid}", functionName, userUuid);
 				string newRefreshToken = _tokenService.GenerateRefreshToken(userUuid);
-				Response.Cookies.Append("refreshToken", newRefreshToken, new CookieOptions
-				{
-					HttpOnly = true,
-					Secure = false,
-					SameSite = SameSiteMode.Lax,
-					Expires = DateTime.UtcNow.AddDays(7),
-					Path = "/api/auth/v1/Auth/refresh"
-				});
+				AppendAccessTokenCookie(opaqueToken);
+				AppendRefreshTokenCookie(newRefreshToken);
 				_logger.LogInformation("{Function}: выдан новый access-токен для пользователя {UserUuid}", functionName, userUuid);
-				// new { accessToken = opaqueToken }f
 				return Ok();
 			}
 			catch (Exception ex)
@@ -856,6 +812,62 @@ namespace AuthService.Controller
 					Message = "Произошла ошибка на сервере"
 				});
 			}
+		}
+
+		private const string AccessTokenCookieName = "accessToken";
+		private const string RefreshTokenCookieName = "refreshToken";
+		private const string AccessCookiePath = "/api/";
+		private const string RefreshCookiePath = "/api/auth/v1/Auth";
+
+		private void AppendAccessTokenCookie(string opaqueToken)
+		{
+			Response.Cookies.Append(AccessTokenCookieName, opaqueToken, new CookieOptions
+			{
+				HttpOnly = true,
+				Secure = false,
+				SameSite = SameSiteMode.Lax,
+				Expires = DateTime.UtcNow.AddMinutes(30),
+				Path = AccessCookiePath
+			});
+		}
+
+		private void AppendRefreshTokenCookie(string refreshToken)
+		{
+			Response.Cookies.Append(RefreshTokenCookieName, refreshToken, new CookieOptions
+			{
+				HttpOnly = true,
+				Secure = false,
+				SameSite = SameSiteMode.Lax,
+				Expires = DateTime.UtcNow.AddDays(7),
+				Path = RefreshCookiePath
+			});
+		}
+
+		private void DeleteAuthCookies()
+		{
+			Response.Cookies.Delete(AccessTokenCookieName, new CookieOptions { Path = AccessCookiePath });
+			Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions { Path = RefreshCookiePath });
+		}
+
+		private bool TryGetOpaqueToken(out string opaqueToken)
+		{
+			if (Request.Cookies.TryGetValue(AccessTokenCookieName, out string? fromCookie)
+				&& !string.IsNullOrWhiteSpace(fromCookie))
+			{
+				opaqueToken = fromCookie;
+				return true;
+			}
+
+			string? authHeader = Request.Headers.Authorization.FirstOrDefault();
+			if (!string.IsNullOrWhiteSpace(authHeader)
+				&& authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+			{
+				opaqueToken = authHeader["Bearer ".Length..].Trim();
+				return !string.IsNullOrWhiteSpace(opaqueToken);
+			}
+
+			opaqueToken = string.Empty;
+			return false;
 		}
 
 		private static IEnumerable<string> GetUserRights(Users user) =>

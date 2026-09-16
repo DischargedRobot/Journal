@@ -8,6 +8,7 @@ import { RoleRightApi } from "@/shared/api/role-right"
 const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
 		{
+			// TODO: добавить обработку ошибки 404
 			error: ApiErrors.BAD_REQUEST,
 			handler: (error) => {
 				console.log(error)
@@ -27,6 +28,7 @@ const getGroups = async () => {
 const getDepartments = async () => {
 	const handleGetDepartmentsError = createApiErrorHandler([
 		{
+			// TODO: добавить обработку ошибки 404
 			error: ApiErrors.BAD_REQUEST,
 			handler: (error) => {
 				console.log(error)
@@ -45,6 +47,7 @@ const getDepartments = async () => {
 const getRoles = async () => {
 	const handleGetRolesError = createApiErrorHandler([
 		{
+			// TODO: добавить обработку ошибки 404
 			error: ApiErrors.NOT_FOUND,
 			handler: (error) => {
 				console.log(error)
