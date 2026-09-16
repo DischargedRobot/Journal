@@ -102,7 +102,7 @@ const Registration = (props: Props) => {
 			// 	roles,
 			// 	"sadas",
 			// )
-			await AuthApi.register({
+			await AuthApi.registration({
 				login: formValues.login.value,
 				password: formValues.password.value,
 				email: formValues.email.value,

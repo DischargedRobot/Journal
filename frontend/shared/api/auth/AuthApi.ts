@@ -12,13 +12,20 @@ type TUsersCreateDto = {
 
 const AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL_V1 + "/Auth"
 
-interface loginResponse {
-	accessToken: string
+type TUserResponse = {
+	uuid: string
+	login: string
+	email?: string | null
+	firstName?: string | null
+	lastName?: string | null
+	patronymic?: string | null
+	tokenVersion: number
+	rolesUuid?: string[] | null
 }
 
 const AuthApi = {
 	login: async (login: string, password: string) => {
-		return ApiJsonRequest<loginResponse>(`${AUTH_URL}/log-in`, {
+		await ApiJsonRequest(`${AUTH_URL}/log-in`, {
 			method: "POST",
 			body: JSON.stringify({ login, password }),
 		})
@@ -30,8 +37,8 @@ const AuthApi = {
 		})
 	},
 
-	register: async (data: TUsersCreateDto) => {
-		await ApiJsonRequest(`${AUTH_URL}/register`, {
+	registration: async (data: TUsersCreateDto) => {
+		return ApiJsonRequest<TUserResponse>(`${AUTH_URL}/registration`, {
 			method: "POST",
 			body: JSON.stringify(data),
 		})
