@@ -11,7 +11,7 @@ type TUsersCreateDto = {
 }
 
 const AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL_V1 + "/Auth"
-
+// TODO: брать из userApi
 type TUserResponse = {
 	uuid: string
 	login: string
@@ -24,15 +24,15 @@ type TUserResponse = {
 }
 
 const AuthApi = {
-	login: async (login: string, password: string) => {
-		await ApiJsonRequest(`${AUTH_URL}/log-in`, {
+	logIn: async (login: string, password: string) => {
+		ApiJsonRequest(`${AUTH_URL}/log-in`, {
 			method: "POST",
 			body: JSON.stringify({ login, password }),
 		})
 	},
 
-	logout: async () => {
-		ApiJsonRequest(`${AUTH_URL}/logout`, {
+	logOut: async () => {
+		ApiJsonRequest(`${AUTH_URL}/log-out`, {
 			method: "POST",
 		})
 	},

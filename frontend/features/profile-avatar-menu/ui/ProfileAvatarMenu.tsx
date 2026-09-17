@@ -11,14 +11,13 @@ import PersonIcon from "@mui/icons-material/Person"
 import Logout from "@mui/icons-material/Logout"
 import { fluidClamp } from "@/shared/lib/fluidClampPx"
 import NextLink from "next/link"
-
-
+import { AuthApi } from "@/shared/api/auth"
 
 interface Props {
 	minIconSize?: number
 	maxIconSize?: number
 }
-
+// TODO: перенести в виджеты и разделить на features
 const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 	const open = Boolean(anchorEl)
@@ -27,10 +26,17 @@ const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 		setAnchorEl(event.currentTarget)
 	}
 
+	const onLogout = async () => {
+		try {
+			await AuthApi.logOut()
+		} catch (error) {
+		} finally {
+			window.location.href = "/auth"
+		}
+	}
+
 	const closeMenu = () => setAnchorEl(null)
 	const avatarSize = fluidClamp(minIconSize, maxIconSize)
-
-
 
 	return (
 		<>
@@ -51,29 +57,23 @@ const ProfileAvatarMenu = ({ minIconSize = 24, maxIconSize = 64 }: Props) => {
 				onClick={closeMenu}
 				transformOrigin={{ vertical: "top", horizontal: "center" }}
 			>
-				<MenuItem >
-					<NextLink
-						className="flex "
-						href="/personal/my-lessons"
-					>
+				<MenuItem>
+					<NextLink className="flex " href="/personal/my-lessons">
 						<ListItemIcon>
 							<PersonIcon fontSize="small" />
 						</ListItemIcon>
 						<ListItemText>Профиль</ListItemText>
 					</NextLink>
 				</MenuItem>
-				<MenuItem >
-					<NextLink
-						className="flex "
-						href="/personal/my-lessons"
-					>
+				<MenuItem>
+					<NextLink className="flex " href="/personal/my-lessons">
 						<ListItemIcon>
 							<PersonIcon fontSize="small" />
 						</ListItemIcon>
 						<ListItemText>Мои занятия</ListItemText>
 					</NextLink>
 				</MenuItem>
-				<MenuItem>
+				<MenuItem onClick={onLogout}>
 					<ListItemIcon>
 						<Logout fontSize="small" />
 					</ListItemIcon>

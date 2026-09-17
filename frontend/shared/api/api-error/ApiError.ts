@@ -16,7 +16,7 @@ type TStatusCode<S extends string> =
 export class ApiError<S extends string = string> extends Error {
 	static readonly errorType = "APIError" // лень писать постоянно при создании
 	constructor(
-		public httpCode: number | null,
+		public httpCode: number,
 		public statusCode: TStatusCode<S>,
 		public title: string,
 		public message: string,
@@ -68,7 +68,7 @@ export function isApiError(error: unknown): error is ApiError {
 }
 
 export const ApiErrors = {
-	NETWORK: new ApiError(null, "1.0.0", "Network error", "Сетевая ошибка"),
+	NETWORK: new ApiError(1, "1.0.0", "Network error", "Сетевая ошибка"),
 	BAD_REQUEST: new ApiError(400, "1.0.0", "Bad request", "Неверный запрос"),
 	FORBIDEN: new ApiError(403, "1.0.0", "Forbidden", "Доступ запрещён"),
 	UNAUTHORIZED: new ApiError(401, "1.0.0", "Unauthorized", "Неавторизован"),
@@ -82,10 +82,7 @@ export const ApiErrors = {
 	SERVER: new ApiError(500, "1.0.0", "Server error", "Ошибка сервера"),
 } as const
 
-export const mapApiErrors = (
-	httpCode: number | null | undefined,
-	message?: string,
-): ApiError => {
+export const mapApiErrors = (httpCode: number, message?: string): ApiError => {
 	let error: ApiError
 
 	const defaultError = new ApiError(

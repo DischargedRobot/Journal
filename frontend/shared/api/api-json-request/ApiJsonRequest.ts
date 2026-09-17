@@ -47,10 +47,10 @@ const ApiJsonRequest = async <T>(
 	} catch (error) {
 		// если нет сети
 		if (error instanceof TypeError && error.message === "Failed to fetch") {
-			throw mapApiErrors(null)
+			throw mapApiErrors(1)
 		}
 
-		// Проверяем структурно: ошибки после response.json() не являются экземпляром ApiError.
+		// если не ApiError, то возвращаем ошибку 0 (хотя такого быть не должно)
 		if (!isApiError(error)) {
 			throw mapApiErrors(0)
 		}
