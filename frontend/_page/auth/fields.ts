@@ -1,6 +1,6 @@
 import { TRole } from "@/shared/model/role/TRole"
 import { TGroup } from "@/shared/model/group/TGroup"
-import { TDepartment } from "@/shared/model/t-department"
+import { TDepartment } from "@/shared/model/department"
 
 export interface FormValues extends PERSONAL_FORM_FIELDS, LOGIN_FORM_FIELDS {}
 

@@ -1,6 +1,6 @@
 import { MAIN_URL } from "@/shared/api/constants"
 import { ApiJsonRequest } from "@/shared/api/api-json-request"
-import { TDepartment } from "@/shared/model/t-department"
+import { TDepartment } from "@/shared/model/department"
 import { TPagedRequestOptions } from "../TPaged/TPagedRequestOptions"
 import { buildQuery } from "../build-query"
 import { Uuid } from "@/shared/model/utility-types/uuid"

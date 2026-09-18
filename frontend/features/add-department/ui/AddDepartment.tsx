@@ -6,7 +6,7 @@ import AddIcon from "@mui/icons-material/Add"
 import { useState } from "react"
 import TextField from "@mui/material/TextField"
 import { useForm } from "react-hook-form"
-import { TDepartment } from "@/shared/model/t-department/TDepartment"
+import { TDepartment } from "@/shared/model/department/TDepartment"
 
 interface Props {
 	onClick: () => void

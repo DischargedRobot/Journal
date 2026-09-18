@@ -7,7 +7,7 @@ import Button from "@mui/material/Button"
 import { useCallback, useState } from "react"
 import DeleteIcon from "@mui/icons-material/Delete"
 import IconButton from "@mui/material/IconButton"
-import { TDepartment } from "@/shared/model/t-department"
+import { TDepartment } from "@/shared/model/department"
 import FormGroup from "@mui/material/FormGroup"
 
 interface Props {

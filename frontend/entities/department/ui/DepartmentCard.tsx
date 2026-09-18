@@ -1,7 +1,7 @@
 "use client"
 
 import { MoreToolsButton } from "@/shared/ui/more-tools-button"
-import { TDepartment } from "@/shared/model/t-department"
+import { TDepartment } from "@/shared/model/department"
 import { TProfessor } from "@/shared/model/professor"
 import Box from "@mui/material/Box"
 import Chip from "@mui/material/Chip"
