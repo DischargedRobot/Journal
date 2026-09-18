@@ -1,4 +1,4 @@
-import { TDepartment } from "../t-department/TDepartment"
+import { TDepartment } from "../department/TDepartment"
 import { mockFaculties } from "./mockFaculties"
 
 const fitFaculty = mockFaculties[0]

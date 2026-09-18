@@ -1,4 +1,4 @@
-import { TDepartment } from "@/shared/model/t-department"
+import { TDepartment } from "@/shared/model/department"
 import DepartmentCard from "../../../entities/department/ui/DepartmentCard"
 import { TProfessor } from "@/shared/model/professor"
 import Box from "@mui/material/Box"
