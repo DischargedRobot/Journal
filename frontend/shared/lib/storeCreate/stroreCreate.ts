@@ -1,11 +1,11 @@
-import { createStore, type StoreApi } from "zustand"
+import { create, type StoreApi, type UseBoundStore } from "zustand"
 
 type BaseStoreFunctions<Name extends string, T> = {
-	[P in `set${Name}`]: (value: T) => void
+	[P in `set${Capitalize<Name>}`]: (value: T) => void
 } & {
-	[P in `get${Name}`]: () => T
+	[P in `get${Capitalize<Name>}`]: () => T
 } & {
-	[P in `update${Name}`]: (value: T) => void
+	[P in `update${Capitalize<Name>}`]: (value: T) => void
 }
 
 type BaseStoreState<Name extends string, T> = {
@@ -43,20 +43,22 @@ export const storeCreate = <
 		set: SetStore<StoreState<Name, T, Options>>,
 		get: GetStore<StoreState<Name, T, Options>>,
 	) => Options,
-) =>
-	createStore<StoreState<Name, T, Options>>((set, get) => {
+): UseBoundStore<StoreApi<StoreState<Name, T, Options>>> =>
+	create<StoreState<Name, T, Options>>()((set, get) => {
 		const extra = options?.(set, get) ?? ({} as Options)
+		const methodName = (itemsName.charAt(0).toUpperCase() +
+			itemsName.slice(1)) as Capitalize<Name>
 
 		return {
 			[itemsName]: initialValue,
-			[`get${itemsName}`]: getItem
+			[`get${methodName}`]: getItem
 				? () => getItem()
 				: () => get()[itemsName],
-			[`set${itemsName}`]: (value: T) =>
+			[`set${methodName}`]: (value: T) =>
 				(setItem ?? set)({ [itemsName]: value } as Partial<
 					StoreState<Name, T, Options>
 				>),
-			[`update${itemsName}`]: (value: T) =>
+			[`update${methodName}`]: (value: T) =>
 				(updateItem ?? set)({ [itemsName]: value } as Partial<
 					StoreState<Name, T, Options>
 				>),

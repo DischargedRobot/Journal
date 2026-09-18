@@ -28,6 +28,7 @@ const Header = () => {
 			<Toolbar
 				component="nav"
 				aria-label="main navigation"
+				// className="flex items-center justify-between gap-2 my-1"
 				sx={{
 					display: "flex",
 					alignItems: "center",
