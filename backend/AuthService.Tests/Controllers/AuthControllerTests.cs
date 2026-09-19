@@ -101,7 +101,8 @@ public class AuthControllerTests : IDisposable
 			Password = "password123"
 		});
 
-		Assert.IsType<OkResult>(result);
+		OkObjectResult ok = Assert.IsType<OkObjectResult>(result);
+		Assert.IsType<UsersResponseDto>(ok.Value);
 		string opaqueToken = AssertHasAccessTokenCookie(_controller);
 		Assert.True(Guid.TryParse(opaqueToken, out Guid tokenUuid));
 		Assert.NotNull(await _accessTokenList.GetAsync(tokenUuid));

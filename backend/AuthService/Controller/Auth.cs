@@ -127,7 +127,7 @@ namespace AuthService.Controller
 				AppendRefreshTokenCookie(refreshToken);
 
 				_logger.LogInformation("{Function}: успешная авторизация для пользователя {UserUuid}", functionName, user.Uuid);
-				return Ok();
+				return Ok(new UsersResponseDto(user));
 			}
 			catch (Exception ex)
 			{

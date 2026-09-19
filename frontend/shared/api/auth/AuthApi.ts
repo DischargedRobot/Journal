@@ -25,14 +25,14 @@ type TUserResponse = {
 
 const AuthApi = {
 	logIn: async (login: string, password: string) => {
-		ApiJsonRequest(`${AUTH_URL}/log-in`, {
+		return ApiJsonRequest(`${AUTH_URL}/log-in`, {
 			method: "POST",
 			body: JSON.stringify({ login, password }),
 		})
 	},
 
 	logOut: async () => {
-		ApiJsonRequest(`${AUTH_URL}/log-out`, {
+		return ApiJsonRequest(`${AUTH_URL}/log-out`, {
 			method: "POST",
 		})
 	},
