@@ -1,9 +1,6 @@
-import { TFaculty } from "../t-faculty/TFaculty"
 import { IBaseEntityWithVersion } from "../utility-types/base-entity"
 
-export type TDepartment = {
+export type TTrainingDirection = {
 	name: string
-	shortName: string
 	code: string
-	faculty: TFaculty
 } & IBaseEntityWithVersion
