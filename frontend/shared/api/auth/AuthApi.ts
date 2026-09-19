@@ -1,4 +1,5 @@
 import { ApiJsonRequest } from "../api-json-request"
+import { AUTH_URL } from "../constants"
 
 type TUsersCreateDto = {
 	login: string
@@ -10,7 +11,7 @@ type TUsersCreateDto = {
 	rolesUuid: string[]
 }
 
-const AUTH_URL = process.env.NEXT_PUBLIC_API_AUTH_URL_V1 + "/Auth"
+const AUTH_CONTROLLER_URL = `${AUTH_URL}/Auth`
 // TODO: брать из userApi
 type TUserResponse = {
 	uuid: string
@@ -25,28 +26,31 @@ type TUserResponse = {
 
 const AuthApi = {
 	logIn: async (login: string, password: string) => {
-		return ApiJsonRequest(`${AUTH_URL}/log-in`, {
+		return ApiJsonRequest(`${AUTH_CONTROLLER_URL}/log-in`, {
 			method: "POST",
 			body: JSON.stringify({ login, password }),
 		})
 	},
 
 	logOut: async () => {
-		return ApiJsonRequest(`${AUTH_URL}/log-out`, {
+		return ApiJsonRequest(`${AUTH_CONTROLLER_URL}/log-out`, {
 			method: "POST",
 		})
 	},
 
 	registration: async (data: TUsersCreateDto) => {
-		return ApiJsonRequest<TUserResponse>(`${AUTH_URL}/registration`, {
-			method: "POST",
-			body: JSON.stringify(data),
-		})
+		return ApiJsonRequest<TUserResponse>(
+			`${AUTH_CONTROLLER_URL}/registration`,
+			{
+				method: "POST",
+				body: JSON.stringify(data),
+			},
+		)
 	},
 
 	downloadRegistrationCode: async () => {
 		const result = await ApiJsonRequest<{ registrationCode: string }>(
-			`${AUTH_URL}/registration-code`,
+			`${AUTH_CONTROLLER_URL}/registration-code`,
 			{
 				method: "POST",
 			},
@@ -54,8 +58,8 @@ const AuthApi = {
 		return result.registrationCode
 	},
 
-	refresh: async () => {
-		return ApiJsonRequest(`${AUTH_URL}/refresh`, {
+	refresh: async (): Promise<void> => {
+		return ApiJsonRequest(`${AUTH_CONTROLLER_URL}/refresh`, {
 			method: "POST",
 		})
 	},

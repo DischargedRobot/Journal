@@ -2,7 +2,18 @@ import { ApiJsonRequest } from "."
 import { isApiError, mapApiErrors } from "../api-error"
 import { AuthApi } from "../auth"
 
-const ApiJsonAuthorisationRequest = async (
+let refreshPromise: Promise<void> | null = null
+
+const refreshSessionOnce = () => {
+	if (!refreshPromise) {
+		refreshPromise = AuthApi.refresh().finally(() => {
+			refreshPromise = null
+		})
+	}
+	return refreshPromise
+}
+
+export const ApiJsonAuthorisationRequest = async (
 	endpoint: string,
 	options?: RequestInit,
 ) => {
@@ -15,7 +26,7 @@ const ApiJsonAuthorisationRequest = async (
 
 		if (error.httpCode === 401) {
 			try {
-				await AuthApi.refresh()
+				await refreshSessionOnce()
 			} catch (error) {
 				if (!isApiError(error)) {
 					throw mapApiErrors(0)
@@ -29,6 +40,7 @@ const ApiJsonAuthorisationRequest = async (
 					window.location.href = "/500"
 				}
 			}
+			return await ApiJsonRequest(endpoint, options)
 		}
 
 		throw error
