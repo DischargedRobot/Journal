@@ -2,7 +2,7 @@ import Autocomplete from "@mui/material/Autocomplete"
 import { memo, ReactNode } from "react"
 import useRegistrationFormStore, {
 	TFormValues,
-} from "./model/useRegistrationFormStore"
+} from "../../model/useRegistrationFormStore"
 import TextField from "@mui/material/TextField"
 
 interface Props {

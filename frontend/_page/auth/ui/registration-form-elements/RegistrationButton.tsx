@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button"
-import useRegistrationFormStore from "./model/useRegistrationFormStore"
+import useRegistrationFormStore from "../../model/useRegistrationFormStore"
 import { memo } from "react"
-import { REQUIRED_FIELDS } from "./fields"
+import { REQUIRED_FIELDS } from "../../lib/fields"
 
 const RegistrationButton = () => {
 	const isValid = useRegistrationFormStore((state) => {

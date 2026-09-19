@@ -10,7 +10,7 @@ interface Props {
 	user: TUser
 }
 
-const MainLayout = (props: Props) => {
+const MainLayout = async (props: Props) => {
 	const { children, groups, departments, user } = props
 	return (
 		<ClientDataProvider

@@ -51,7 +51,7 @@ const Login = (props: Props) => {
 		setLoading(true)
 		try {
 			await AuthApi.logIn(data.login, data.password)
-			router.push("/journal")
+			router.push("/main/journal")
 		} catch (error) {
 			handlerError(error)
 		} finally {

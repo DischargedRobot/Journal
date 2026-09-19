@@ -14,15 +14,15 @@ import {
 	LOGIN_FIELDS,
 	PERSONAL_FIELDS,
 	REQUIRED_FIELDS,
-} from "./fields"
+} from "../lib/fields"
 import { useShallow } from "zustand/shallow"
 
 import FormTextField, {
 	PasswordRegistrationTextField,
-} from "./RegistrationTextField"
-import FormRadioGroup from "./RegistrationRadioGroup"
-import RegistrationButton from "./RegistrationButton"
-import useRegistrationFormStore from "./model/useRegistrationFormStore"
+} from "./registration-form-elements/RegistrationTextField"
+import FormRadioGroup from "./registration-form-elements/RegistrationRadioGroup"
+import RegistrationButton from "./registration-form-elements/RegistrationButton"
+import useRegistrationFormStore from "../model/useRegistrationFormStore"
 import { TRole } from "@/shared/model/role"
 import { useRouter } from "next/navigation"
 

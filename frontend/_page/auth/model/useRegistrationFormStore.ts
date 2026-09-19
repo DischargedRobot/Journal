@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { FormValues, REQUIRED_FIELDS } from "../fields"
+import { FormValues, REQUIRED_FIELDS } from "../lib/fields"
 
 type TFormField<T> = {
 	value: T

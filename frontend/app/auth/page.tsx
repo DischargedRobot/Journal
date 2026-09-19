@@ -1,86 +1,9 @@
-import { GroupApi } from "@/shared/api/group"
-import { AuthClient } from "../../_page/auth/auth-client"
-import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
-import { DepartmentApi } from "@/shared/api/department"
-import { RolesApi } from "@/shared/api/roles"
-import { RoleRightApi } from "@/shared/api/role-right"
-
-const getGroups = async () => {
-	const handleGetGroupsError = createApiErrorHandler([
-		{
-			// TODO: добавить обработку ошибки 404
-			error: ApiErrors.BAD_REQUEST,
-			handler: (error) => {
-				console.log(error)
-			},
-		},
-	])
-
-	try {
-		const response = await GroupApi.getGroupsWithoutEnhance()
-		return response.items
-	} catch (error) {
-		handleGetGroupsError(error)
-		return []
-	}
-}
-
-const getDepartments = async () => {
-	const handleGetDepartmentsError = createApiErrorHandler([
-		{
-			// TODO: добавить обработку ошибки 404
-			error: ApiErrors.BAD_REQUEST,
-			handler: (error) => {
-				console.log(error)
-			},
-		},
-	])
-
-	try {
-		return await DepartmentApi.getDepartmentsWithoutEnhance()
-	} catch (error) {
-		handleGetDepartmentsError(error)
-		return []
-	}
-}
-
-const getRoles = async () => {
-	const handleGetRolesError = createApiErrorHandler([
-		{
-			// TODO: добавить обработку ошибки 404
-			error: ApiErrors.NOT_FOUND,
-			handler: (error) => {
-				console.log(error)
-			},
-		},
-	])
-
-	try {
-		return await RolesApi.getRoles()
-	} catch (error) {
-		handleGetRolesError(error)
-		return []
-	}
-}
-
-// const getRoleRight = async () => {
-// 	const handleGetRoleRightError = createApiErrorHandler([
-// 		{
-// 			error: ApiErrors.NOT_FOUND,
-// 			handler(error) {
-// 				console.log(error)
-// 			},
-// 		},
-// 	])
-
-// 	try {
-// 		return await RoleRightApi.getRoleRights()
-
-// 	} catch (error) {
-// 		handleGetRoleRightError(error)
-// 		return []
-// 	}
-// }
+import {
+	getDepartments,
+	getGroups,
+	getRoles,
+} from "@/_page/auth/api/getAuthPageData"
+import { AuthClient } from "@/_page/auth/ui/auth-client"
 
 const AuthPage = async () => {
 	const groups = await getGroups()
@@ -89,7 +12,7 @@ const AuthPage = async () => {
 
 	// const roleRights = await getRoleRight()
 
-	console.log(roles, "roles auth page")
+	// console.log(roles, "roles auth page")
 	return (
 		<main className="content-center h-screen w-screen overflow-auto">
 			<AuthClient

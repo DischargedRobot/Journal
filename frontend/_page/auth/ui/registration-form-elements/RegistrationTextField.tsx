@@ -2,7 +2,7 @@ import TextField, { TextFieldProps } from "@mui/material/TextField"
 import { HTMLInputTypeAttribute, memo, ReactNode, useState } from "react"
 import useRegistrationFormStore, {
 	TFormValues,
-} from "./model/useRegistrationFormStore"
+} from "../../model/useRegistrationFormStore"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import { InputAdornment } from "@mui/material"
 import { IconButton } from "@mui/material"

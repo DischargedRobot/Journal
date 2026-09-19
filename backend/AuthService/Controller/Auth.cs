@@ -295,7 +295,7 @@ namespace AuthService.Controller
 				if (!TryGetOpaqueToken(out string token))
 				{
 					_logger.LogWarning("{Function}: access token не предоставлен", functionName);
-					return BadRequest(new ApiError
+					return Unauthorized(new ApiError
 					{
 						StatusCode = "2.4.0",
 						Title = "Неверный запрос",
@@ -849,6 +849,7 @@ namespace AuthService.Controller
 			Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions { Path = RefreshCookiePath });
 		}
 
+		// TODO: поменять чтобы было через куки
 		private bool TryGetOpaqueToken(out string opaqueToken)
 		{
 			if (Request.Cookies.TryGetValue(AccessTokenCookieName, out string? fromCookie)
