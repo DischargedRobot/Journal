@@ -436,7 +436,6 @@ namespace AuthService.Controller
 		[HttpDelete("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status204NoContent, "Тип роли удалён")]
 		[SwaggerOperation(Summary = "Удалить тип роли по UUID")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Тип роли не найден", "Тип роли с указанным UUID не найден", nameof(uuid))]
 		public async Task<IActionResult> DeleteRoleType(
 			[SwaggerParameter("UUID типа роли")]
 			Guid uuid)
@@ -448,20 +447,17 @@ namespace AuthService.Controller
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
 				RolesTypes? roleType = await _context.RolesTypes.FirstOrDefaultAsync(rt => rt.Uuid == uuid);
-				if (roleType == null)
+				if (roleType != null)
+				{
+					_context.RolesTypes.Remove(roleType);
+					await _context.SaveChangesAsync();
+					_logger.LogInformation("{Function}: тип роли uuid={Uuid} удалён", functionName, uuid);
+				}
+				else
 				{
 					_logger.LogInformation("{Function}: тип роли uuid={Uuid} не найден", functionName, uuid);
-					return NotFound(new ApiError(
-						"1.2.3",
-						"Тип роли не найден",
-						"Тип роли с указанным UUID не найден",
-						nameof(uuid)));
 				}
 
-				_context.RolesTypes.Remove(roleType);
-				await _context.SaveChangesAsync();
-
-				_logger.LogInformation("{Function}: тип роли uuid={Uuid} удалён", functionName, uuid);
 				return NoContent();
 			}
 			catch (Exception ex)

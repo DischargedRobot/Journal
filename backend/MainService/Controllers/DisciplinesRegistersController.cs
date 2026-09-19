@@ -209,8 +209,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Запись реестра дисциплин удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Запись реестра дисциплин не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить запись реестра дисциплин по идентификатору"
         )]
@@ -231,19 +229,11 @@ namespace MainService.Controllers
             }
 
             DisciplinesRegisters? register = await _context.DisciplinesRegisters.FirstOrDefaultAsync(r => r.Uuid == uuid);
-            if (register == null)
+            if (register != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Запись реестра дисциплин не найдена",
-                    Message = $"Запись реестра дисциплин с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.DisciplinesRegisters.Remove(register);
+                await _context.SaveChangesAsync();
             }
-
-            _context.DisciplinesRegisters.Remove(register);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

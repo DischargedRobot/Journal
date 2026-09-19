@@ -361,8 +361,6 @@ namespace MainService
         [SwaggerResponse(StatusCodes.Status204NoContent, "Кафедра удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Кафедра не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить кафедру",
             Description = "Удаляет кафедру по её UUID"
@@ -384,19 +382,11 @@ namespace MainService
             }
 
             Departments? department = await _context.Departments.FirstOrDefaultAsync(d => d.Uuid == uuid);
-            if (department == null)
+            if (department != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Кафедра не найдена",
-                    Message = $"Кафедра с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.Departments.Remove(department);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Departments.Remove(department);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

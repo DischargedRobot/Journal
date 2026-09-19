@@ -340,11 +340,9 @@ namespace MainService.Controllers
         }
         [HttpDelete("{uuid}")]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.0", "Неверный запрос", "UUID бригады не может быть пустым", nameof(uuid))]
-        [ApiErrorExample(StatusCodes.Status404NotFound, "1.0.3", "Бригада не найдена", "Бригада с указанным UUID не найдена", nameof(uuid))]
         [ApiErrorExample(StatusCodes.Status500InternalServerError, "1.0.0", "Внутренняя ошибка сервера", "Произошла ошибка на сервере", "server")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Бригада удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Бригада не найдена", typeof(ApiError))]
         [SwaggerOperation(
             Summary = "Удалить бригаду по UUID"
         )]
@@ -374,23 +372,17 @@ namespace MainService.Controllers
 
                 Brigades? brigade = await _context.Brigades.FirstOrDefaultAsync(b => b.Uuid == uuid);
 
-                // проверка ответа БД
-                if (brigade == null)
+                if (brigade != null)
+                {
+                    _context.Brigades.Remove(brigade);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("{Function}: бригада удалена uuid={Uuid}", functionName, uuid);
+                }
+                else
                 {
                     _logger.LogInformation("{Function}: бригада не найдена uuid={Uuid}", functionName, uuid);
-                    return NotFound(new ApiError
-                    {
-                        StatusCode = "1.0.3",
-                        Title = "Бригада не найдена",
-                        Message = $"Бригада с UUID \"{uuid}\" не найдена",
-                        Field = nameof(uuid)
-                    });
                 }
 
-                _context.Brigades.Remove(brigade);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("{Function}: бригада удалена uuid={Uuid}", functionName, uuid);
                 return NoContent();
             }
             catch (Exception ex)

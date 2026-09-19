@@ -488,8 +488,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Посещение удалено")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Посещение не найдено", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(Summary = "Удалить посещение по UUID")]
         public async Task<IActionResult> DeleteLessonPresence(
             [SwaggerParameter("UUID посещения")]
@@ -510,19 +508,11 @@ namespace MainService.Controllers
             LessonPresences? lp = await _context.LessonPresences
                 .FirstOrDefaultAsync(x => x.Uuid == uuid);
 
-            if (lp == null)
+            if (lp != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Посещение не найдено",
-                    Message = $"Посещение занятия с UUID \"{uuid}\" не найдено",
-                    Field = nameof(uuid)
-                });
+                _context.LessonPresences.Remove(lp);
+                await _context.SaveChangesAsync();
             }
-
-            _context.LessonPresences.Remove(lp);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

@@ -128,8 +128,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "StudentPerson удалён")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "StudentPerson не найден", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить StudentPerson по UUID"
         )]
@@ -152,19 +150,11 @@ namespace MainService.Controllers
             StudentPersons? studentPerson = await _context.StudentPersons
                 .FirstOrDefaultAsync(sp => sp.Uuid == uuid);
 
-            if (studentPerson == null)
+            if (studentPerson != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "StudentPerson не найден",
-                    Message = $"StudentPerson с UUID \"{uuid}\" не найден",
-                    Field = nameof(uuid)
-                });
+                _context.StudentPersons.Remove(studentPerson);
+                await _context.SaveChangesAsync();
             }
-
-            _context.StudentPersons.Remove(studentPerson);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

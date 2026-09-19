@@ -228,8 +228,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Факультет удален")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Факультет не найден", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить факультет",
             Description = "Удаляет факультет по его UUID"
@@ -250,19 +248,11 @@ namespace MainService.Controllers
             }
 
             Faculties? faculty = await _context.Faculties.FirstOrDefaultAsync(f => f.Uuid == uuid);
-            if (faculty == null)
+            if (faculty != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Факультет не найден",
-                    Message = "В системе не найден факультет с указанным UUID",
-                    Field = nameof(uuid)
-                });
+                _context.Faculties.Remove(faculty);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Faculties.Remove(faculty);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

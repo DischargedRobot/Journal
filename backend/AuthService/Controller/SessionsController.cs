@@ -406,8 +406,6 @@ namespace AuthService.Controller
         [SwaggerResponse(StatusCodes.Status204NoContent, "Сессия удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [ApiErrorExample(StatusCodes.Status400BadRequest, "0.2.1", "Неверный запрос", "UUID не может быть пустым", nameof(refreshTokenUuid))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Сессия не найдена", typeof(ApiError))]
-        [ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Сессия не найдена", "Сессия с указанным UUID refresh-токена не найдена", nameof(refreshTokenUuid))]
         [SwaggerOperation(Summary = "Удалить сессию по UUID refresh-токена")]
         public async Task<IActionResult> DeleteSession(Guid refreshTokenUuid)
         {
@@ -427,21 +425,17 @@ namespace AuthService.Controller
                 }
 
                 Sessions? session = await _context.Sessions.FirstOrDefaultAsync(s => s.RefreshTokenUuid == refreshTokenUuid);
-                if (session == null)
+                if (session != null)
+                {
+                    _context.Sessions.Remove(session);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("{Function}: удалена сессия refreshTokenUuid={Refresh}", functionName, refreshTokenUuid);
+                }
+                else
                 {
                     _logger.LogInformation("{Function}: сессия не найдена {Refresh}", functionName, refreshTokenUuid);
-                    return NotFound(new ApiError(
-                        "1.2.3",
-                        "Сессия не найдена",
-                        "Сессия с указанным UUID refresh-токена не найдена",
-                        nameof(refreshTokenUuid))
-                    );
                 }
 
-                _context.Sessions.Remove(session);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("{Function}: удалена сессия refreshTokenUuid={Refresh}", functionName, refreshTokenUuid);
                 return NoContent();
             }
             catch (Exception ex)

@@ -269,8 +269,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Группа удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Группа не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить группу",
             Description = "Удаляет группу по её UUID"
@@ -292,19 +290,11 @@ namespace MainService.Controllers
             }
 
             Groups? group = await _context.Groups.FirstOrDefaultAsync(g => g.Uuid == uuid);
-            if (group == null)
+            if (group != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Группа не найдена",
-                    Message = $"Группа с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.Groups.Remove(group);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Groups.Remove(group);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

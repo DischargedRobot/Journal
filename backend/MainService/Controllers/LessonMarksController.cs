@@ -322,7 +322,6 @@ namespace MainService.Controllers
         [HttpDelete("{uuid}")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Оценка удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Оценка не найдена", typeof(ApiError))]
         [SwaggerOperation(Summary = "Удалить оценку по UUID")]
         public async Task<IActionResult> DeleteLessonMark(
             [SwaggerParameter("UUID оценки")]
@@ -341,19 +340,11 @@ namespace MainService.Controllers
             }
 
             LessonMarks? lm = await _context.LessonMarks.FirstOrDefaultAsync(x => x.Uuid == uuid);
-            if (lm == null)
+            if (lm != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Оценка не найдена",
-                    Message = $"Оценка с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.LessonMarks.Remove(lm);
+                await _context.SaveChangesAsync();
             }
-
-            _context.LessonMarks.Remove(lm);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

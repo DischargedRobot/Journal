@@ -436,7 +436,6 @@ namespace AuthService.Controller
 		[HttpDelete("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status204NoContent, "Право роли удалено")]
 		[SwaggerOperation(Summary = "Удалить право роли по UUID")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Право роли не найдено", "Право роли с указанным UUID не найдено", nameof(uuid))]
 		public async Task<IActionResult> DeleteRoleRight(
 			[SwaggerParameter("UUID права роли")]
 			Guid uuid)
@@ -448,20 +447,17 @@ namespace AuthService.Controller
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
 				RoleRights? roleRight = await _context.RoleRights.FirstOrDefaultAsync(rr => rr.Uuid == uuid);
-				if (roleRight == null)
+				if (roleRight != null)
+				{
+					_context.RoleRights.Remove(roleRight);
+					await _context.SaveChangesAsync();
+					_logger.LogInformation("{Function}: право роли uuid={Uuid} удалено", functionName, uuid);
+				}
+				else
 				{
 					_logger.LogInformation("{Function}: право роли uuid={Uuid} не найдено", functionName, uuid);
-					return NotFound(new ApiError(
-						"1.2.3",
-						"Право роли не найдено",
-						"Право роли с указанным UUID не найдено",
-						nameof(uuid)));
 				}
 
-				_context.RoleRights.Remove(roleRight);
-				await _context.SaveChangesAsync();
-
-				_logger.LogInformation("{Function}: право роли uuid={Uuid} удалено", functionName, uuid);
 				return NoContent();
 			}
 			catch (Exception ex)

@@ -383,8 +383,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Оценка удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Оценка не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(Summary = "Удалить оценку по UUID")]
         public async Task<IActionResult> DeleteMark([SwaggerParameter("UUID оценки")] Guid uuid)
         {
@@ -400,19 +398,11 @@ namespace MainService.Controllers
             }
 
             Marks? mark = await _context.Marks.FirstOrDefaultAsync(m => m.Uuid == uuid);
-            if (mark == null)
+            if (mark != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Оценка не найдена",
-                    Message = $"Оценка с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.Marks.Remove(mark);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Marks.Remove(mark);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

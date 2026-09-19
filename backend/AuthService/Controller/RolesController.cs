@@ -946,7 +946,6 @@ namespace AuthService.Controller
 		[HttpDelete("{uuid}")]
 		[SwaggerResponse(StatusCodes.Status204NoContent, "Роль удалена")]
 		[SwaggerOperation(Summary = "Удалить роль по UUID")]
-		[ApiErrorExample(StatusCodes.Status404NotFound, "1.2.3", "Роль не найдена", "Роль с указанным UUID не найдена", nameof(uuid))]
 		public async Task<IActionResult> DeleteRole(
 			[SwaggerParameter("UUID роли")]
 			Guid uuid)
@@ -958,23 +957,17 @@ namespace AuthService.Controller
 				_logger.LogInformation("{Function}: вызвано для uuid={Uuid}", functionName, uuid);
 
 				Roles? role = await _context.Roles.Include(r => r.RoleRights).FirstOrDefaultAsync(r => r.Uuid == uuid);
-				if (role == null)
+				if (role != null)
+				{
+					_context.Roles.Remove(role);
+					await _context.SaveChangesAsync();
+					_logger.LogInformation("{Function}: роль uuid={Uuid} удалена", functionName, uuid);
+				}
+				else
 				{
 					_logger.LogInformation("{Function}: роль uuid={Uuid} не найдена", functionName, uuid);
-					return NotFound(
-						new ApiError(
-							"1.3.3",
-							"Роль не найдена",
-							"Роль с указанным UUID не найдена",
-							nameof(uuid)
-						)
-					);
 				}
 
-				_context.Roles.Remove(role);
-				await _context.SaveChangesAsync();
-
-				_logger.LogInformation("{Function}: роль uuid={Uuid} удалена", functionName, uuid);
 				return NoContent();
 			}
 			catch (Exception ex)

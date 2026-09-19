@@ -360,8 +360,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Занятие удалено")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Занятие не найдено", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(Summary = "Удалить занятие по UUID")]
         public async Task<IActionResult> DeleteLesson(
             [SwaggerParameter("UUID занятия")]
@@ -379,19 +377,11 @@ namespace MainService.Controllers
             }
 
             Lessons? lesson = await _context.Lessons.FirstOrDefaultAsync(l => l.Uuid == uuid);
-            if (lesson == null)
+            if (lesson != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Занятие не найдено",
-                    Message = $"Занятие с UUID \"{uuid}\" не найдено",
-                    Field = nameof(uuid)
-                });
+                _context.Lessons.Remove(lesson);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Lessons.Remove(lesson);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

@@ -134,8 +134,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Сотрудник удалён")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Сотрудник не найден", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить сотрудника по UUID"
         )]
@@ -158,19 +156,11 @@ namespace MainService.Controllers
             UniversityEmployers? employee = await _context.UniversityEmployers
                 .FirstOrDefaultAsync(e => e.Uuid == uuid);
 
-            if (employee == null)
+            if (employee != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Сотрудник не найден",
-                    Message = $"Сотрудник с UUID \"{uuid}\" не найден",
-                    Field = nameof(uuid)
-                });
+                _context.UniversityEmployers.Remove(employee);
+                await _context.SaveChangesAsync();
             }
-
-            _context.UniversityEmployers.Remove(employee);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

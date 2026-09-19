@@ -201,8 +201,6 @@ namespace MainService.Controllers
         [HttpDelete("{uuid}")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Тип оценки удалён")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Тип оценки не найден", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить тип оценки по UUID"
         )]
@@ -223,19 +221,11 @@ namespace MainService.Controllers
             }
 
             MarkTypes? markType = await _context.MarkTypes.FirstOrDefaultAsync(m => m.Uuid == uuid);
-            if (markType == null)
+            if (markType != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Тип оценки не найден",
-                    Message = $"Тип оценки с UUID \"{uuid}\" не найден",
-                    Field = nameof(uuid)
-                });
+                _context.MarkTypes.Remove(markType);
+                await _context.SaveChangesAsync();
             }
-
-            _context.MarkTypes.Remove(markType);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

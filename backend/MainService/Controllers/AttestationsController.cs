@@ -514,7 +514,6 @@ namespace MainService.Controllers
         [HttpDelete("{uuid}")]
         [SwaggerResponse(StatusCodes.Status204NoContent, "Аттестация удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Аттестация не найдена", typeof(ApiError))]
         [SwaggerOperation(Summary = "Удалить аттестацию по UUID")]
         public async Task<IActionResult> DeleteAttestation([SwaggerParameter("UUID аттестации")] Guid uuid)
         {
@@ -537,22 +536,17 @@ namespace MainService.Controllers
                 }
 
                 Attestations? attestation = await _context.Attestations.FirstOrDefaultAsync(x => x.Uuid == uuid);
-                if (attestation == null)
+                if (attestation != null)
+                {
+                    _context.Attestations.Remove(attestation);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("{Function}: удалена запись uuid={Uuid}", functionName, uuid);
+                }
+                else
                 {
                     _logger.LogInformation("{Function}: запись с uuid={Uuid} не найдена", functionName, uuid);
-                    return NotFound(new ApiError
-                    {
-                        StatusCode = "1.2.3",
-                        Title = "Аттестация не найдена",
-                        Message = $"Аттестация с UUID \"{uuid}\" не найдена",
-                        Field = nameof(uuid)
-                    });
                 }
 
-                _context.Attestations.Remove(attestation);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("{Function}: удалена запись uuid={Uuid}", functionName, uuid);
                 return NoContent();
             }
             catch (Exception ex)

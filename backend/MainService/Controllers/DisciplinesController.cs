@@ -729,8 +729,6 @@ namespace MainService.Controllers
         [SwaggerResponse(StatusCodes.Status204NoContent, "Дисциплина удалена")]
         [SwaggerResponse(StatusCodes.Status400BadRequest, "Неверный запрос", typeof(ApiError))]
         [SwaggerResponseExample(StatusCodes.Status400BadRequest, typeof(ApiError400BadRequestExample))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Дисциплина не найдена", typeof(ApiError))]
-        [SwaggerResponseExample(StatusCodes.Status404NotFound, typeof(ApiError404NotFoundExample))]
         [SwaggerOperation(
             Summary = "Удалить дисциплину по идентификатору"
         )]
@@ -751,19 +749,11 @@ namespace MainService.Controllers
             }
 
             Disciplines? discipline = await _context.Disciplines.FirstOrDefaultAsync(d => d.Uuid == uuid);
-            if (discipline == null)
+            if (discipline != null)
             {
-                return NotFound(new ApiError
-                {
-                    StatusCode = "1.2.3",
-                    Title = "Дисциплина не найдена",
-                    Message = $"Дисциплина с UUID \"{uuid}\" не найдена",
-                    Field = nameof(uuid)
-                });
+                _context.Disciplines.Remove(discipline);
+                await _context.SaveChangesAsync();
             }
-
-            _context.Disciplines.Remove(discipline);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }

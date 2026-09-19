@@ -408,21 +408,11 @@ namespace AuthService.Controller
 		public async Task<IActionResult> DeleteUser(Guid uuid)
 		{
 			Users? user = await _context.Users.FirstOrDefaultAsync(u => u.Uuid == uuid);
-			if (user == null)
+			if (user != null)
 			{
-				return NotFound(
-					new ApiError
-					{
-						StatusCode = "1.2.3",
-						Title = "Пользователь не найден",
-						Message = "Пользователь с указанным UUID не найден",
-						Field = nameof(uuid),
-					}
-				);
+				_context.Users.Remove(user);
+				await _context.SaveChangesAsync();
 			}
-
-			_context.Users.Remove(user);
-			await _context.SaveChangesAsync();
 
 			return NoContent();
 		}
