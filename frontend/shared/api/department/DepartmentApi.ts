@@ -9,7 +9,7 @@ import { IBaseEntityWithVersion } from "@/shared/model/utility-types/base-entity
 
 const DEPARTMENTS_URL = `${MAIN_URL}/departments`
 
-export type TDepartmentResponseDto = {
+export type TDepartmentWE = {
 	name: string
 	shortName: string
 	facultyUuid: Uuid
@@ -17,13 +17,13 @@ export type TDepartmentResponseDto = {
 } & IBaseEntityWithVersion
 
 export const DepartmentApi = {
-	getDepartmentsWithoutEnhance: async (
+	getDepartmentsWithoutEnrich: async (
 		options?: TPagedRequestOptions,
-	): Promise<TDepartmentResponseDto[]> => {
+	): Promise<TDepartmentWE[]> => {
 		const query = buildQuery(options ?? {})
-		const response = await ApiJsonRequest<
-			TPagedResponse<TDepartmentResponseDto>
-		>(`${DEPARTMENTS_URL}${query}`)
+		const response = await ApiJsonRequest<TPagedResponse<TDepartmentWE>>(
+			`${DEPARTMENTS_URL}${query}`,
+		)
 
 		return response.items
 	},

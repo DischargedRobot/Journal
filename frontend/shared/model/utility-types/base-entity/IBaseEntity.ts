@@ -1,10 +1,20 @@
 import { Uuid } from "../uuid"
 
-interface IBaseEntity {
-	uuid: Uuid
+type Brand = {
+	readonly brand: symbol
 }
 
-interface IBaseEntityWithVersion extends IBaseEntity {
+type UniqueBrand = {
+	readonly brand: unique symbol
+}
+
+interface IBaseEntity<T extends Brand = UniqueBrand> {
+	uuid: Uuid & { readonly brand: T["brand"] }
+}
+
+interface IBaseEntityWithVersion<
+	T extends Brand = UniqueBrand,
+> extends IBaseEntity<T> {
 	version: number
 }
 
