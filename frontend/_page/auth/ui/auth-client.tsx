@@ -1,37 +1,23 @@
 "use client"
 
 import { Login, Registration } from "@/_page/auth"
-import { MAIN_URL } from "@/shared/api/constants"
-import { DepartmentApi, TDepartmentResponseDto } from "@/shared/api/department"
-import { TGroupResponseDto } from "@/shared/api/group"
+import { TGroup } from "@/shared/model/group"
+import { TDepartment } from "@/shared/model/department"
 import { TRole } from "@/shared/model/role"
 import { Container } from "@mui/material"
 import { useState } from "react"
 
 interface Props {
-	groups: TGroupResponseDto[]
-	departments: TDepartmentResponseDto[]
+	groups: TGroup[]
+	departments: TDepartment[]
 	roles: TRole[]
-}
-
-const mainUrl = MAIN_URL
-
-const removeDeps = async (deps: TDepartmentResponseDto[]) => {
-	return await Promise.all(
-		deps.map(async (dep) => {
-			return {
-				deps: fetch(`${mainUrl}/departments/${dep.uuid}`, {
-					method: "DELETE",
-				}),
-			}
-		}),
-	)
 }
 
 export const AuthClient = (props: Props) => {
 	const { groups, departments, roles } = props
 	const [registrationOpen, setRegistrationOpen] = useState(false)
 
+	// console.log(groups, "groups auth client ")
 	// console.log(roles, "roles auth client ")
 	return (
 		<Container
@@ -51,10 +37,7 @@ export const AuthClient = (props: Props) => {
 				groups={groups}
 				departments={departments}
 				roles={roles.filter((r) => r.isBase)}
-				onToRegistration={async () => {
-					await removeDeps(departments)
-					setRegistrationOpen(true)
-				}}
+				onToRegistration={() => setRegistrationOpen(true)}
 			/>
 			<Login
 				focused={!registrationOpen}

@@ -1,4 +1,5 @@
 import { isApiError, mapApiErrors } from "../api-error"
+import { isConnectionRefused } from "../api-error/ApiError"
 
 const ApiJsonRequest = async <T>(
 	endpoint: string,
@@ -49,9 +50,14 @@ const ApiJsonRequest = async <T>(
 		if (error instanceof TypeError && error.message === "Failed to fetch") {
 			throw mapApiErrors(1)
 		}
-
+		// если нет соединения с сервером
+		if (isConnectionRefused(error)) {
+			console.log(error, "error is ConnectionRefused")
+			throw mapApiErrors(503)
+		}
 		// если не ApiError, то возвращаем ошибку 0 (хотя такого быть не должно)
 		if (!isApiError(error)) {
+			console.log(error, "error is not ApiError")
 			throw mapApiErrors(0)
 		}
 

@@ -2,6 +2,7 @@ import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
 import { DepartmentApi } from "@/shared/api/department"
 import { GroupApi } from "@/shared/api/group"
 import { RolesApi } from "@/shared/api/roles"
+import { TRole } from "@/shared/model/role"
 
 export const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
@@ -12,10 +13,16 @@ export const getGroups = async () => {
 				console.log(error)
 			},
 		},
+		{
+			error: ApiErrors.NOT_FOUND,
+			handler: (error) => {
+				console.log(error)
+			},
+		},
 	])
 
 	try {
-		const response = await GroupApi.getGroupsWithoutEnhance()
+		const response = await GroupApi.getGroupsWithoutEnrich()
 		return response.items
 	} catch (error) {
 		handleGetGroupsError(error)
@@ -32,10 +39,16 @@ export const getDepartments = async () => {
 				console.log(error)
 			},
 		},
+		{
+			error: ApiErrors.NOT_FOUND,
+			handler: (error) => {
+				console.log(error, "error get departments")
+			},
+		},
 	])
 
 	try {
-		return await DepartmentApi.getDepartmentsWithoutEnhance()
+		return await DepartmentApi.getDepartmentsWithoutEnrich()
 	} catch (error) {
 		handleGetDepartmentsError(error)
 		return []
@@ -46,6 +59,12 @@ export const getRoles = async () => {
 	const handleGetRolesError = createApiErrorHandler([
 		{
 			// TODO: добавить обработку ошибки 404
+			error: ApiErrors.SERVER,
+			handler: (error) => {
+				console.log(error)
+			},
+		},
+		{
 			error: ApiErrors.NOT_FOUND,
 			handler: (error) => {
 				console.log(error)

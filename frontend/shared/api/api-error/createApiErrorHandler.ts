@@ -30,9 +30,7 @@ export const createApiErrorHandler = (
 			}
 		}
 
-		const apiError: ApiError = isApiError(error)
-			? error
-			: mapApiErrors(null)
+		const apiError: ApiError = isApiError(error) ? error : mapApiErrors(0)
 
 		if (defaultHandler !== undefined) {
 			defaultHandler(apiError)

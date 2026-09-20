@@ -114,7 +114,7 @@ const Registration = (props: Props) => {
 
 			router.push("/journal")
 		} catch (error) {
-			console.log(error, "error onSubmit")
+			// console.log(error, "error onSubmit")
 			handlerRegistrationError(error)
 		}
 	})

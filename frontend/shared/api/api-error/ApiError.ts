@@ -68,10 +68,11 @@ export function isApiError(error: unknown): error is ApiError {
 }
 
 export const ApiErrors = {
-	NETWORK: new ApiError(1, "1.0.0", "Network error", "Сетевая ошибка"),
-	BAD_REQUEST: new ApiError(400, "1.0.0", "Bad request", "Неверный запрос"),
-	FORBIDEN: new ApiError(403, "1.0.0", "Forbidden", "Доступ запрещён"),
-	UNAUTHORIZED: new ApiError(401, "1.0.0", "Unauthorized", "Неавторизован"),
+	NETWORK: new ApiError(1, "0.0.0", "Network error", "Сетевая ошибка"),
+
+	BAD_REQUEST: new ApiError(400, "0.0.0", "Bad request", "Неверный запрос"),
+	FORBIDEN: new ApiError(403, "0.0.0", "Forbidden", "Доступ запрещён"),
+	UNAUTHORIZED: new ApiError(401, "0.0.0", "Unauthorized", "Неавторизован"),
 	NOT_FOUND: new ApiError(404, "1.0.0", "Not found", "Ресурс не найден"),
 	CONFLICT: new ApiError(
 		409,
@@ -80,7 +81,25 @@ export const ApiErrors = {
 		"Ресурс с таким парамметром уже существует",
 	),
 	SERVER: new ApiError(500, "1.0.0", "Server error", "Ошибка сервера"),
+	SERVICE_UNAVAILABLE: new ApiError(
+		503,
+		"1.0.0",
+		"Service unavailable",
+		"Сервис недоступен",
+	),
 } as const
+
+export const isConnectionRefused = (error: unknown): boolean => {
+	if (!(error instanceof TypeError)) return false
+
+	const cause = error.cause
+	return (
+		typeof cause === "object" &&
+		cause !== null &&
+		"code" in cause &&
+		cause.code === "ECONNREFUSED"
+	)
+}
 
 export const mapApiErrors = (httpCode: number, message?: string): ApiError => {
 	let error: ApiError
