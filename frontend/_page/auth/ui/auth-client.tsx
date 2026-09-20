@@ -1,15 +1,15 @@
 "use client"
 
 import { Login, Registration } from "@/_page/auth"
-import { TGroup } from "@/shared/model/group"
-import { TDepartment } from "@/shared/model/department"
-import { TRole } from "@/shared/model/role"
+import { TDepartmentWE } from "@/shared/api/department/DepartmentApi"
+import { TGroupWE } from "@/shared/api/group/GroupApi"
 import { Container } from "@mui/material"
 import { useState } from "react"
+import { TRole } from "@/shared/model/role"
 
 interface Props {
-	groups: TGroup[]
-	departments: TDepartment[]
+	groups: TGroupWE[]
+	departments: TDepartmentWE[]
 	roles: TRole[]
 }
 

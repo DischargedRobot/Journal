@@ -1,14 +1,14 @@
 "use client"
 import { AuthApi } from "@/shared/api/auth"
-import { TDepartmentResponseDto } from "@/shared/api/department"
-import { TGroupResponseDto } from "@/shared/api/group"
+import { TDepartmentWE } from "@/shared/api/department/DepartmentApi"
+import { TGroupWE } from "@/shared/api/group/GroupApi"
 import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
 import { Logo } from "@/shared/ui/Logo"
 import { PasswordStregth } from "@/shared/ui/PasswordStregth"
 import Wizard from "@/shared/ui/wizard/Wizard"
 import { Box, Button, Stack, Typography, SvgIcon, Tooltip } from "@mui/material"
 import { useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import {
 	FormValues,
 	LOGIN_FIELDS,
@@ -23,14 +23,14 @@ import FormTextField, {
 import FormRadioGroup from "./registration-form-elements/RegistrationRadioGroup"
 import RegistrationButton from "./registration-form-elements/RegistrationButton"
 import useRegistrationFormStore from "../model/useRegistrationFormStore"
-import { TRole } from "@/shared/model/role"
 import { useRouter } from "next/navigation"
+import { TRole } from "@/shared/model/role"
 
 interface Props {
 	onToRegistration: (event: React.MouseEvent<HTMLButtonElement>) => void
 	focused: boolean
-	groups: TGroupResponseDto[]
-	departments: TDepartmentResponseDto[]
+	groups: TGroupWE[]
+	departments: TDepartmentWE[]
 	roles: TRole[]
 }
 

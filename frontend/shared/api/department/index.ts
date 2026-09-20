@@ -1,2 +1,2 @@
 export { DepartmentApi } from "./DepartmentApi"
-export type { TDepartmentResponseDto } from "./DepartmentApi"
+export type { TDepartmentWE } from "./DepartmentApi"

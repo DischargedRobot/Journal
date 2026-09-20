@@ -9,31 +9,20 @@ import {
 } from "@/shared/model/role"
 import { ApiJsonRequest } from "@/shared/api/api-json-request"
 import { AUTH_URL } from "../constants"
+import { TWithoutEnrich } from "@/shared/lib/enricher"
 
 const ROLES_URL = `${AUTH_URL}/roles`
 
 type GetRolesOptions = TPagedRequestOptions & { roleTypeUuid: Uuid }
 
-type role = {
-	uuid: string
-	name: string
-	isBase: boolean
-	rights: {
-		uuid: string
-		Name: string
-	}[]
-	roleTypes: {
-		Uuid: string
-		Name: string
-	}[]
-}
+export type TRoleWE = TWithoutEnrich<TRole>
 
 const RolesApi = {
 	getRoles: async (options?: TPagedRequestOptions): Promise<TRole[]> => {
 		const query = buildQuery(options ?? {})
 		console.log(`getroles ${ROLES_URL}${query}`)
 
-		const result = await ApiJsonRequest<TPagedResponse<role>>(
+		const result = await ApiJsonRequest<TPagedResponse<TRole>>(
 			`${ROLES_URL}${query}`,
 		)
 		console.log("getroles ss", result)
@@ -47,15 +36,15 @@ const RolesApi = {
 			rights: item.rights
 				.map((right) => ({
 					uuid: right.uuid,
-					name: right.Name,
+					name: right.name,
 					// Сужаем тип до TRoleRight
 				}))
 				.filter((right): right is TRoleRight =>
 					TRoleRightName.includes(right.name as TRoleRightName),
 				),
 			roleTypes: item.roleTypes.map((roleType) => ({
-				uuid: roleType.Uuid,
-				name: roleType.Name as TRoleTypeName,
+				uuid: roleType.uuid,
+				name: roleType.name as TRoleTypeName,
 			})),
 		}))
 	},

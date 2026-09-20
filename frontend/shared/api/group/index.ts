@@ -1,2 +1,2 @@
 export { GroupApi } from "./GroupApi"
-export type { TGroupResponseDto } from "./GroupApi"
+export type { TGroupWE } from "./GroupApi"

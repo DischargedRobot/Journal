@@ -2,7 +2,6 @@ import { ApiErrors, createApiErrorHandler } from "@/shared/api/api-error"
 import { DepartmentApi } from "@/shared/api/department"
 import { GroupApi } from "@/shared/api/group"
 import { RolesApi } from "@/shared/api/roles"
-import { TRole } from "@/shared/model/role"
 
 export const getGroups = async () => {
 	const handleGetGroupsError = createApiErrorHandler([
